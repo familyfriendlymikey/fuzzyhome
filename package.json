@@ -1,0 +1,12 @@
+{
+	"name": "fuzzyhome",
+	"scripts": {
+		"start": "imba -w server.imba",
+		"build": "imba build server.imba"
+	},
+	"dependencies": {
+		"express": "^4.17.1",
+		"imba": "^2.0.0-alpha.207",
+		"lodash": "^4.17.21"
+	}
+}
