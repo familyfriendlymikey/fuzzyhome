@@ -1,8 +1,11 @@
 {
 	"name": "fuzzyhome",
 	"scripts": {
-		"start": "imba -w server.imba",
-		"build": "imba build server.imba"
+		"start": "imba run --baseurl . -w server.imba",
+		"build": "imba build --baseurl . server.imba",
+		"nojekyll": "npx touch dist/public/.nojekyll",
+		"pages": "npx gh-pages --no-history --dotfiles --dist dist/public",
+		"deploy": "npm run build && npm run nojekyll && npm run pages"
 	},
 	"dependencies": {
 		"express": "^4.17.1",
