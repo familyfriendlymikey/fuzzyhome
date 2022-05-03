@@ -14,7 +14,7 @@ db.open!
 global css body
 	d:flex fld:column jc:center ai:center
 	m:0 w:100% h:100% bg:#20222f
-	ff:sans-serif
+	ff:sans-serif fw:1
 
 tag app
 
@@ -114,7 +114,7 @@ tag app
 			css button, label
 				d:flex fld:column jc:center ai:center
 				bg:none c:purple4 bd:none cursor:pointer fl:1
-				fs:14px ff:sans-serif
+				fs:14px ff:sans-serif fw:1
 
 			css $input
 				bd:1px solid purple4
