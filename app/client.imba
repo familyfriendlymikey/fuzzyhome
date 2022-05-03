@@ -21,14 +21,31 @@ tag app
 	def mount
 		$input.focus!
 		state.links = await db.reload!
-		state.scored_links = state.links
+		sort_links!
 
 	def reload_db
 		state.links = await db.reload!
 		state.scored_links = fzy state.links, state.query
 
+	def navigate link
+		link.last_modified = Date.now!
+		link.frequency = (link.frequency or 0) + 1
+		await db.put link
+		window.location.href = link.link
+
+	def sort_links
+		if state.query.trim!.length > 0
+			state.scored_links = fzy state.links, state.query
+		else
+			state.scored_links = sortBy(state.links) do |link|
+				-link.frequency
+
+	def handle_click_link link
+		navigate link
+
 	def handle_return
-		window.location.href = state.scored_links[0].link
+		return if state.scored_links.length < 1
+		navigate state.scored_links[0]
 
 	def handle_shift_return
 		window.location.href = 'https://www.google.com/search?q=' + state.query
@@ -46,13 +63,15 @@ tag app
 		return if split_query.length < 2
 		let link = split_query.pop!
 		let name = split_query.join(" ")
+		let frequency = 1
+		let last_modified = Date.now!
 		return if name_exists name
-		await db.put { name, link }
+		await db.put { name, link, frequency, last_modified }
 		state.query = ''
 		reload_db!
 
 	def handle_input
-		state.scored_links = fzy state.links, state.query
+		sort_links!
 
 	def handle_click_delete
 		let link = state.scored_links[0]
@@ -128,7 +147,7 @@ tag app
 				@input=handle_input
 			>
 			<.links>
-				for { name, link } in state.scored_links
-					<a href=link> name
+				for obj in state.scored_links
+					<a href=obj.link @click.prevent=handle_click_link(obj)> obj.name
 
 imba.mount <app>
