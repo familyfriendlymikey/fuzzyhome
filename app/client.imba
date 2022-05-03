@@ -94,6 +94,11 @@ tag app
 	def handle_click_export
 		download_json_file JSON.stringify(state.links)
 
+	def handle_paste e
+		return if state.query.length > 0
+		global.setTimeout(&, 0) do
+			window.location.href = 'https://www.google.com/search?q=' + state.query.trim!
+
 	def render
 		<self>
 
@@ -145,6 +150,7 @@ tag app
 				@hotkey('shift+return').capture=handle_shift_return
 				@hotkey('esc').capture=$input..blur
 				@input=handle_input
+				@paste=handle_paste
 			>
 			<.links>
 				for obj in state.scored_links
