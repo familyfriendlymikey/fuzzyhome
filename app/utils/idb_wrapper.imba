@@ -83,7 +83,6 @@ class idb_wrapper
 				resolve no
 
 	def #get_store permission="readwrite"
-		p permission
 		let db = openRequest.result
 		let transaction = db.transaction(table_name, permission)
 		transaction.objectStore(table_name)

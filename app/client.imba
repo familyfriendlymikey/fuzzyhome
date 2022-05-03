@@ -1,6 +1,7 @@
 let p = console.log
 
 import { sortBy } from 'lodash'
+import { version } from '../package.json'
 import fzy from './utils/fzy'
 import download_json_file from './utils/download'
 import upload_json_file from './utils/upload'
@@ -13,7 +14,7 @@ db.open!
 global css body
 	d:flex fld:column jc:center ai:center
 	m:0 w:100% h:100% bg:#20222f
-	ff:Open Sans
+	ff:sans-serif
 
 tag app
 
@@ -89,7 +90,7 @@ tag app
 			css button, label
 				d:flex fld:column jc:center ai:center
 				bg:none c:purple4 bd:none cursor:pointer fl:1
-				fs:14px font-weight:bold ff:Open Sans
+				fs:14px ff:sans-serif
 
 			css $input
 				bd:1px solid purple4
@@ -97,6 +98,7 @@ tag app
 				bc:purple4 outline:none c:blue3 caret-color:blue3 px:20px
 				transition:background 0.5s
 				@focus bg:purple4/10
+				@placeholder fs:10px c:blue3
 
 			css .links
 				d:flex fld:column jc:flex-start
@@ -119,6 +121,7 @@ tag app
 			<input$input
 				@hotkey('mod+k').capture=$input..focus
 				bind=state.query
+				placeholder="v{version}"
 				@hotkey('return').capture=handle_return
 				@hotkey('shift+return').capture=handle_shift_return
 				@hotkey('esc').capture=$input..blur
