@@ -25,7 +25,7 @@ tag app
 
 	def reload_db
 		state.links = await db.reload!
-		state.scored_links = fzy state.links, state.query
+		sort_links!
 
 	def navigate link
 		link.last_opened = Date.now!
@@ -108,8 +108,7 @@ tag app
 	def handle_input
 		sort_links!
 
-	def handle_click_delete
-		let link = state.scored_links[0]
+	def handle_click_delete link
 		return unless link
 		return unless window.confirm "Do you really want to delete {link..name}?"
 		await db.delete link
@@ -165,13 +164,13 @@ tag app
 
 			css .links
 				d:flex fld:column jc:flex-start
-				g:20px w:100% mt:20px ofy:auto fl:1
+				w:100% mt:20px ofy:auto fl:1
 				px:20px
 
 			css .link
 				d:flex fld:row jc:space-between ai:center
-				cursor:pointer px:15px rd:5px
-				@first py:10px bg:blue3/5
+				px:15px py:10px rd:5px
+				@first mb:10px bg:blue3/5
 
 			css a
 				tt:capitalize td:none c:blue3 fs:20px
@@ -188,9 +187,17 @@ tag app
 			css .create
 				c:purple4 cursor:pointer py:10px
 
+			css .delete
+				bd:1px solid purple4/50
+				transition:opacity 100ms
+				px:7px rd:3px fs:15px mr:15px
+				c:purple4 cursor:pointer o:0
+
+			css .link@hover .delete
+				o:100
+
 			<.buttons>
 
-				<.button@click=handle_click_delete> "DELETE"
 				<.button@click=handle_click_export> "EXPORT"
 
 				if loading_import
@@ -222,10 +229,12 @@ tag app
 				
 			<.links>
 				for obj in state.scored_links
-					<.link@click.prevent=handle_click_link(obj)>
-						<[d:flex]>
+					<.link>
+						<[d:flex fl:1 cursor:pointer]@click.prevent=handle_click_link(obj)>
 							<img height=20 width=20 src=obj.img>
 							<a href=obj.link> obj.name
-						<.frequency> obj.frequency
+						<[d:flex]>
+							<.delete@click=handle_click_delete(obj)> "x"
+							<.frequency> obj.frequency
 
 imba.mount <app>
