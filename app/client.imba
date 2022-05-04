@@ -28,10 +28,10 @@ tag app
 		state.scored_links = fzy state.links, state.query
 
 	def navigate link
-		link.last_modified = Date.now!
-		link.frequency = (link.frequency or 0) + 1
+		link.last_opened = Date.now!
+		link.frequency = link.frequency + 1
 		await db.put link
-		window.location.href = link.link
+		window.location.href = "//{link.link}"
 
 	def sort_links
 		if state.query.trim!.length > 0
@@ -56,19 +56,54 @@ tag app
 				return yes
 		return no
 
+	def fetch_image_as_base_64 url
+		return new Promise! do |resolve, reject|
+			let res
+			try
+				res = await global.fetch("https://icon.horse/icon/{url}")
+			catch
+				reject 'icon not found error'
+				return
+			let blob = await res.blob!
+			let reader = new FileReader!
+			reader.onload = do
+				resolve this.result
+			reader.onerror = do
+				reject 'blob to base64 error'
+				return
+			reader.readAsDataURL(blob)
+
 	def handle_click_create
+		loading_create = yes
 		let query = state.query.trim!
-		return if query === ''
+
+		if query === ''
+			loading_create = no
+			return
+
 		split_query = query.split /\s+/
-		return if split_query.length < 2
+
+		if split_query.length < 2
+			loading_create = no
+			return
+
 		let link = split_query.pop!
 		let name = split_query.join(" ")
-		let frequency = 1
-		let last_modified = Date.now!
-		return if name_exists name
-		await db.put { name, link, frequency, last_modified }
+		await put_link { link, name }
 		state.query = ''
 		reload_db!
+		loading_create = no
+
+	def put_link { link, name, frequency=1, last_opened=Date.now! }
+		link = link.replace(/(^\w+:|^)\/\//, '')
+		let url = new URL("https://{link}")
+		return if name_exists name
+		let img
+		try
+			img = await fetch_image_as_base_64(url.hostname)
+		catch
+			img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
+		await db.put { name, link, frequency, last_opened, img }
 
 	def handle_input
 		sort_links!
@@ -82,14 +117,18 @@ tag app
 		reload_db!
 
 	def handle_click_import e
+		loading_import = yes
 		let data = await upload_json_file e
-		return unless Array.isArray(data)
+
+		unless Array.isArray(data)
+			loading_import = no
+			return
+
 		for link in data
-			if name_exists link.name
-				console.log "Name already exists: {link.name}"
-				continue
-			await db.put { name: link.name, link: link.link }
+			await put_link(link)
+
 		reload_db!
+		loading_import = no
 
 	def handle_click_export
 		download_json_file JSON.stringify(state.links)
@@ -111,7 +150,7 @@ tag app
 			css .buttons
 				d:flex fld:row jc:space-around w:100% h:50px
 
-			css button, label
+			css .button
 				d:flex fld:column jc:center ai:center
 				bg:none c:purple4 bd:none cursor:pointer fl:1
 				fs:14px ff:sans-serif fw:1
@@ -139,19 +178,32 @@ tag app
 				fs:15px c:blue3
 
 			css img
-				mr:10px rd:3px h:20px w:20px
+				mr:10px rd:3px h:20px w:20px bd:none
+
+			css .disabled
+				c:gray4 cursor:default
 
 			<.buttons>
-				<button@click=handle_click_create> "CREATE"
-				<button@click=handle_click_delete> "DELETE"
-				<button@click=handle_click_export> "EXPORT"
-				<label>
-					"IMPORT"
-					<input[d:none]
-						@change=handle_click_import
-						@click=(this.value = '')
-						type="file"
-					>
+
+				if loading_create
+					<.button.disabled> "CREATE"
+				else
+					<.button@click=handle_click_create> "CREATE"
+
+				<.button@click=handle_click_delete> "DELETE"
+				<.button@click=handle_click_export> "EXPORT"
+
+				if loading_import
+					<.button.disabled> "IMPORT"
+				else
+					<label.button>
+						"IMPORT"
+						<input[d:none]
+							@change=handle_click_import
+							@click=(this.value = '')
+							type="file"
+						>
+
 			<input$input
 				@hotkey('mod+k').capture=$input..focus
 				bind=state.query
@@ -166,8 +218,8 @@ tag app
 				for obj in state.scored_links
 					<.link@click.prevent=handle_click_link(obj)>
 						<[d:flex]>
-							<img height=20 width=20 src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&size=128&url={obj.link}">
+							<img height=20 width=20 src=obj.img>
 							<a href=obj.link> obj.name
-						<.frequency> obj.frequency or 0
+						<.frequency> obj.frequency
 
 imba.mount <app>
