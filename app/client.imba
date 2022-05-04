@@ -234,11 +234,20 @@ tag app
 						@paste=handle_paste
 					>
 				<[fs:25px c:purple4 cursor:pointer]@click=toggle_settings> "..."
-			if state.query.trim!.split(/\s+/).length > 1
-				if loading_create
-					<.create.disabled> "+ {state.query}"
+			let split_query = state.query.trim!.split(/\s+/)
+			if split_query.length > 1
+				let last = split_query.pop!
+				let joined = split_query.join " "
+				if name_exists joined
+					<.create.disabled> "name already exists"
 				else
-					<.create@click=handle_click_create> "+ {state.query}"
+					if loading_create
+						<.create.disabled>
+							<span> "+ {joined} {last}"
+					else
+						<.create@click=handle_click_create>
+							<span> "+ {joined} "
+							<span[c:purple2]> last
 				
 			<.links>
 				for obj in state.scored_links
