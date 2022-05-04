@@ -20,6 +20,11 @@ tag app
 
 	def mount
 		$input.focus!
+		unless global.localStorage.fuzzyhome_visited
+			await put_link { name: "fuzzy home help", link: "github.com/familyfriendlymikey/fuzzyhome" }
+			await put_link { name: "google", link: "google.com" }
+			await put_link { name: "youtube", link: "youtube.com" }
+			global.localStorage.fuzzyhome_visited = yes
 		state.links = await db.reload!
 		sort_links!
 
