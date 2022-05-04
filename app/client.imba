@@ -170,6 +170,8 @@ tag app
 
 			css .link
 				d:flex fld:row jc:space-between ai:center
+				cursor:pointer px:15px rd:5px
+				@first py:10px bg:blue3/5
 
 			css a
 				tt:capitalize td:none c:blue3 fs:20px
