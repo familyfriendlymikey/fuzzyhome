@@ -137,6 +137,12 @@ tag app
 		global.setTimeout(&, 0) do
 			window.location.href = 'https://www.google.com/search?q=' + state.query.trim!
 
+	def toggle_settings
+		if settings_active
+			settings_active = no
+		else
+			settings_active = yes
+
 	def render
 		<self>
 
@@ -144,7 +150,7 @@ tag app
 				d:flex fld:column jc:flex-start ai:center
 				bxs:0px 0px 10px rgba(0,0,0,0.35)
 				w:80% h:80% max-width:700px min-height:205px
-				p:40px pt:20px box-sizing:border-box rd:10px
+				p:30px box-sizing:border-box rd:10px
 
 			css .buttons
 				d:flex fld:row jc:space-around w:100% h:50px
@@ -164,7 +170,7 @@ tag app
 
 			css .links
 				d:flex fld:column jc:flex-start
-				w:100% mt:20px ofy:auto fl:1
+				w:100% mt:10px ofy:auto fl:1
 				px:20px
 
 			css .link
@@ -196,31 +202,32 @@ tag app
 			css .link@hover .delete
 				o:100
 
-			<.buttons>
-
-				<.button@click=handle_click_export> "EXPORT"
-
-				if loading_import
-					<.button.disabled> "IMPORT"
+			<[d:flex fld:column jc:space-between ai:center w:100%]>
+				if settings_active
+					<.buttons>
+						<.button@click=handle_click_export> "EXPORT"
+						if loading_import
+							<.button.disabled> "IMPORT"
+						else
+							<label.button>
+								"IMPORT"
+								<input[d:none]
+									@change=handle_click_import
+									@click=(this.value = '')
+									type="file"
+								>
 				else
-					<label.button>
-						"IMPORT"
-						<input[d:none]
-							@change=handle_click_import
-							@click=(this.value = '')
-							type="file"
-						>
-
-			<input$input
-				@hotkey('mod+k').capture=$input..focus
-				bind=state.query
-				placeholder="v{version}"
-				@hotkey('return').capture=handle_return
-				@hotkey('shift+return').capture=handle_shift_return
-				@hotkey('esc').capture=$input..blur
-				@input=handle_input
-				@paste=handle_paste
-			>
+					<input$input
+						@hotkey('mod+k').capture=$input..focus
+						bind=state.query
+						placeholder="v{version}"
+						@hotkey('return').capture=handle_return
+						@hotkey('shift+return').capture=handle_shift_return
+						@hotkey('esc').capture=$input..blur
+						@input=handle_input
+						@paste=handle_paste
+					>
+				<[fs:25px c:purple4 cursor:pointer]@click=toggle_settings> "..."
 			if state.query.trim!.split(/\s+/).length > 1
 				if loading_create
 					<.create.disabled> "+ {state.query}"
