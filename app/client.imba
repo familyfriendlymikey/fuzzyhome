@@ -127,9 +127,16 @@ tag app
 			css .links
 				d:flex fld:column jc:flex-start
 				g:20px w:100% mt:20px ofy:auto fl:1
+				px:20px
+
+			css .link
+				d:flex fld:row jc:space-between ai:center
 
 			css a
-				tt:capitalize td:none fs:20px c:blue3
+				tt:capitalize td:none c:blue3 fs:20px
+
+			css .frequency
+				fs:15px c:blue3
 
 			<.buttons>
 				<button@click=handle_click_create> "CREATE"
@@ -154,6 +161,8 @@ tag app
 			>
 			<.links>
 				for obj in state.scored_links
-					<a href=obj.link @click.prevent=handle_click_link(obj)> obj.name
+					<.link@click.prevent=handle_click_link(obj)>
+						<a href=obj.link> obj.name
+						<.frequency> obj.frequency or 0
 
 imba.mount <app>
