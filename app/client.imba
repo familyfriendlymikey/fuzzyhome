@@ -138,6 +138,9 @@ tag app
 			css .frequency
 				fs:15px c:blue3
 
+			css img
+				mr:10px rd:3px h:20px w:20px
+
 			<.buttons>
 				<button@click=handle_click_create> "CREATE"
 				<button@click=handle_click_delete> "DELETE"
@@ -162,7 +165,9 @@ tag app
 			<.links>
 				for obj in state.scored_links
 					<.link@click.prevent=handle_click_link(obj)>
-						<a href=obj.link> obj.name
+						<[d:flex]>
+							<img height=20 width=20 src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&size=128&url={obj.link}">
+							<a href=obj.link> obj.name
 						<.frequency> obj.frequency or 0
 
 imba.mount <app>
