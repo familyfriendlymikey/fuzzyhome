@@ -205,7 +205,6 @@ tag app
 			<[d:flex fld:column jc:space-between ai:center w:100%]>
 				if settings_active
 					<.buttons>
-						<.button@click=handle_click_export> "EXPORT"
 						if loading_import
 							<.button.disabled> "IMPORT"
 						else
@@ -216,6 +215,8 @@ tag app
 									@click=(this.value = '')
 									type="file"
 								>
+						<.button@click=handle_click_export> "EXPORT"
+						<.button@click=(global.location.href="https://github.com/familyfriendlymikey/fuzzyhome")> "HELP"
 				else
 					<input$input
 						@hotkey('mod+k').capture=$input..focus
