@@ -181,14 +181,12 @@ tag app
 				mr:10px rd:3px h:20px w:20px bd:none
 
 			css .disabled
-				c:gray4 cursor:default
+				@important c:gray4 cursor:default
+
+			css .create
+				c:purple4 cursor:pointer py:10px
 
 			<.buttons>
-
-				if loading_create
-					<.button.disabled> "CREATE"
-				else
-					<.button@click=handle_click_create> "CREATE"
 
 				<.button@click=handle_click_delete> "DELETE"
 				<.button@click=handle_click_export> "EXPORT"
@@ -214,6 +212,12 @@ tag app
 				@input=handle_input
 				@paste=handle_paste
 			>
+			if state.query.trim!.split(/\s+/).length > 1
+				if loading_create
+					<.create.disabled> "+ {state.query}"
+				else
+					<.create@click=handle_click_create> "+ {state.query}"
+				
 			<.links>
 				for obj in state.scored_links
 					<.link@click.prevent=handle_click_link(obj)>
