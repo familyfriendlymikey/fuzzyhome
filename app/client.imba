@@ -181,7 +181,7 @@ tag app
 			css .link
 				d:flex fld:row jc:space-between ai:center
 				px:15px py:10px rd:5px
-				@first mb:10px bg:blue3/5
+				@first bg:blue3/5
 
 			css a
 				tt:capitalize td:none c:blue3 fs:20px
