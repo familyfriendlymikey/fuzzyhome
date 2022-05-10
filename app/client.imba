@@ -135,7 +135,7 @@ tag app
 		loading_import = no
 
 	def handle_click_export
-		download_json_file JSON.stringify(state.links)
+		download_json_file JSON.stringify(state.links), "fuzzyhome_"
 
 	def handle_paste e
 		return if state.query.length > 0
