@@ -48,12 +48,17 @@ tag app
 	def handle_click_link link
 		navigate link
 
+	def search_google
+		window.location.href = 'https://www.google.com/search?q=' + state.query
+
 	def handle_return
-		return if state.scored_links.length < 1
-		navigate state.scored_links[0]
+		if state.scored_links.length < 1
+			search_google!
+		else
+			navigate state.scored_links[0]
 
 	def handle_shift_return
-		window.location.href = 'https://www.google.com/search?q=' + state.query
+		search_google!
 
 	def name_exists query
 		for { name } in state.links
