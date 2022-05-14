@@ -1,7 +1,7 @@
 let p = console.log
 
 const app_prefix = "fuzzyhome_cache"
-const version = "0.0.21"
+const version = "0.0.22"
 
 const cache_name = "{app_prefix}-{version}"
 

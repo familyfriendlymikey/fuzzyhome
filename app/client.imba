@@ -18,6 +18,8 @@ global css body
 
 tag app
 
+	settings_active = no
+
 	def mount
 		$input.focus!
 		unless global.localStorage.fuzzyhome_visited
@@ -25,6 +27,10 @@ tag app
 			await put_link { name: "google", link: "google.com" }
 			await put_link { name: "youtube", link: "youtube.com" }
 			global.localStorage.fuzzyhome_visited = yes
+
+		if global.localStorage.fuzzyhome_search_engine_url
+			state.search_engine_url = global.localStorage.fuzzyhome_search_engine_url
+
 		state.links = await db.reload!
 		sort_links!
 
@@ -48,17 +54,17 @@ tag app
 	def handle_click_link link
 		navigate link
 
-	def search_google
-		window.location.href = 'https://www.google.com/search?q=' + state.query
+	def use_search_engine
+		window.location.href = state.search_engine_url + state.query
 
 	def handle_return
 		if state.scored_links.length < 1
-			search_google!
+			use_search_engine!
 		else
 			navigate state.scored_links[0]
 
 	def handle_shift_return
-		search_google!
+		use_search_engine!
 
 	def name_exists query
 		for { name } in state.links
@@ -138,14 +144,23 @@ tag app
 
 		reload_db!
 		loading_import = no
+		settings_active = no
 
 	def handle_click_export
 		download_json_file JSON.stringify(state.links), "fuzzyhome_"
+		settings_active = no
+
+	def handle_click_search_config
+		let url = window.prompt("Please enter the URL of your search engine.")
+		return unless url
+		state.search_engine_url = url.trim!
+		global.localStorage.fuzzyhome_search_engine_url = state.search_engine_url
+		settings_active = no
 
 	def handle_paste e
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
-			window.location.href = 'https://www.google.com/search?q=' + state.query.trim!
+			window.location.href = state.search_engine_url + state.query.trim!
 
 	def toggle_settings
 		if settings_active
@@ -226,6 +241,7 @@ tag app
 									type="file"
 								>
 						<.button@click=handle_click_export> "EXPORT"
+						<.button@click=handle_click_search_config> "SEARCH_CONFIG"
 						<.button@click=(global.location.href="https://github.com/familyfriendlymikey/fuzzyhome")> "HELP"
 				else
 					<input$input
