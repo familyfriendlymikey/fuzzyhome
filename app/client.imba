@@ -12,13 +12,15 @@ let db = new idb_wrapper 'fuzzyhome', 'links', 1
 db.open!
 
 global css body
-	d:flex fld:column jc:center ai:center
+	d:flex fld:column jc:flex-start ai:center
 	m:0 w:100% h:100% bg:#20222f
 	ff:sans-serif fw:1
 
 tag app
 
 	settings_active = no
+
+	get render? do mounted?
 
 	def mount
 		$input.focus!
@@ -28,8 +30,20 @@ tag app
 			await put_link { name: "youtube", link: "youtube.com" }
 			global.localStorage.fuzzyhome_visited = yes
 
-		if global.localStorage.fuzzyhome_search_engine_url
-			state.search_engine_url = global.localStorage.fuzzyhome_search_engine_url
+		if not global.localStorage.fuzzyhome_config
+			let search_engine_url = 'www.google.com/search?q='
+			let search_engine_hostname = 'www.google.com'
+			let search_engine_frequency = 0
+			let search_engine_icon = await fetch_image_as_base_64 'google.com'
+			state.config = {
+				search_engine_url
+				search_engine_hostname
+				search_engine_icon
+				search_engine_frequency
+			}
+			save_config!
+		else
+			load_config!
 
 		state.links = await db.reload!
 		sort_links!
@@ -55,7 +69,9 @@ tag app
 		navigate link
 
 	def use_search_engine
-		window.location.href = state.search_engine_url + state.query
+		state.config.search_engine_frequency += 1
+		save_config!
+		window.location.href = "//{state.config.search_engine_url}{state.query}"
 
 	def handle_return
 		if state.scored_links.length < 1
@@ -73,19 +89,22 @@ tag app
 		return no
 
 	def fetch_image_as_base_64 url
-		return new Promise! do |resolve, reject|
+		let fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
+		return new Promise! do |resolve|
 			let res
 			try
 				res = await global.fetch("https://icon.horse/icon/{url}")
 			catch
-				reject 'icon not found error'
+				p "Failed to get icon from icon horse."
+				resolve fallback
 				return
 			let blob = await res.blob!
 			let reader = new FileReader!
 			reader.onload = do
 				resolve this.result
 			reader.onerror = do
-				reject 'blob to base64 error'
+				p "Failed to get data from reader."
+				resolve fallback
 				return
 			reader.readAsDataURL(blob)
 
@@ -110,15 +129,22 @@ tag app
 		reload_db!
 		loading_create = no
 
+	def can_put_link text
+		let split_text = text.trim!.split(/\s+/)
+		return no if split_text.length < 2
+		split_text.pop!
+		let name = split_text.join " "
+		return no if name_exists name
+		return no if name.toLowerCase! === 'search'
+		yes
+
 	def put_link { link, name, frequency=1, last_opened=Date.now! }
-		link = link.replace(/(^\w+:|^)\/\//, '')
-		let url = new URL("https://{link}")
+		name = name.trim!
 		return if name_exists name
-		let img
-		try
-			img = await fetch_image_as_base_64(url.hostname)
-		catch
-			img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
+		return if name.toLowerCase! === 'search'
+		link = link.trim!.replace(/(^\w+:|^)\/\//, '')
+		let url = new URL("https://{link}")
+		let img = await fetch_image_as_base_64(url.hostname)
 		await db.put { name, link, frequency, last_opened, img }
 
 	def handle_input
@@ -150,17 +176,27 @@ tag app
 		download_json_file JSON.stringify(state.links), "fuzzyhome_"
 		settings_active = no
 
-	def handle_click_search_config
-		let url = window.prompt("Please enter the URL of your search engine.")
-		return unless url
-		state.search_engine_url = url.trim!
-		global.localStorage.fuzzyhome_search_engine_url = state.search_engine_url
+	def save_config
+		global.localStorage.fuzzyhome_config = JSON.stringify(state.config)
+
+	def load_config
+		state.config = JSON.parse(global.localStorage.fuzzyhome_config)
+
+	def handle_click_config
+		let link = window.prompt("Please enter the URL of your search engine.")
+		return unless link
+		link = link.trim!.replace(/(^\w+:|^)\/\//, '')
+		let url = new URL("https://{link}")
+		state.config.search_engine_icon = await fetch_image_as_base_64 url.hostname
+		state.config.search_engine_url = link
+		state.config.search_engine_hostname = url.hostname
+		save_config!
 		settings_active = no
 
 	def handle_paste e
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
-			window.location.href = state.search_engine_url + state.query.trim!
+			window.location.href = state.config.search_engine_url + state.query.trim!
 
 	def toggle_settings
 		if settings_active
@@ -174,11 +210,13 @@ tag app
 			css self
 				d:flex fld:column jc:flex-start ai:center
 				bxs:0px 0px 10px rgba(0,0,0,0.35)
-				w:80% h:80% max-width:700px min-height:205px
+				w:80vw h:auto max-width:700px
 				p:30px box-sizing:border-box rd:10px
+				mt:10vh max-height:80vh
 
 			css .buttons
 				d:flex fld:row jc:space-around w:100% h:50px
+				bg:purple4/10 rd:5px
 
 			css .button
 				d:flex fld:column jc:center ai:center
@@ -195,7 +233,7 @@ tag app
 
 			css .links
 				d:flex fld:column jc:flex-start
-				w:100% mt:10px ofy:auto fl:1
+				w:100% ofy:auto fl:1
 				px:20px
 
 			css .link
@@ -209,14 +247,21 @@ tag app
 			css .frequency
 				fs:15px c:blue3
 
-			css img
+			css .link-icon
 				mr:10px rd:3px h:20px w:20px bd:none
 
 			css .disabled
 				@important c:gray4 cursor:default
 
+			css .settings-or-create
+				h:35px
+				d:flex fld:column jc:center ai:center
+
 			css .create
-				c:purple4 cursor:pointer py:10px
+				d:inline fs:20px c:purple4 cursor:pointer
+
+			css .toggle-settings
+				fs:25px c:purple4 cursor:pointer d:inline mt:-10px
 
 			css .delete
 				bd:1px solid purple4/50
@@ -226,6 +271,12 @@ tag app
 
 			css .link@hover .delete
 				o:100
+
+			css .link-left
+				d:flex fl:1 cursor:pointer
+
+			css .link-right
+				d:flex
 
 			<[d:flex fld:column jc:space-between ai:center w:100%]>
 				if settings_active
@@ -241,43 +292,49 @@ tag app
 									type="file"
 								>
 						<.button@click=handle_click_export> "EXPORT"
-						<.button@click=handle_click_search_config> "SEARCH_CONFIG"
+						<.button@click=handle_click_config> "CONFIG"
 						<.button@click=(global.location.href="https://github.com/familyfriendlymikey/fuzzyhome")> "HELP"
 				else
-					<input$input
-						@hotkey('mod+k').capture=$input..focus
-						bind=state.query
-						placeholder="v{version}"
-						@hotkey('return').capture=handle_return
-						@hotkey('shift+return').capture=handle_shift_return
-						@hotkey('esc').capture=$input..blur
-						@input=handle_input
-						@paste=handle_paste
-					>
-				<[fs:25px c:purple4 cursor:pointer]@click=toggle_settings> "..."
-			let split_query = state.query.trim!.split(/\s+/)
-			if split_query.length > 1
-				let last = split_query.pop!
-				let joined = split_query.join " "
-				if name_exists joined
-					<.create.disabled> "name already exists"
-				else
-					if loading_create
-						<.create.disabled>
-							<span> "+ {joined} {last}"
+					<[d:flex fld:row jc:space-between ai:center w:100%]>
+						<input$input
+							@hotkey('mod+k').capture=$input..focus
+							bind=state.query
+							placeholder="v{version}"
+							@hotkey('return').capture=handle_return
+							@hotkey('shift+return').capture=handle_shift_return
+							@hotkey('esc').capture=$input..blur
+							@input=handle_input
+							@paste=handle_paste
+						>
+
+				<.settings-or-create>
+					if can_put_link(state.query) and not settings_active
+							if loading_create
+								<.create.disabled>
+									"   +"
+							else
+								<.create@click=handle_click_create>
+									"   +"
 					else
-						<.create@click=handle_click_create>
-							<span> "+ {joined} "
-							<span[c:purple2]> last
-				
-			<.links>
-				for obj in state.scored_links
+						<.toggle-settings@click=toggle_settings> "..."
+
+			if state.scored_links.length > 0
+				<.links>
+					for obj in state.scored_links
+						<.link>
+							<.link-left@click.prevent=handle_click_link(obj)>
+								<img.link-icon height=20 width=20 src=obj.img>
+								<a href=obj.link> obj.name
+							<.link-right>
+								<.delete@click=handle_click_delete(obj)> "x"
+								<.frequency> obj.frequency
+			else
+				<.links>
 					<.link>
-						<[d:flex fl:1 cursor:pointer]@click.prevent=handle_click_link(obj)>
-							<img height=20 width=20 src=obj.img>
-							<a href=obj.link> obj.name
-						<[d:flex]>
-							<.delete@click=handle_click_delete(obj)> "x"
-							<.frequency> obj.frequency
+						<.link-left>
+							<img.link-icon src=state.config.search_engine_icon>
+							<a[tt:none]> "Search {state.config.search_engine_hostname}"
+						<.link-right>
+							<.frequency> state.config.search_engine_frequency
 
 imba.mount <app>
