@@ -23,7 +23,6 @@ tag app
 	get render? do mounted?
 
 	def mount
-		$input.focus!
 		unless global.localStorage.fuzzyhome_visited
 			await put_link { name: "fuzzy home help", link: "github.com/familyfriendlymikey/fuzzyhome" }
 			await put_link { name: "google", link: "google.com" }
@@ -336,5 +335,6 @@ tag app
 							<a[tt:none]> "Search {state.config.search_engine_hostname}"
 						<.link-right>
 							<.frequency> state.config.search_engine_frequency
+		$input.focus!
 
 imba.mount <app>

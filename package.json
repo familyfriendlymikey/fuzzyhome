@@ -1,6 +1,6 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.0.23",
+	"version": "0.0.24",
 	"scripts": {
 		"start": "imba run -SMH --baseurl . -w server.imba",
 		"build-app": "imba build -SMH --baseurl . server.imba",
