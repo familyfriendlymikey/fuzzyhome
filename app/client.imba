@@ -195,7 +195,7 @@ tag app
 	def handle_paste e
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
-			window.location.href = state.config.search_engine_url + state.query.trim!
+			window.location.href = "//{state.config.search_engine_url}{state.query.trim!}"
 
 	def toggle_settings
 		if settings_active
