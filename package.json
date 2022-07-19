@@ -3,13 +3,12 @@
 	"version": "0.0.28",
 	"scripts": {
 		"start": "imba run -SMH --baseurl . -w server.imba",
-		"build-app": "imba build -SMH --baseurl . server.imba",
+		"build-app": "rm -rf dist && imba build -SMH --baseurl . server.imba",
 		"build-sw": "imbac sw.imba -o dist/public",
 		"build": "npm run build-app && npm run build-sw",
-		"nojekyll": "npx touch dist/public/.nojekyll",
-		"pages": "npx gh-pages --no-history --dotfiles --dist dist/public",
+		"pages": "npx gh-pages --no-history --dotfiles --dist dist/public --branch deploy",
 		"static": "cd dist/public && echo http://localhost:8000 && python3 -m http.server &>/dev/null",
-		"deploy": "npm run build && npm run nojekyll && npm run pages"
+		"deploy": "npm run build && npm run pages"
 	},
 	"dependencies": {
 		"express": "^4.17.1",
