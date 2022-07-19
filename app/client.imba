@@ -70,7 +70,8 @@ tag app
 	def use_search_engine
 		state.config.search_engine_frequency += 1
 		save_config!
-		window.location.href = "//{state.config.search_engine_url}{state.query}"
+		let encoded_query = window.encodeURIComponent(state.query)
+		window.location.href = "//{state.config.search_engine_url}{encoded_query}"
 
 	def handle_return
 		if state.scored_links.length < 1
