@@ -18,6 +18,8 @@ global css body
 
 tag app
 
+	selection_index = 0
+
 	settings_active = no
 
 	get render? do mounted?
@@ -77,7 +79,7 @@ tag app
 		if state.scored_links.length < 1
 			use_search_engine!
 		else
-			navigate state.scored_links[0]
+			navigate state.scored_links[selection_index]
 
 	def handle_shift_return
 		use_search_engine!
@@ -204,6 +206,12 @@ tag app
 		else
 			settings_active = yes
 
+	def increment_selection_index
+		selection_index = Math.min(state.links.length - 1, selection_index + 1)
+
+	def decrement_selection_index
+		selection_index = Math.max(0, selection_index - 1)
+
 	def render
 		<self>
 
@@ -239,7 +247,9 @@ tag app
 			css .link
 				d:flex fld:row jc:space-between ai:center
 				px:15px py:10px rd:5px
-				@first bg:blue3/5
+
+			css .selected
+				bg:blue3/5
 
 			css a
 				tt:capitalize td:none c:blue3 fs:20px
@@ -303,6 +313,8 @@ tag app
 							@hotkey('return').capture=handle_return
 							@hotkey('shift+return').capture=handle_shift_return
 							@hotkey('esc').capture=$input..blur
+							@hotkey('down').capture=increment_selection_index
+							@hotkey('up').capture=decrement_selection_index
 							@input=handle_input
 							@paste=handle_paste
 						>
@@ -320,8 +332,8 @@ tag app
 
 			if state.scored_links.length > 0
 				<.links>
-					for obj in state.scored_links
-						<.link>
+					for obj, index in state.scored_links
+						<.link .selected=(index == selection_index)>
 							<.link-left@click.prevent=handle_click_link(obj)>
 								<img.link-icon height=20 width=20 src=obj.img>
 								<a href=obj.link> obj.name
