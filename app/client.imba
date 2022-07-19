@@ -150,6 +150,7 @@ tag app
 		await db.put { name, link, frequency, last_opened, img }
 
 	def handle_input
+		selection_index = 0
 		sort_links!
 
 	def handle_click_delete link
@@ -235,7 +236,6 @@ tag app
 				bd:1px solid purple4
 				w:100% h:50px ta:center fs:20px bg:none rd:5px
 				bc:purple4 outline:none c:blue3 caret-color:blue3 px:20px
-				transition:background 0.5s
 				@focus bg:purple4/10
 				@placeholder fs:10px c:blue3
 
@@ -246,7 +246,7 @@ tag app
 
 			css .link
 				d:flex fld:row jc:space-between ai:center
-				px:15px py:10px rd:5px
+				px:15px py:10px rd:5px cursor:pointer
 
 			css .selected
 				bg:blue3/5
@@ -275,15 +275,14 @@ tag app
 
 			css .delete
 				bd:1px solid purple4/50
-				transition:opacity 100ms
 				px:7px rd:3px fs:15px mr:15px
 				c:purple4 cursor:pointer o:0
 
-			css .link@hover .delete
+			css .selected .delete
 				o:100
 
 			css .link-left
-				d:flex fl:1 cursor:pointer
+				d:flex fl:1
 
 			css .link-right
 				d:flex
@@ -333,12 +332,16 @@ tag app
 			if state.scored_links.length > 0
 				<.links>
 					for obj, index in state.scored_links
-						<.link .selected=(index == selection_index)>
-							<.link-left@click.prevent=handle_click_link(obj)>
+						<.link
+							@pointerover=(selection_index = index)
+							@click.prevent=handle_click_link(obj)
+							.selected=(index == selection_index)
+						>
+							<.link-left>
 								<img.link-icon height=20 width=20 src=obj.img>
 								<a href=obj.link> obj.name
 							<.link-right>
-								<.delete@click=handle_click_delete(obj)> "x"
+								<.delete@click.prevent.stop=handle_click_delete(obj)> "x"
 								<.frequency> obj.frequency
 			else
 				<.links>
