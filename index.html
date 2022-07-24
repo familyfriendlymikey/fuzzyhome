@@ -1,0 +1,18 @@
+<html lang="en">
+	<head><!--$head$-->
+		<title>🥰 🏠</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel='stylesheet' href='./__assets__/all.css'>
+	</head>
+	<body><!--$body$-->
+		<script type="module">
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('./sw.js').then(function(reg){
+					reg.update()
+				})
+			}
+		</script>
+		<script type="module" src='./__assets__/app/client.js'></script>
+	</body>
+</html>
