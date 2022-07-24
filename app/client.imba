@@ -251,7 +251,10 @@ tag app
 				bg:blue3/5
 
 			css a
-				tt:capitalize td:none c:blue3 fs:20px
+				td:none
+
+			css .name
+				tt:capitalize c:blue3 fs:20px
 
 			css .frequency
 				fs:15px c:blue3
@@ -274,7 +277,7 @@ tag app
 
 			css .delete
 				bd:1px solid purple4/50
-				px:7px rd:3px fs:15px mr:15px
+				px:7px rd:3px fs:15px
 				c:purple4 cursor:pointer o:0
 
 			css .selected .delete
@@ -284,7 +287,7 @@ tag app
 				d:flex fl:1
 
 			css .link-right
-				d:flex
+				d:flex fld:row jc:space-between ai:center w:70px
 
 			<[d:flex fld:column jc:space-between ai:center w:100%]>
 				if settings_active
@@ -339,7 +342,7 @@ tag app
 						>
 							<.link-left>
 								<img.link-icon height=20 width=20 src=obj.img>
-								<a href=obj.link> obj.name
+								<.name> obj.name
 							<.link-right>
 								<.delete@click.prevent.stop=handle_click_delete(obj)> "x"
 								<.frequency> obj.frequency
@@ -348,8 +351,8 @@ tag app
 					<.link>
 						<.link-left>
 							<img.link-icon src=state.config.search_engine_icon>
-							<a[tt:none]> "Search {state.config.search_engine_hostname}"
-						<.link-right>
+							<.name[tt:none]> "Search {state.config.search_engine_hostname}"
+						<.link-right[jc:flex-end]>
 							<.frequency> state.config.search_engine_frequency
 		$input.focus!
 
