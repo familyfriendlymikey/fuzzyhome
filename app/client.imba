@@ -53,18 +53,17 @@ tag app
 		state.links = await db.reload!
 		sort_links!
 
-	def navigate link
-		link.last_opened = Date.now!
-		link.frequency = link.frequency + 1
-		await db.put link
-		window.location.href = "//{link.link}"
-
 	def sort_links
 		if state.query.trim!.length > 0
 			state.scored_links = fzy state.links, state.query
 		else
 			state.scored_links = sortBy(state.links) do |link|
 				-link.frequency
+
+	def navigate link
+		link.last_opened = Date.now!
+		link.frequency = link.frequency + 1
+		await db.put link
 
 	def handle_click_link link
 		navigate link
@@ -332,9 +331,10 @@ tag app
 			if state.scored_links.length > 0
 				<.links>
 					for obj, index in state.scored_links
-						<.link
+						<a.link
+							href="//{obj.link}"
 							@pointerover=(selection_index = index)
-							@click.prevent=handle_click_link(obj)
+							@click=handle_click_link(obj)
 							.selected=(index == selection_index)
 						>
 							<.link-left>
