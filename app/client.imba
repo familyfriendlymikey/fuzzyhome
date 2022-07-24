@@ -61,12 +61,15 @@ tag app
 				-link.frequency
 
 	def navigate link
+		window.location.href = "//{link.link}"
+
+	def update_link link
 		link.last_opened = Date.now!
 		link.frequency = link.frequency + 1
 		await db.put link
 
 	def handle_click_link link
-		navigate link
+		update_link link
 
 	def use_search_engine
 		state.config.search_engine_frequency += 1
@@ -78,7 +81,9 @@ tag app
 		if state.scored_links.length < 1
 			use_search_engine!
 		else
-			navigate state.scored_links[selection_index]
+			let link = state.scored_links[selection_index]
+			update_link link
+			navigate link
 
 	def handle_shift_return
 		use_search_engine!
