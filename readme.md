@@ -1,12 +1,17 @@
-# fuzzyhome
+<h1 align="center">
+<a href="https://fuzzyho.me/">
+fuzzyhome
+</a>
+</h1>
 
-A new-tab page [hosted](https://fuzzyho.me/) on github pages
-that lets you fuzzy find links and quickly navigate to the top result.
+A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.
 
 ## Installation
-On Firefox, unfortunately you can't choose a custom new-tab page,
-so I opted to use [this addon](https://addons.mozilla.org/en-US/firefox/addon/new-tab-override)
-and choose `https://fuzzyho.me/` as the custom url.
+1. Copy this link: `https://fuzzyho.me/`:
+1. Change your homepage in your browser settings.
+1. Install a browser extension that lets you change your new-tab page url. These have worked fine for me:
+	- Firefox: [New Tab Override](https://addons.mozilla.org/en-US/firefox/addon/new-tab-override)
+	- Chrome: [New Tab Redirect](https://chrome.google.com/webstore/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna)
 
 ## Usage
 
@@ -18,45 +23,45 @@ imba home page https://imba.io/
 ```
 The last space-separated string will be used as the url for your link.
 
-### Search
-Search your links by focusing the search bar and typing.
+### Fuzzy Find
+Search for a link by typing.
 The fuzzy sorting algorithm makes searching very fast,
 as you can usually just type the first letter of each word to get to a link (`ihp` to get to `imba home page`, for example).
 
 ### Navigate
-Navigate to the topmost search result by pretting `return`.
+Navigate to the currently selected search result by pressing `return`.
+You can also click on a link to navigate to it.
+You can also press the up or down arrow keys to move your selection up and down.
+
+### Search
+If there are no matching links, a search will be performed with your query.
+The default search engine is Google Search, however you can customize it by clicking the three dots to go to settings,
+clicking `config`, and pasting in your search engine url, such as `https://search.brave.com/search?q=`.
+Your search query simply gets encoded and pasted to the end of your configured search engine url.
 
 ### Hotkeys
 Hotkey | Action
 -|-
-Return | Navigate to the topmost link, if any.
-Shift + Return | Perform a Google search with search bar text.
-CMD + K | Focus search bar.
-Esc | Blur search bar.
+Return | Navigate to the currently selected link, or perform a search if there are no matching links.
+Up Arrow | Move selection up.
+Down Arrow | Move selection down.
 
-## FAQ
+### Tips
+Fuzzyhome doesn't use an algorithm that attempts to be intelligent about which links it ranks first because
+having a more predictable behavior lets you work faster since you know it will do the same thing every single time.
 
-### Why Don't You Use A "Smarter" Algorithm Based On Frecency?
-Having one result ranked highest when you expect
-another can be really frustrating,
-namely because you have to pay attention to the results
-instead of just typing the same thing to get the same result
-every single time and pressing enter without thinking about it.
+The search results are first filtered on character order.
+If the characters of a given link name are not in the same order as the query, that link will be excluded from the results.
+So if I have a link named `messenger` and I type `mgs`,
+`messenger` will be excluded from the results because the `g` does not come before the `s`.
 
-What's the solution then? Just rename your links accordingly.
-This way, it's **your** choice.
+The fuzzy search [algorithm](https://github.com/jhawthorn/fzy/blob/master/ALGORITHM.md)
+prioritizes shorter strings and strings whose words begin with the letters of the query.
 
-For example, I have one link named `mpv` which I've accessed `7` times,
-and one link named `messenger` which I've accessed `106` times.
-Under conventional wisdom, typing the query `m` should show
-`messenger` at the top of the results because I access it way more
-often, so it's probably what I want, right?
+With those factors in mind, if you encounter a situation where a certain link you access less often is showing up in search results on top of
+a link you access much more often, such as `mpv` showing up on top of a desired link `messenger`,
+either lengthen `mpv`'s name to something like `_mpv`, or shorten `messenger`'s name to something like `m`.
 
-No. Instead, I should just rename `mpv` to something else,
-such as `_mpv`. Now, typing `m` results in `messenger` showing up first,
-and typing `mp` results in `mpv` showing up first.
-This is what will happen **every single time**.
-It doesn't matter what time of day it is,
-how many times I accessed some other link recently,
-or any other variable;
-I type `m`, press enter, and that's it.
+With either of these solutions, typing `m` will always result in the desired link showing up first.
+That will be the behavior every single time, regardless of which link you accessed more recently,
+what time of day it is, or some other random variable.
