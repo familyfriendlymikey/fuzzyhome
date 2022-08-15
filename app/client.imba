@@ -29,7 +29,7 @@ tag app
 
 	selection_index = 0
 	settings_active = no
-	loading_add = no
+	loading = no
 	fatal_error = no
 
 	get render? do mounted?
@@ -37,32 +37,44 @@ tag app
 	def mount
 		try
 			await reload_db!
+			p "load db success"
+			p state.links
 		catch e
 			err "loading database", e
 			fatal_error = yes
 			return
 		unless global.localStorage.fuzzyhome_visited
-			await add_link { name: "help", url: "github.com/familyfriendlymikey/fuzzyhome" }
-			await add_link { name: "google", url: "google.com" }
-			await add_link { name: "youtube", url: "youtube.com" }
-			await add_link { name: "3000", url: "localhost:3000" }
+			await add_initial_links!
 			global.localStorage.fuzzyhome_visited = yes
+		load_config!
 
-		if not global.localStorage.fuzzyhome_config
-			let url = 'www.google.com/search?q='
-			let hostname = 'www.google.com'
-			let frequency = 0
-			let icon = await fetch_image_as_base_64 'google.com'
-			config.search_engine = { url, hostname, icon, frequency }
-			save_config!
-		else
-			load_config!
+	def add_initial_links
+		await add_link { name: "help", url: "github.com/familyfriendlymikey/fuzzyhome" }
+		await add_link { name: "google", url: "google.com" }
+		await add_link { name: "youtube", url: "youtube.com" }
+		await add_link { name: "3000", url: "localhost:3000" }
+
+	def validate_config
+		throw 'config error' unless config..search_engine..url
+		throw 'config error' unless config..search_engine..frequency
+		throw 'config error' unless config..search_engine..icon
+
+	def reset_config
+		let url = 'www.google.com/search?q='
+		let frequency = 0
+		let icon = await fetch_image_as_base_64 'google.com'
+		config.search_engine = { url, icon, frequency }
+		save_config!
 
 	def save_config
 		global.localStorage.fuzzyhome_config = JSON.stringify(config)
 
 	def load_config
-		config = JSON.parse(global.localStorage.fuzzyhome_config)
+		try
+			config = JSON.parse(global.localStorage.fuzzyhome_config)
+			validate_config!
+		catch
+			reset_config!
 
 	def err s, e
 		p e
@@ -73,7 +85,7 @@ tag app
 		sort_links!
 
 	def can_add
-		return no if loading_add
+		return no if loading
 		return no if settings_active
 		await get_valid_link(state.query)
 
@@ -170,7 +182,7 @@ tag app
 			window.location.href = "//{link.url}"
 
 	def handle_click_add
-		loading_add = yes
+		loading = yes
 		let link = await get_valid_link(state.query)
 		unless link
 			err "adding link", "Invalid link."
@@ -178,13 +190,14 @@ tag app
 		await add_link(link)
 		state.query = ''
 		sort_links!
-		loading_add = no
+		loading = no
 
 	def handle_input
 		selection_index = 0
 		sort_links!
 
 	def handle_click_delete link
+		loading = yes
 		return unless window.confirm "Do you really want to delete {link..name}?"
 		try
 			await db.links.delete(link.id)
@@ -195,9 +208,10 @@ tag app
 			await reload_db!
 		catch e
 			err "reloading db after successful delete", e
+		loading = no
 
 	def handle_click_import e
-		loading_import = yes
+		loading = yes
 		let id_exists = do |newid|
 			state.links.some! do |{id}| newid === id
 		let filter = do |table, value, key|
@@ -208,16 +222,11 @@ tag app
 			await reload_db!
 		catch e
 			err "importing db", e
-		loading_import = no
 		settings_active = no
-
-	def set_search_engine url
-		let hostname = new URL("https://{url}").hostname
-		let icon = await fetch_image_as_base_64 hostname
-		config.search_engine = { url, hostname, icon }
-		save_config!
+		loading = no
 
 	def handle_click_export
+		loading = yes
 		let datetime = new Date!.toString!.split(" ")
 		let date = datetime.slice(1, 4).join("-").toLowerCase!
 		let time = datetime[4].split(":").join("-")
@@ -225,15 +234,24 @@ tag app
 		const blob = await db.export({ prettyJson: yes })
 		download(blob, filename, "application/json")
 		settings_active = no
+		loading = no
+
+	def set_search_engine url
+		let icon = await fetch_image_as_base_64 url
+		config.search_engine = { url, icon }
+		save_config!
 
 	def handle_click_config
+		loading = yes
 		let input = window.prompt("Please enter the URL of your search engine.")
+		return unless input
 		let url = input.trim!.replace(/(^\w+:|^)\/\//, '')
 		unless url
 			err "changing search engine", "Invalid URL."
 			return
-		set_search_engine url
+		await set_search_engine url
 		settings_active = no
+		loading = no
 
 	def handle_click_github
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
@@ -268,10 +286,14 @@ tag app
 				w:100% h:50px px:20px
 				fs:20px ta:center
 				bd:1px solid purple4
-				bg:none c:blue3 caret-color:blue3
+				bg:purple4/10 c:blue3 caret-color:blue3
 				outline:none rd:5px
-				@focus bg:purple4/10
 				@placeholder fs:10px c:blue3
+
+			css .loading-container
+				d:flex fld:row jc:space-around ai:center
+				w:100% h:50px
+				bg:purple4/10 rd:5px c:gray4
 
 			css .settings-container
 				d:flex fld:row jc:space-around ai:center
@@ -288,10 +310,10 @@ tag app
 				fs:20px
 
 			css .disabled
-				@important c:gray4 cursor:default
+				c:gray4 cursor:default user-select:none
 
 			css .links
-				d:flex fld:column jc:flex-start
+				d:flex fld:column jc:flex-start fl:1
 				w:100% ofy:auto
 
 			css .link
@@ -337,7 +359,29 @@ tag app
 						Check developer console for more information.
 					"""
 			else
-				unless settings_active
+				if settings_active
+					<.settings-container>
+						<label.settings-button .disabled=loading>
+							"IMPORT"
+							<input[d:none]
+								disabled=loading
+								@change=handle_click_import
+								@click=(this.value = '')
+								type="file"
+							>
+						<.settings-button
+							.disabled=loading
+							@click.if(!loading)=handle_click_export
+						> "EXPORT"
+						<.settings-button
+							.disabled=loading
+							@click.if(!loading)=handle_click_config
+						> "CONFIG"
+						<.settings-button
+							.disabled=loading
+							@click.if(!loading)=handle_click_github
+						> "GITHUB"
+				else
 					<input$main-input
 						bind=state.query
 						placeholder=pretty_date
@@ -347,25 +391,16 @@ tag app
 						@input=handle_input
 						@paste=handle_paste
 						@blur=this.focus
+						.disabled=loading
+						disabled=loading
 					>
-				else
-					<.settings-container>
-						unless loading_import
-							<label.settings-button>
-								"IMPORT"
-								<input[d:none]
-									@change=handle_click_import
-									@click=(this.value = '')
-									type="file"
-								>
-						else
-							<.settings-button.disabled> "IMPORT"
-						<.settings-button@click=handle_click_export> "EXPORT"
-						<.settings-button@click=handle_click_config> "CONFIG"
-						<.settings-button@click=handle_click_github> "GITHUB"
 
 				if state.query.trim!.split(/\s+/).length < 2
-					<.middle-button[mt:-10px py:5px fs:25px]@click=toggle_settings> "..."
+					<.middle-button
+						[mt:-10px py:5px fs:25px]
+						.disabled=loading
+						@click.if(!loading)=toggle_settings
+					> "..."
 				elif await can_add!
 					<.middle-button@click=handle_click_add> "+"
 				else
