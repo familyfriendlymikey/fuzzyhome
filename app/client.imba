@@ -169,7 +169,8 @@ tag app
 			err "adding link", e
 
 	def handle_click_link link
-		increment_link_frequency link
+		await increment_link_frequency link
+		window.location.href = "//{link.url}"
 
 	def handle_click_search
 		increment_search_engine_frequency!
@@ -179,7 +180,7 @@ tag app
 			use_search_engine!
 		else
 			let link = state.scored_links[selection_index]
-			increment_link_frequency link
+			await increment_link_frequency link
 			window.location.href = "//{link.url}"
 
 	def handle_click_add
@@ -390,7 +391,7 @@ tag app
 							<a.link
 								href="//{link.url}"
 								@pointerover=(selection_index = index)
-								@click=handle_click_link(link)
+								@click.prevent=handle_click_link(link)
 								.selected=(index == selection_index)
 							>
 								<.link-left>
