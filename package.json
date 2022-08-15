@@ -1,13 +1,13 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"scripts": {
 		"start": "imba run -SMH --baseurl . -w server.imba",
 		"build-app": "rm -rf dist && imba build -SMH --baseurl . server.imba",
-		"build-sw": "imbac sw.imba -o dist/public",
+		"build-sw": "imba build -SMH sw.imba -o dist/public",
 		"build": "npm run build-app && npm run build-sw",
 		"pages": "npx gh-pages --no-history --dotfiles --dist dist/public --branch deploy",
-		"static": "cd dist/public && echo http://localhost:8000 && python3 -m http.server &>/dev/null",
+		"static": "npm run build && cd dist/public && echo http://localhost:8000 && python3 -m http.server &>/dev/null",
 		"deploy": "npm run build && npm run pages"
 	},
 	"dependencies": {

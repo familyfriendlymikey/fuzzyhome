@@ -1,7 +1,9 @@
 let p = console.log
+import { version } from './package.json'
 const app_prefix = "fuzzyhome_cache"
-const version = "0.1.1"
 const cache_name = "{app_prefix}-{version}"
+
+p "service worker for fuzzyhome version {version}"
 
 let urls = [
 	'./',
