@@ -311,7 +311,7 @@ tag app
 				w:20px h:20px mr:10px rd:3px
 
 			css .name
-				tt:capitalize fs:20px word-wrap:anywhere
+				tt:capitalize fs:20px overflow-wrap:anywhere
 
 			css .link-right
 				d:flex fld:row jc:space-between ai:center w:70px
