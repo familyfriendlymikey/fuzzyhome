@@ -1,12 +1,11 @@
 let p = console.log
 
-import { version } from '../package.json'
 import { orderBy } from 'lodash'
-import Dexie from 'dexie'
+import { version } from '../package.json'
+import db from './db'
 import fzi from 'fzi'
 import download from 'downloadjs'
-import 'dexie-export-import'
-import 'dexie-observable'
+import { nanoid } from 'nanoid'
 
 let state = {
 	query: ''
@@ -17,20 +16,6 @@ let state = {
 let config = {
 	search_engine: {}
 }
-
-let db = new Dexie 'fuzzyhome'
-db.version(1).stores({
-	links: "++id,name,link"
-})
-db.version(2).stores({
-	links: "$$id,name,url"
-}).upgrade(do |trans|
-	trans.links.toCollection!.modify(do |link|
-		link.url = link.link
-		delete link.link
-		delete link.last_opened
-	)
-)
 
 global._fuzzyhome_delete_everything = do
 	return unless window.confirm "This will delete everything. Are you sure?"
@@ -161,9 +146,10 @@ tag app
 		name = name.trim!
 		url = strip_url url
 		let img = await fetch_image_as_base_64(url)
-		let link = { name, url, frequency, img }
+		let id = nanoid!
+		let link = { id, name, url, frequency, img }
 		try
-			await db.links.put(link)
+			await db.links.add link
 			await reload_db!
 		catch e
 			err "adding link", e

@@ -1,6 +1,6 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"scripts": {
 		"start": "imba run -SMH --baseurl . -w server.imba",
 		"build-app": "rm -rf dist && imba build -SMH --baseurl . server.imba",
@@ -18,7 +18,8 @@
 		"express": "^4.17.1",
 		"fzi": "^1.0.0",
 		"imba": "^2.0.0-alpha.207",
-		"lodash": "^4.17.21"
+		"lodash": "^4.17.21",
+		"nanoid": "^4.0.0"
 	},
 	"description": "A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.",
 	"homepage": "https://fuzzyho.me/",
