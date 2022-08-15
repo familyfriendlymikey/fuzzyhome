@@ -1,6 +1,6 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.0.32",
+	"version": "0.1.0",
 	"scripts": {
 		"start": "imba run -SMH --baseurl . -w server.imba",
 		"build-app": "rm -rf dist && imba build -SMH --baseurl . server.imba",
@@ -11,8 +11,15 @@
 		"deploy": "npm run build && npm run pages"
 	},
 	"dependencies": {
+		"dexie": "^3.2.2",
+		"dexie-export-import": "^1.0.3",
+		"dexie-observable": "^3.0.0-beta.11",
+		"download": "^8.0.0",
+		"downloadjs": "^1.4.7",
 		"express": "^4.17.1",
+		"fzi": "^1.0.0",
 		"imba": "^2.0.0-alpha.207",
-		"lodash": "^4.17.21"
+		"lodash": "^4.17.21",
+		"nanoid": "^4.0.0"
 	}
 }

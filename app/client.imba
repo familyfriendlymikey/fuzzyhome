@@ -1,98 +1,129 @@
 let p = console.log
 
-import { sortBy } from 'lodash'
 import { version } from '../package.json'
-import fzy from './utils/fzy'
-import download_json_file from './utils/download'
-import upload_json_file from './utils/upload'
-import idb_wrapper from './utils/idb_wrapper'
-import state from './state'
+import { orderBy } from 'lodash'
+import Dexie from 'dexie'
+import fzi from 'fzi'
+import download from 'downloadjs'
+import 'dexie-export-import'
+import 'dexie-observable'
 
-let db = new idb_wrapper 'fuzzyhome', 'links', 1
-db.open!
+let state = {
+	query: ''
+	links: []
+	scored_links: []
+}
 
-global css body
-	d:flex fld:column jc:flex-start ai:center
-	m:0 w:100% h:100% bg:#20222f
-	ff:sans-serif fw:1
+let config = {
+	search_engine: {}
+}
+
+let db = new Dexie 'fuzzyhome'
+db.version(1).stores({
+	links: "++id,name,link"
+})
+db.version(2).stores({
+	links: "$$id,name,url"
+}).upgrade(do |trans|
+	trans.links.toCollection!.modify(do |link|
+		link.url = link.link
+		delete link.link
+		delete link.last_opened
+	)
+)
+
+global._fuzzyhome_delete_everything = do
+	return unless window.confirm "This will delete everything. Are you sure?"
+	indexedDB.deleteDatabase("fuzzyhome")
+	delete localStorage.fuzzyhome_config
+	delete localStorage.fuzzyhome_visited
+
+p "fuzzyhome version {version}"
 
 tag app
 
 	selection_index = 0
-
 	settings_active = no
+	loading_add = no
+	fatal_error = no
 
 	get render? do mounted?
 
 	def mount
+		try
+			await reload_db!
+		catch e
+			err "loading database", e
+			fatal_error = yes
+			return
 		unless global.localStorage.fuzzyhome_visited
-			await put_link { name: "fuzzy home help", link: "github.com/familyfriendlymikey/fuzzyhome" }
-			await put_link { name: "google", link: "google.com" }
-			await put_link { name: "youtube", link: "youtube.com" }
+			await add_link { name: "help", url: "github.com/familyfriendlymikey/fuzzyhome" }
+			await add_link { name: "google", url: "google.com" }
+			await add_link { name: "youtube", url: "youtube.com" }
+			await add_link { name: "3000", url: "localhost:3000" }
 			global.localStorage.fuzzyhome_visited = yes
 
 		if not global.localStorage.fuzzyhome_config
-			let search_engine_url = 'www.google.com/search?q='
-			let search_engine_hostname = 'www.google.com'
-			let search_engine_frequency = 0
-			let search_engine_icon = await fetch_image_as_base_64 'google.com'
-			state.config = {
-				search_engine_url
-				search_engine_hostname
-				search_engine_icon
-				search_engine_frequency
-			}
+			let url = 'www.google.com/search?q='
+			let hostname = 'www.google.com'
+			let frequency = 0
+			let icon = await fetch_image_as_base_64 'google.com'
+			config.search_engine = { url, hostname, icon, frequency }
 			save_config!
 		else
 			load_config!
 
-		state.links = await db.reload!
-		sort_links!
+	def save_config
+		global.localStorage.fuzzyhome_config = JSON.stringify(config)
+
+	def load_config
+		config = JSON.parse(global.localStorage.fuzzyhome_config)
+
+	def err s, e
+		p e
+		window.alert("Error {s}:\n\n{e}")
 
 	def reload_db
-		state.links = await db.reload!
+		state.links = await db.links.toArray()
 		sort_links!
+
+	def can_add
+		return no if loading_add
+		return no if settings_active
+		await get_valid_link(state.query)
 
 	def sort_links
 		if state.query.trim!.length > 0
-			state.scored_links = fzy state.links, state.query
+			state.scored_links = fzi state.links, state.query
 		else
-			state.scored_links = sortBy(state.links) do |link|
-				-link.frequency
+			state.scored_links = orderBy(state.links, 'frequency', 'desc')
 
-	def navigate link
-		window.location.href = "//{link.link}"
+	def increment_link_frequency link
+		try
+			await db.links.update link.id, { frequency: link.frequency + 1 }
+		catch e
+			err "putting link", e
 
-	def update_link link
-		link.last_opened = Date.now!
-		link.frequency = link.frequency + 1
-		await db.put link
+	def toggle_settings
+		settings_active = !settings_active
 
-	def handle_click_link link
-		update_link link
+	def increment_selection_index
+		selection_index = Math.min(state.scored_links.length - 1, selection_index + 1)
+
+	def decrement_selection_index
+		selection_index = Math.max(0, selection_index - 1)
+
+	def increment_search_engine_frequency
+		config.search_engine.frequency += 1
+		save_config!
+
+	get encoded_search_query
+		let encoded_query = window.encodeURIComponent(state.query)
+		"{config.search_engine.url}{encoded_query}"
 
 	def use_search_engine
-		state.config.search_engine_frequency += 1
-		save_config!
-		let encoded_query = window.encodeURIComponent(state.query)
-		window.location.href = "//{state.config.search_engine_url}{encoded_query}"
-
-	def handle_return
-		if state.scored_links.length < 1
-			use_search_engine!
-		else
-			let link = state.scored_links[selection_index]
-			update_link link
-			navigate link
-
-	def handle_shift_return
-		use_search_engine!
-
-	def name_exists query
-		for { name } in state.links
-			if query.trim!.toLowerCase! === name.trim!.toLowerCase!
-				return yes
-		return no
+		increment_search_engine_frequency!
+		window.location.href = "//{encoded_search_query}"
 
 	def fetch_image_as_base_64 url
 		let fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
@@ -114,143 +145,174 @@ tag app
 				return
 			reader.readAsDataURL(blob)
 
-	def handle_click_create
-		loading_create = yes
-		let query = state.query.trim!
-
-		if query === ''
-			loading_create = no
-			return
-
-		split_query = query.split /\s+/
-
-		if split_query.length < 2
-			loading_create = no
-			return
-
-		let link = split_query.pop!
-		let name = split_query.join(" ")
-		await put_link { link, name }
-		state.query = ''
-		reload_db!
-		loading_create = no
-
-	def can_put_link text
-		let split_text = text.trim!.split(/\s+/)
+	def get_valid_link text
+		text = text.trim!
+		return no if text === ''
+		let split_text = text.split(/\s+/)
 		return no if split_text.length < 2
-		split_text.pop!
-		let name = split_text.join " "
-		return no if name_exists name
-		return no if name.toLowerCase! === 'search'
-		yes
+		let url = split_text.pop!
+		let name = split_text.join(" ")
+		{ name, url }
 
-	def put_link { link, name, frequency=1, last_opened=Date.now! }
+	def strip_url url
+		url.trim!.replace(/(^\w+:|^)\/\//, '')
+
+	def add_link { url, name, frequency=1 }
 		name = name.trim!
-		return if name_exists name
-		return if name.toLowerCase! === 'search'
-		link = link.trim!.replace(/(^\w+:|^)\/\//, '')
-		let url = new URL("https://{link}")
-		let img = await fetch_image_as_base_64(url.hostname)
-		await db.put { name, link, frequency, last_opened, img }
+		url = strip_url url
+		let img = await fetch_image_as_base_64(url)
+		let link = { name, url, frequency, img }
+		try
+			await db.links.put(link)
+			await reload_db!
+		catch e
+			err "adding link", e
+
+	def handle_click_link link
+		increment_link_frequency link
+
+	def handle_click_search
+		increment_search_engine_frequency!
+
+	def handle_return
+		if state.scored_links.length < 1
+			use_search_engine!
+		else
+			let link = state.scored_links[selection_index]
+			increment_link_frequency link
+			window.location.href = "//{link.url}"
+
+	def handle_click_add
+		loading_add = yes
+		let link = await get_valid_link(state.query)
+		unless link
+			err "adding link", "Invalid link."
+			return
+		await add_link(link)
+		state.query = ''
+		sort_links!
+		loading_add = no
 
 	def handle_input
 		selection_index = 0
 		sort_links!
 
 	def handle_click_delete link
-		return unless link
 		return unless window.confirm "Do you really want to delete {link..name}?"
-		await db.delete link
+		try
+			await db.links.delete(link.id)
+		catch e
+			err "deleting link", e
 		state.query = ''
-		reload_db!
+		try
+			await reload_db!
+		catch e
+			err "reloading db after successful delete", e
 
 	def handle_click_import e
 		loading_import = yes
-		let data = await upload_json_file e
-
-		unless Array.isArray(data)
-			loading_import = no
-			return
-
-		for link in data
-			await put_link(link)
-
-		reload_db!
+		let id_exists = do |newid|
+			state.links.some! do |{id}| newid === id
+		let filter = do |table, value, key|
+			table === 'links' and not id_exists value.id
+		try
+			await reload_db!
+			await db.import(e.target.files[0], { filter })
+			await reload_db!
+		catch e
+			err "importing db", e
 		loading_import = no
 		settings_active = no
 
+	def set_search_engine url
+		let hostname = new URL("https://{url}").hostname
+		let icon = await fetch_image_as_base_64 hostname
+		config.search_engine = { url, hostname, icon }
+		save_config!
+
 	def handle_click_export
-		download_json_file JSON.stringify(state.links), "fuzzyhome_"
+		let datetime = new Date!.toString!.split(" ")
+		let date = datetime.slice(1, 4).join("-").toLowerCase!
+		let time = datetime[4].split(":").join("-")
+		let filename = "fuzzyhome_{date}_{time}.json"
+		const blob = await db.export({ prettyJson: yes })
+		download(blob, filename, "application/json")
 		settings_active = no
-
-	def save_config
-		global.localStorage.fuzzyhome_config = JSON.stringify(state.config)
-
-	def load_config
-		state.config = JSON.parse(global.localStorage.fuzzyhome_config)
 
 	def handle_click_config
-		let link = window.prompt("Please enter the URL of your search engine.")
-		return unless link
-		link = link.trim!.replace(/(^\w+:|^)\/\//, '')
-		let url = new URL("https://{link}")
-		state.config.search_engine_icon = await fetch_image_as_base_64 url.hostname
-		state.config.search_engine_url = link
-		state.config.search_engine_hostname = url.hostname
-		save_config!
+		let input = window.prompt("Please enter the URL of your search engine.")
+		let url = input.trim!.replace(/(^\w+:|^)\/\//, '')
+		unless url
+			err "changing search engine", "Invalid URL."
+			return
+		set_search_engine url
 		settings_active = no
+
+	def handle_click_github
+		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
 
 	def handle_paste e
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
-			window.location.href = "//{state.config.search_engine_url}{state.query.trim!}"
+			use_search_engine!
 
-	def toggle_settings
-		if settings_active
-			settings_active = no
-		else
-			settings_active = yes
-
-	def increment_selection_index
-		selection_index = Math.min(state.links.length - 1, selection_index + 1)
-
-	def decrement_selection_index
-		selection_index = Math.max(0, selection_index - 1)
+	get pretty_date
+		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
 	def render
 		<self>
 
+			css body
+				d:flex fld:column jc:flex-start ai:center
+				m:0 w:100% h:100% bg:#20222f
+				ff:sans-serif fw:1
+				user-select:none
+
 			css self
 				d:flex fld:column jc:flex-start ai:center
+				w:80vw max-width:700px max-height:80vh
 				bxs:0px 0px 10px rgba(0,0,0,0.35)
-				w:80vw h:auto max-width:700px
-				p:30px box-sizing:border-box rd:10px
-				mt:10vh max-height:80vh
+				box-sizing:border-box p:30px rd:10px mt:10vh
 
-			css .buttons
-				d:flex fld:row jc:space-around w:100% h:50px
-				bg:purple4/10 rd:5px
+			css .fatal
+				c:blue2
 
-			css .button
-				d:flex fld:column jc:center ai:center
-				bg:none c:purple4 bd:none cursor:pointer fl:1
-				fs:14px ff:sans-serif fw:1
-
-			css $input
+			css $main-input
+				w:100% h:50px px:20px
+				fs:20px ta:center
 				bd:1px solid purple4
-				w:100% h:50px ta:center fs:20px bg:none rd:5px
-				bc:purple4 outline:none c:blue3 caret-color:blue3 px:20px
+				bg:none c:blue3 caret-color:blue3
+				outline:none rd:5px
 				@focus bg:purple4/10
 				@placeholder fs:10px c:blue3
 
+			css .settings-container
+				d:flex fld:row jc:space-around ai:center
+				w:100% h:50px
+				bg:purple4/10 rd:5px
+
+			css .settings-button
+				d:flex fld:column jc:center ai:center fl:1
+				bg:none c:purple4 bd:none cursor:pointer fs:14px
+
+			css .middle-button
+				d:flex fld:column jc:center ai:center
+				h:35px c:purple4 fs:20px cursor:pointer
+				fs:20px
+
+			css .disabled
+				@important c:gray4 cursor:default
+
 			css .links
 				d:flex fld:column jc:flex-start
-				w:100% ofy:auto fl:1
-				px:20px
+				w:100% ofy:auto
 
 			css .link
 				d:flex fld:row jc:space-between ai:center
-				px:15px py:10px rd:5px cursor:pointer
+				px:15px py:10px rd:5px cursor:pointer c:blue3
+
+			css .link-left
+				d:flex fl:1
 
 			css .selected
 				bg:blue3/5
@@ -258,107 +320,95 @@ tag app
 			css a
 				td:none
 
-			css .name
-				tt:capitalize c:blue3 fs:20px
-
-			css .frequency
-				fs:15px c:blue3
-
 			css .link-icon
-				mr:10px rd:3px h:20px w:20px bd:none
+				w:20px h:20px mr:10px rd:3px
 
-			css .disabled
-				@important c:gray4 cursor:default
-
-			css .settings-or-create
-				h:35px
-				d:flex fld:column jc:center ai:center
-
-			css .create
-				d:inline fs:20px c:purple4 cursor:pointer
-
-			css .toggle-settings
-				fs:25px c:purple4 cursor:pointer d:inline mt:-10px
-
-			css .delete
-				bd:1px solid purple4/50
-				px:7px rd:3px fs:15px
-				c:purple4 cursor:pointer o:0
-
-			css .selected .delete
-				o:100
-
-			css .link-left
-				d:flex fl:1
+			css .name
+				tt:capitalize fs:20px word-wrap:anywhere
 
 			css .link-right
 				d:flex fld:row jc:space-between ai:center w:70px
 
-			<[d:flex fld:column jc:space-between ai:center w:100%]>
-				if settings_active
-					<.buttons>
-						if loading_import
-							<.button.disabled> "IMPORT"
-						else
-							<label.button>
+			css .delete
+				o:0
+				px:7px rd:3px c:purple4 fs:15px cursor:pointer
+				bd:1px solid purple4/50
+
+			css .selected .delete
+				o:100
+
+			css .frequency
+				fs:15px
+
+			if fatal_error
+				<.fatal>
+					"""
+						There was an error loading the database.
+						This could be due to a user setting
+						disallowing local storage, or a random error.
+						Consider refreshing.
+						Check developer console for more information.
+					"""
+			else
+				unless settings_active
+					<input$main-input
+						bind=state.query
+						placeholder=pretty_date
+						@hotkey('return').capture=handle_return
+						@hotkey('down').capture=increment_selection_index
+						@hotkey('up').capture=decrement_selection_index
+						@input=handle_input
+						@paste=handle_paste
+						@blur=this.focus
+					>
+				else
+					<.settings-container>
+						unless loading_import
+							<label.settings-button>
 								"IMPORT"
 								<input[d:none]
 									@change=handle_click_import
 									@click=(this.value = '')
 									type="file"
 								>
-						<.button@click=handle_click_export> "EXPORT"
-						<.button@click=handle_click_config> "CONFIG"
-						<.button@click=(global.location.href="https://github.com/familyfriendlymikey/fuzzyhome")> "HELP"
+						else
+							<.settings-button.disabled> "IMPORT"
+						<.settings-button@click=handle_click_export> "EXPORT"
+						<.settings-button@click=handle_click_config> "CONFIG"
+						<.settings-button@click=handle_click_github> "GITHUB"
+
+				if state.query.trim!.split(/\s+/).length < 2
+					<.middle-button[mt:-10px py:5px fs:25px]@click=toggle_settings> "..."
+				elif await can_add!
+					<.middle-button@click=handle_click_add> "+"
 				else
-					<[d:flex fld:row jc:space-between ai:center w:100%]>
-						<input$input
-							@hotkey('mod+k').capture=$input..focus
-							bind=state.query
-							placeholder="v{version}"
-							@hotkey('return').capture=handle_return
-							@hotkey('shift+return').capture=handle_shift_return
-							@hotkey('esc').capture=$input..blur
-							@hotkey('down').capture=increment_selection_index
-							@hotkey('up').capture=decrement_selection_index
-							@input=handle_input
-							@paste=handle_paste
-						>
+					<.middle-button.disabled> "+"
 
-				<.settings-or-create>
-					if can_put_link(state.query) and not settings_active
-							if loading_create
-								<.create.disabled>
-									"   +"
-							else
-								<.create@click=handle_click_create>
-									"   +"
-					else
-						<.toggle-settings@click=toggle_settings> "..."
-
-			if state.scored_links.length > 0
 				<.links>
-					for obj, index in state.scored_links
-						<a.link
-							href="//{obj.link}"
-							@pointerover=(selection_index = index)
-							@click=handle_click_link(obj)
-							.selected=(index == selection_index)
+					if state.scored_links.length > 0
+						for link, index in state.scored_links
+							<a.link
+								href="//{link.url}"
+								@pointerover=(selection_index = index)
+								@click=handle_click_link(link)
+								.selected=(index == selection_index)
+							>
+								<.link-left>
+									<img.link-icon src=link.img>
+									<.name> link.name
+								<.link-right>
+									<.delete@click.prevent.stop=handle_click_delete(link)> "x"
+									<.frequency> link.frequency
+					else
+						<a.link.selected
+							href="//{encoded_search_query}"
+							@click=handle_click_search
 						>
 							<.link-left>
-								<img.link-icon height=20 width=20 src=obj.img>
-								<.name> obj.name
-							<.link-right>
-								<.delete@click.prevent.stop=handle_click_delete(obj)> "x"
-								<.frequency> obj.frequency
-			else
-				<.links>
-					<.link>
-						<.link-left>
-							<img.link-icon src=state.config.search_engine_icon>
-							<.name[tt:none]> "Search {state.config.search_engine_hostname}"
-						<.link-right[jc:flex-end]>
-							<.frequency> state.config.search_engine_frequency
-		$input.focus!
+								<img.link-icon src=config.search_engine.icon>
+								<.name[tt:none]> encoded_search_query
+							<.link-right[jc:flex-end]>
+								<.frequency> config.search_engine.frequency
+			$main-input.focus!
 
 imba.mount <app>
