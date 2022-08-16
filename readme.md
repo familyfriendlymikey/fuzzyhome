@@ -22,6 +22,7 @@ For example:
 imba home page https://imba.io/
 ```
 The last space-separated string will be used as the url for your link.
+In most cases if you do not specify a protocol, `https` will be used.
 
 ### Fuzzy Find
 Search for a link by typing.

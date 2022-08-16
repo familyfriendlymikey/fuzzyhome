@@ -6,6 +6,7 @@ import db from './db'
 import fzi from 'fzi'
 import download from 'downloadjs'
 import { nanoid } from 'nanoid'
+import { parse_url } from './utils'
 
 let state = {
 	query: ''
@@ -48,13 +49,14 @@ tag app
 		await load_config!
 
 	def add_initial_links
-		add_link { name: "github", url: "https://github.com/familyfriendlymikey" }
+		add_link { name: "click here for help", url: "github.com/familyfriendlymikey/fuzzyhome", frequency: 1 }
 		add_link { name: "google", url: "google.com" }
 		add_link { name: "youtube", url: "youtube.com" }
 		add_link { name: "photopea", url: "photopea.com" }
 		add_link { name: "twitch", url: "twitch.tv" }
 		add_link { name: "messenger", url: "messenger.com" }
 		add_link { name: "instagram", url: "instagram.com" }
+		add_link { name: "localhost 3000", url: "http://localhost:3000" }
 
 	def validate_config
 		throw 'config error' unless config..search_engine.hasOwnProperty 'url'
@@ -63,7 +65,7 @@ tag app
 
 	def reset_config
 		p "resetting config"
-		let url = 'www.google.com/search?q='
+		let url = 'https://www.google.com/search?q='
 		let frequency = 0
 		let icon = await fetch_image_as_base_64 'google.com'
 		config.search_engine = { url, icon, frequency }
@@ -123,14 +125,14 @@ tag app
 
 	def use_search_engine
 		increment_search_engine_frequency!
-		window.location.href = "//{encoded_search_query}"
+		window.location.href = encoded_search_query
 
-	def fetch_image_as_base_64 url
+	def fetch_image_as_base_64 host
 		let fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
 		return new Promise! do |resolve|
 			let res
 			try
-				res = await global.fetch("https://icon.horse/icon/{url}")
+				res = await global.fetch("https://icon.horse/icon/{host}")
 			catch
 				p "Failed to get icon from icon horse."
 				resolve fallback
@@ -154,13 +156,14 @@ tag app
 		let name = split_text.join(" ")
 		{ name, url }
 
-	def strip_url url
-		url.trim!.replace(/(^\w+:|^)\/\//, '')
-
 	def add_link { url, name, frequency=0 }
 		name = name.trim!
-		url = strip_url url
-		let img = await fetch_image_as_base_64(url)
+		let host
+		try
+			{ href:url, host } = parse_url url
+		catch e
+			return err "parsing url", e
+		let img = await fetch_image_as_base_64 host
 		let id = nanoid!
 		let link = { id, name, url, frequency, img }
 		try
@@ -172,7 +175,7 @@ tag app
 
 	def handle_click_link link
 		await increment_link_frequency link
-		window.location.href = "//{link.url}"
+		window.location.href = link.url
 
 	def handle_click_search
 		increment_search_engine_frequency!
@@ -183,7 +186,7 @@ tag app
 		else
 			let link = state.scored_links[selection_index]
 			await increment_link_frequency link
-			window.location.href = "//{link.url}"
+			window.location.href = link.url
 
 	def handle_click_add
 		loading = yes
@@ -240,20 +243,19 @@ tag app
 		settings_active = no
 		loading = no
 
-	def set_search_engine url
-		let icon = await fetch_image_as_base_64 url
-		config.search_engine = { url, icon }
-		save_config!
-
 	def handle_click_config
 		loading = yes
-		let input = window.prompt("Please enter the URL of your search engine.")
-		return unless input
-		let url = input.trim!.replace(/(^\w+:|^)\/\//, '')
-		unless url
-			err "changing search engine", "Invalid URL."
-			return
-		await set_search_engine url
+		let set_search_engine = do
+			let input = window.prompt "Please enter the URL of your search engine."
+			return if input === null
+			try
+				var { href:url, host } = parse_url input
+			catch e
+				return err "changing search engine", e
+			let icon = await fetch_image_as_base_64 host
+			config.search_engine = { url, icon }
+			save_config!
+		await set_search_engine!
 		settings_active = no
 		loading = no
 
@@ -414,7 +416,7 @@ tag app
 					if state.scored_links.length > 0
 						for link, index in state.scored_links
 							<a.link
-								href="//{link.url}"
+								href=link.url
 								@pointerover=(selection_index = index)
 								@click.prevent=handle_click_link(link)
 								.selected=(index == selection_index)
@@ -427,7 +429,7 @@ tag app
 									<.frequency> link.frequency
 					else
 						<a.link.selected
-							href="//{encoded_search_query}"
+							href=encoded_search_query
 							@click=handle_click_search
 						>
 							<.link-left>
