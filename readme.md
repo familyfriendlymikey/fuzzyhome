@@ -59,6 +59,11 @@ If you want to export your links to use them on another computer, go to the sett
 This downloads a `.json` file, which you can then send to your other computer and import by clicking the `IMPORT` button
 and selecting your file.
 
+### Reset Everything To Default
+Not sure why anyone except me would do this, but if for some reason you want to delete everything and restore the default config,
+you can do so by bringing up your developer console and running the function `_fuzzyhome_delete_everything()`,
+and confirming that you do indeed want to delete all your links on the prompt that pops up.
+
 ## Hotkeys
 Hotkey | Action
 -|-
