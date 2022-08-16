@@ -24,6 +24,8 @@ imba home page https://imba.io/
 The last space-separated string will be used as the url for your link.
 In most cases if you do not specify a protocol, `https` will be used.
 
+You can also use the hotkey `shift+return` to create a new link.
+
 ### Fuzzy Find
 Search for a link by typing.
 The fuzzy sorting algorithm makes searching very fast,
@@ -34,24 +36,44 @@ Navigate to the currently selected search result by pressing `return`.
 You can also click on a link to navigate to it.
 You can also press the up or down arrow keys to move your selection up and down.
 
+### Move Selection
+You can move your selection up and down with the arrow keys.
+
 ### Search
 If there are no matching links, a search will be performed with your query.
-The default search engine is Google Search, however you can customize it by clicking the three dots to go to settings,
-clicking `config`, and pasting in your search engine url, such as `https://search.brave.com/search?q=`.
-Your search query simply gets encoded and pasted to the end of your configured search engine url.
 
 ### Quick Search
 If you paste while the input is empty, fuzzyhome will immediately make a search with your pasted query.
 
-### Hotkeys
+### Delete
+You can delete notes by clicking the purple `x` on the currently selected link.
+You can also use the hotkey `shift+backspace` to delete the currently selected link.
+
+### Customize Search Engine
+The default search engine is Google Search, however you can customize it by clicking the three dots to go to settings,
+clicking `config`, and pasting in your search engine url, such as `https://search.brave.com/search?q=`.
+Your search query simply gets encoded and pasted to the end of your configured search engine url.
+
+### Importing / Exporting Links
+If you want to export your links to use them on another computer, go to the settings menu and click `EXPORT`.
+This downloads a `.json` file, which you can then send to your other computer and import by clicking the `IMPORT` button
+and selecting your file.
+
+## Hotkeys
 Hotkey | Action
 -|-
 Return | Navigate to the currently selected link, or perform a search if there are no matching links.
 Up Arrow | Move selection up.
 Down Arrow | Move selection down.
 Paste | If input is empty, immediately search with pasted query.
+Shift + Return | Create new link.
+Shift + Backspace | Delete currently selected link.
 
-### Tips
+## FAQ
+
+### The Link I Want Is Showing Up Last
+TLDR either rename the desired link to something shorter or the undesired link to something longer.
+
 Fuzzyhome doesn't use an algorithm that attempts to be intelligent about which links it ranks first because
 having a more predictable behavior lets you work faster since you know it will do the same thing every single time.
 
@@ -70,3 +92,12 @@ either lengthen `mpv`'s name to something like `_mpv`, or shorten `messenger`'s 
 With either of these solutions, typing `m` will always result in the desired link showing up first.
 That will be the behavior every single time, regardless of which link you accessed more recently,
 what time of day it is, or some other random variable.
+
+### A Link Is Blocking My Search
+This happens very rarely if at all. Just throw some spaces at the end of your query.
+
+### The Quick Search Function Is Stopping Me From Finishing My Query
+Just type a single space before you paste in text.
+
+### My Localhost Link Isn't Working
+If you want to make a link that points to `localhost`, you likely need to specify the `http` protocol when creating your link.

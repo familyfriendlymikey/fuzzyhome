@@ -89,10 +89,10 @@ tag app
 		state.links = await db.links.toArray()
 		sort_links!
 
-	def can_add
+	get can_add
 		return no if loading
 		return no if settings_active
-		await get_valid_link(state.query)
+		get_valid_link(state.query)
 
 	def sort_links
 		if state.query.trim!.length > 0
@@ -188,9 +188,38 @@ tag app
 			await increment_link_frequency link
 			window.location.href = link.url
 
-	def handle_click_add
+	def handle_click_delete link
+		handle_delete link
+
+	def handle_shift_backspace
+		return unless state.scored_links.length > 0
+		handle_delete state.scored_links[selection_index]
+
+	def handle_delete link
 		loading = yes
-		let link = await get_valid_link(state.query)
+		let delete_link = do
+			return unless window.confirm "Do you really want to delete {link..name}?"
+			try
+				await db.links.delete(link.id)
+			catch e
+				err "deleting link", e
+			try
+				await reload_db!
+			catch e
+				err "reloading db after successful delete", e
+			selection_index = Math.min selection_index, state.scored_links.length - 1
+		await delete_link!
+		loading = no
+
+	def handle_shift_return
+		handle_add!
+
+	def handle_click_add
+		handle_add!
+
+	def handle_add
+		loading = yes
+		let link = get_valid_link(state.query)
 		unless link
 			err "adding link", "Invalid link."
 			return
@@ -202,20 +231,6 @@ tag app
 	def handle_input
 		selection_index = 0
 		sort_links!
-
-	def handle_click_delete link
-		loading = yes
-		return unless window.confirm "Do you really want to delete {link..name}?"
-		try
-			await db.links.delete(link.id)
-		catch e
-			err "deleting link", e
-		try
-			await reload_db!
-		catch e
-			err "reloading db after successful delete", e
-		selection_index = 0
-		loading = no
 
 	def handle_click_import e
 		loading = yes
@@ -392,6 +407,8 @@ tag app
 						bind=state.query
 						placeholder=pretty_date
 						@hotkey('return').capture=handle_return
+						@hotkey('shift+return').capture.if(can_add)=handle_shift_return
+						@hotkey('shift+backspace').capture=handle_shift_backspace
 						@hotkey('down').capture=increment_selection_index
 						@hotkey('up').capture=decrement_selection_index
 						@input=handle_input
@@ -407,7 +424,7 @@ tag app
 						.disabled=loading
 						@click.if(!loading)=toggle_settings
 					> "..."
-				elif await can_add!
+				elif can_add
 					<.middle-button@click=handle_click_add> "+"
 				else
 					<.middle-button.disabled> "+"
