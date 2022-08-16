@@ -37,22 +37,24 @@ tag app
 	def mount
 		try
 			await reload_db!
-			p "load db success"
 			p state.links
 		catch e
 			err "loading database", e
 			fatal_error = yes
 			return
 		unless global.localStorage.fuzzyhome_visited
-			await add_initial_links!
+			add_initial_links!
 			global.localStorage.fuzzyhome_visited = yes
 		await load_config!
 
 	def add_initial_links
-		await add_link { name: "help", url: "github.com/familyfriendlymikey/fuzzyhome" }
-		await add_link { name: "google", url: "google.com" }
-		await add_link { name: "youtube", url: "youtube.com" }
-		await add_link { name: "3000", url: "localhost:3000" }
+		add_link { name: "github", url: "https://github.com/familyfriendlymikey" }
+		add_link { name: "google", url: "google.com" }
+		add_link { name: "youtube", url: "youtube.com" }
+		add_link { name: "photopea", url: "photopea.com" }
+		add_link { name: "twitch", url: "twitch.tv" }
+		add_link { name: "messenger", url: "messenger.com" }
+		add_link { name: "instagram", url: "instagram.com" }
 
 	def validate_config
 		throw 'config error' unless config..search_engine.hasOwnProperty 'url'
@@ -155,7 +157,7 @@ tag app
 	def strip_url url
 		url.trim!.replace(/(^\w+:|^)\/\//, '')
 
-	def add_link { url, name, frequency=1 }
+	def add_link { url, name, frequency=0 }
 		name = name.trim!
 		url = strip_url url
 		let img = await fetch_image_as_base_64(url)
@@ -166,6 +168,7 @@ tag app
 			await reload_db!
 		catch e
 			err "adding link", e
+		imba.commit!
 
 	def handle_click_link link
 		await increment_link_frequency link
