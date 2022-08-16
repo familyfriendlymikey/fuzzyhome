@@ -264,11 +264,11 @@ tag app
 			let input = window.prompt "Please enter the URL of your search engine."
 			return if input === null
 			try
-				var { href:url, host } = parse_url input
+				var { href, host } = parse_url input
 			catch e
 				return err "changing search engine", e
-			let icon = await fetch_image_as_base_64 host
-			config.search_engine = { url, icon }
+			config.search_engine.url = href
+			config.search_engine.icon = await fetch_image_as_base_64 host
 			save_config!
 		await set_search_engine!
 		settings_active = no
