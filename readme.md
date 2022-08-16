@@ -39,12 +39,16 @@ The default search engine is Google Search, however you can customize it by clic
 clicking `config`, and pasting in your search engine url, such as `https://search.brave.com/search?q=`.
 Your search query simply gets encoded and pasted to the end of your configured search engine url.
 
+### Quick Search
+If you paste while the input is empty, fuzzyhome will immediately make a search with your pasted query.
+
 ### Hotkeys
 Hotkey | Action
 -|-
 Return | Navigate to the currently selected link, or perform a search if there are no matching links.
 Up Arrow | Move selection up.
 Down Arrow | Move selection down.
+Paste | If input is empty, immediately search with pasted query.
 
 ### Tips
 Fuzzyhome doesn't use an algorithm that attempts to be intelligent about which links it ranks first because
