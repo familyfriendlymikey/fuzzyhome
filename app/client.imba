@@ -203,11 +203,11 @@ tag app
 			await db.links.delete(link.id)
 		catch e
 			err "deleting link", e
-		state.query = ''
 		try
 			await reload_db!
 		catch e
 			err "reloading db after successful delete", e
+		selection_index = 0
 		loading = no
 
 	def handle_click_import e
