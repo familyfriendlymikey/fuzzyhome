@@ -46,7 +46,7 @@ tag app
 		unless global.localStorage.fuzzyhome_visited
 			await add_initial_links!
 			global.localStorage.fuzzyhome_visited = yes
-		load_config!
+		await load_config!
 
 	def add_initial_links
 		await add_link { name: "help", url: "github.com/familyfriendlymikey/fuzzyhome" }
@@ -55,11 +55,12 @@ tag app
 		await add_link { name: "3000", url: "localhost:3000" }
 
 	def validate_config
-		throw 'config error' unless config..search_engine..url
-		throw 'config error' unless config..search_engine..frequency
-		throw 'config error' unless config..search_engine..icon
+		throw 'config error' unless config..search_engine.hasOwnProperty 'url'
+		throw 'config error' unless config..search_engine.hasOwnProperty 'icon'
+		throw 'config error' unless config..search_engine.hasOwnProperty 'frequency'
 
 	def reset_config
+		p "resetting config"
 		let url = 'www.google.com/search?q='
 		let frequency = 0
 		let icon = await fetch_image_as_base_64 'google.com'
@@ -74,7 +75,7 @@ tag app
 			config = JSON.parse(global.localStorage.fuzzyhome_config)
 			validate_config!
 		catch
-			reset_config!
+			await reset_config!
 
 	def err s, e
 		p e
