@@ -45,6 +45,19 @@ If there are no matching links, a search will be performed with your query.
 ### Quick Search
 If you paste while the input is empty, fuzzyhome will immediately make a search with your pasted query.
 
+### Bangs
+You can easily append queries to arbitrary links, and as such use them in a similar manner as the "bang" feature from some search engines.
+Just get the query link for a website and create a link with that url. For example:
+```
+y https://www.youtube.com/results?search_query=
+```
+This will create a link named `y`.
+Now all you have to do is press `tab` when the `y` link is selected.
+In practice you'll just type `y<tab>`.
+This will allow you to start typing a query which will be appended onto the url of that link.
+To navigate to the link, just press `return` or click the link.
+To cancel, just press `tab` again.
+
 ### Delete
 You can delete notes by clicking the purple `x` on the currently selected link.
 You can also use the hotkey `shift+backspace` to delete the currently selected link.

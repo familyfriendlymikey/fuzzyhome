@@ -32,6 +32,7 @@ tag app
 	settings_active = no
 	loading = no
 	fatal_error = no
+	bang = no
 
 	get render? do mounted?
 
@@ -120,8 +121,10 @@ tag app
 		save_config!
 
 	get encoded_search_query
-		let encoded_query = window.encodeURIComponent(state.query)
-		"{config.search_engine.url}{encoded_query}"
+		"{config.search_engine.url}{window.encodeURIComponent(state.query)}"
+
+	get encoded_bang_query
+		"{bang.url}{window.encodeURIComponent(state.query)}"
 
 	def use_search_engine
 		increment_search_engine_frequency!
@@ -180,13 +183,30 @@ tag app
 	def handle_click_search
 		increment_search_engine_frequency!
 
+	def handle_bang
+		return unless bang
+		let url = encoded_bang_query
+		await increment_link_frequency bang
+		window.location.href = url
+
+	def handle_click_bang
+		handle_bang!
+
 	def handle_return
-		if state.scored_links.length < 1
+		if bang
+			handle_bang!
+		elif state.scored_links.length < 1
 			use_search_engine!
 		else
 			let link = state.scored_links[selection_index]
 			await increment_link_frequency link
 			window.location.href = link.url
+
+	def handle_tab
+		return bang = no if bang
+		return unless state.scored_links.length > 0
+		state.query = ''
+		bang = state.scored_links[selection_index]
 
 	def handle_click_delete link
 		handle_delete link
@@ -410,6 +430,7 @@ tag app
 						@hotkey('shift+backspace').capture=handle_shift_backspace
 						@hotkey('down').capture=increment_selection_index
 						@hotkey('up').capture=decrement_selection_index
+						@hotkey('tab').capture=handle_tab
 						@input=handle_input
 						@paste=handle_paste
 						@blur=this.focus
@@ -429,7 +450,17 @@ tag app
 					<.middle-button.disabled> "+"
 
 				<.links>
-					if state.scored_links.length > 0
+					if bang
+						<a.link.selected
+							href=encoded_bang_query
+							@click=handle_click_bang
+						>
+							<.link-left>
+								<img.link-icon src=bang.img>
+								<.name[tt:none]> encoded_bang_query
+							<.link-right[jc:flex-end]>
+								<.frequency> bang.frequency
+					elif state.scored_links.length > 0
 						for link, index in state.scored_links
 							<a.link
 								href=link.url
