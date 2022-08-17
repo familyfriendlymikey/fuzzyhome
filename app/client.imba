@@ -260,17 +260,16 @@ tag app
 
 	def handle_click_config
 		loading = yes
-		let set_search_engine = do
+		await (do
 			let input = window.prompt "Please enter the URL of your search engine."
 			return if input === null
 			try
-				var { href, host } = parse_url input
+				var { href: url, host } = parse_url input
 			catch e
 				return err "changing search engine", e
-			config.search_engine.url = href
-			config.search_engine.icon = await fetch_image_as_base_64 host
-			save_config!
-		await set_search_engine!
+			let icon = await fetch_image_as_base_64 host
+			Object.assign config.search_engine, { url, icon }
+			save_config!)!
 		settings_active = no
 		loading = no
 
