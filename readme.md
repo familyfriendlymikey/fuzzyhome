@@ -13,6 +13,8 @@ A lightweight new-tab page that lets you very quickly fuzzy find links and navig
 	- Firefox: [New Tab Override](https://addons.mozilla.org/en-US/firefox/addon/new-tab-override)
 	- Chrome: [New Tab Redirect](https://chrome.google.com/webstore/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna)
 
+	If the extension has an option for setting focus to the webpage instead of the address bar, be sure to enable it.
+
 ## Usage
 
 ### Create
