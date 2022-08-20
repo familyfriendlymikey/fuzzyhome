@@ -1,14 +1,17 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.1.38",
+	"version": "0.1.39",
 	"scripts": {
-		"start": "imba run -SMH --baseurl . -w server.imba",
 		"build-app": "rm -rf dist && imba build -SMH --baseurl . server.imba",
 		"build-sw": "imba build -SMH sw.imba -o dist/public",
 		"build": "npm run build-app && npm run build-sw",
-		"pages": "npx gh-pages --no-history --dotfiles --dist dist/public --branch deploy",
+		"publish-preview": "npx gh-pages --no-history --dotfiles --dist dist/public --branch preview",
+		"publish-release": "npx gh-pages --no-history --dotfiles --dist dist/public --branch release",
+
+		"start": "imba run -SMH --baseurl . -w server.imba",
 		"static": "npm run build && cd dist/public && echo http://localhost:8000 && python3 -m http.server &>/dev/null",
-		"deploy": "npm run build && npm run pages"
+		"preview": "npm version patch && npm run build && npm run publish-preview",
+		"deploy-only-after-preview": "npm run publish-release"
 	},
 	"dependencies": {
 		"dexie": "^3.2.2",

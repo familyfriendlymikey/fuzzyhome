@@ -4,6 +4,8 @@ fuzzyhome
 </a>
 </h1>
 
+test
+
 A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.
 
 ## Installation
