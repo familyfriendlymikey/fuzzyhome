@@ -373,7 +373,11 @@ tag app
 				w:20px h:20px mr:10px rd:3px
 
 			css .name
-				tt:capitalize fs:20px overflow-wrap:anywhere
+				tt:capitalize fs:20px
+				overflow-wrap:anywhere
+
+			css .search
+				tt:none word-break:break-all
 
 			css .link-right
 				d:flex fld:row jc:space-between ai:center w:70px
@@ -457,7 +461,7 @@ tag app
 						>
 							<.link-left>
 								<img.link-icon src=bang.img>
-								<.name[tt:none]> encoded_bang_query
+								<.name.search> encoded_bang_query
 							<.link-right[jc:flex-end]>
 								<.frequency> bang.frequency
 					elif state.scored_links.length > 0
@@ -481,7 +485,7 @@ tag app
 						>
 							<.link-left>
 								<img.link-icon src=config.search_engine.icon>
-								<.name[tt:none]> encoded_search_query
+								<.name.search> encoded_search_query
 							<.link-right[jc:flex-end]>
 								<.frequency> config.search_engine.frequency
 			$main-input.focus!
