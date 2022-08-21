@@ -50,7 +50,7 @@ tag app
 		await load_config!
 
 	def add_initial_links
-		add_link { name: "click here for help", url: "github.com/familyfriendlymikey/fuzzyhome", frequency: 1 }
+		add_link { name: "click here to learn how to use this tool effectively", url: "github.com/familyfriendlymikey/fuzzyhome", frequency: 1 }
 		add_link { name: "google", url: "google.com" }
 		add_link { name: "youtube", url: "youtube.com" }
 		add_link { name: "photopea", url: "photopea.com" }
