@@ -50,14 +50,21 @@ tag app
 		await load_config!
 
 	def add_initial_links
-		add_link { name: "click here to learn how to use this tool effectively", url: "github.com/familyfriendlymikey/fuzzyhome", frequency: 1 }
-		add_link { name: "google", url: "google.com" }
-		add_link { name: "youtube", url: "youtube.com" }
-		add_link { name: "photopea", url: "photopea.com" }
-		add_link { name: "twitch", url: "twitch.tv" }
-		add_link { name: "messenger", url: "messenger.com" }
-		add_link { name: "instagram", url: "instagram.com" }
-		add_link { name: "localhost 3000", url: "http://localhost:3000" }
+		let initial_links = [
+			"click here to learn how to use this tool effectively github.com/familyfriendlymikey/fuzzyhome"
+			"google google.com"
+			"youtube youtube.com"
+			"photopea photopea.com"
+			"twitch twitch.tv"
+			"messenger messenger.com"
+			"instagram instagram.com"
+			"localhost 3000 http://localhost:3000"
+		]
+		for link in initial_links
+			try
+				add_link link
+			catch e
+				err "adding link", e
 
 	def validate_config
 		throw 'config error' unless config..search_engine.hasOwnProperty 'url'
@@ -89,11 +96,6 @@ tag app
 	def reload_db
 		state.links = await db.links.toArray()
 		sort_links!
-
-	get can_add
-		return no if loading
-		return no if settings_active
-		get_valid_link(state.query)
 
 	def sort_links
 		if state.query.trim!.length > 0
@@ -150,30 +152,62 @@ tag app
 				return
 			reader.readAsDataURL(blob)
 
-	def get_valid_link text
-		text = text.trim!
-		return no if text === ''
-		let split_text = text.split(/\s+/)
-		return no if split_text.length < 2
-		let url = split_text.pop!
-		let name = split_text.join(" ")
-		{ name, url }
+	get can_add
+		return no if loading
+		return no if settings_active
+		let query = state.query.trim!
+		return no if query === ''
+		let split_query = query.split /\s+/
+		return no if split_query.length < 2
+		yes
 
-	def add_link { url, name, frequency=0 }
-		name = name.trim!
+	def create_link_from_text text
+		text = text.trim!
+		throw "text is empty" if text === ''
+		let split_text = text.split(/\s+/)
+		throw "no url provided" if split_text.length < 2
+		let url = split_text.pop!
 		let host
-		try
-			{ href:url, host } = parse_url url
-		catch e
-			return err "parsing url", e
+		{ href:url, host } = parse_url url
 		let img = await fetch_image_as_base_64 host
-		let id = nanoid!
-		let link = { id, name, url, frequency, img }
+		let name = split_text.join(" ")
+		{ name, url, frequency:0, img }
+
+	def handle_add
+		loading = yes
 		try
-			await db.links.add link
-			await reload_db!
+			await add_link state.query
+			state.query = ''
+			sort_links!
 		catch e
 			err "adding link", e
+		loading = no
+
+	def add_link text
+		let link = await create_link_from_text text
+		link.id = nanoid!
+		await db.links.add link
+		await reload_db!
+		imba.commit!
+
+	def handle_edit link
+		def edit_link
+			let input = window.prompt "Enter the new link name and url:"
+			return if input === null
+			try
+				await update_link link, input
+			catch e
+				return err "editing link", e
+		loading = yes
+		await edit_link!
+		loading = no
+
+	def update_link old_link, new_link_text
+		let new_link = await create_link_from_text new_link_text
+		new_link.frequency = old_link.frequency
+		let result = await db.links.update old_link.id, new_link
+		throw "link id not found" if result === 0
+		await reload_db!
 		imba.commit!
 
 	def handle_click_link link
@@ -211,13 +245,9 @@ tag app
 	def handle_click_delete link
 		handle_delete link
 
-	def handle_shift_backspace
-		return unless state.scored_links.length > 0
-		handle_delete state.scored_links[selection_index]
-
 	def handle_delete link
-		loading = yes
-		let delete_link = do
+
+		def delete_link
 			return unless window.confirm "Do you really want to delete {link..name}?"
 			try
 				await db.links.delete(link.id)
@@ -228,25 +258,23 @@ tag app
 			catch e
 				err "reloading db after successful delete", e
 			selection_index = Math.min selection_index, state.scored_links.length - 1
+
+		loading = yes
 		await delete_link!
 		loading = no
+
+	def handle_click_edit link
+		handle_edit link
+
+	def handle_shift_backspace
+		return unless state.scored_links.length > 0
+		handle_delete state.scored_links[selection_index]
 
 	def handle_shift_return
 		handle_add!
 
 	def handle_click_add
 		handle_add!
-
-	def handle_add
-		loading = yes
-		let link = get_valid_link(state.query)
-		unless link
-			err "adding link", "Invalid link."
-			return
-		await add_link(link)
-		state.query = ''
-		sort_links!
-		loading = no
 
 	def handle_input
 		selection_index = 0
@@ -279,8 +307,8 @@ tag app
 		loading = no
 
 	def handle_click_config
-		loading = yes
-		await (do
+
+		def edit_config
 			let input = window.prompt "Please enter the URL of your search engine."
 			return if input === null
 			try
@@ -289,7 +317,10 @@ tag app
 				return err "changing search engine", e
 			let icon = await fetch_image_as_base_64 host
 			Object.assign config.search_engine, { url, icon }
-			save_config!)!
+			save_config!
+
+		loading = yes
+		await edit_config!
 		settings_active = no
 		loading = no
 
@@ -380,14 +411,17 @@ tag app
 				tt:none word-break:break-all
 
 			css .link-right
-				d:flex fld:row jc:space-between ai:center w:70px
+				d:flex fld:row jc:space-between ai:center
 
-			css .delete
+			css .link-buttons
+				d:flex fld:row jc:flex-start ai:center pr:25px gap:5px
+
+			css .link-button
 				o:0
 				px:7px rd:3px c:purple4 fs:15px cursor:pointer
 				bd:1px solid purple4/50
 
-			css .selected .delete
+			css .selected .link-button
 				o:100
 
 			css .frequency
@@ -476,7 +510,9 @@ tag app
 									<img.link-icon src=link.img>
 									<.name> link.name
 								<.link-right>
-									<.delete@click.prevent.stop=handle_click_delete(link)> "x"
+									<.link-buttons>
+										<.link-button[fs:12px]@click.prevent.stop=handle_click_edit(link)> "✎"
+										<.link-button@click.prevent.stop=handle_click_delete(link)> "x"
 									<.frequency> link.frequency
 					else
 						<a.link.selected
