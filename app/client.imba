@@ -288,7 +288,7 @@ tag app
 		let datetime = new Date!.toString!.split(" ")
 		let date = datetime.slice(1, 4).join("-").toLowerCase!
 		let time = datetime[4].split(":").join("-")
-		let filename = "fuzzyhome_{date}_{time}.json"
+		let filename = "fuzzyhome_v{version}_{date}_{time}.json"
 		const blob = await db.export({ prettyJson: yes })
 		download(blob, filename, "application/json")
 		settings_active = no
