@@ -64,11 +64,11 @@ tag app
 				err "adding link", e
 
 	def validate_config
-		throw _ if config.default_bang.id === null
-		throw _ if config.default_bang.url === null
-		throw _ if config.default_bang.img === null
-		throw _ if config.default_bang.name === null
-		throw _ if config.default_bang.frequency === null
+		throw _ if config.default_bang.id is null
+		throw _ if config.default_bang.url is null
+		throw _ if config.default_bang.img is null
+		throw _ if config.default_bang.name is null
+		throw _ if config.default_bang.frequency is null
 
 	def reset_config
 		p "resetting config"
@@ -144,14 +144,14 @@ tag app
 		return no if loading
 		return no if settings_active
 		let query = state.query.trim!
-		return no if query === ''
+		return no if query is ''
 		let split_query = query.split /\s+/
 		return no if split_query.length < 2
 		yes
 
 	def create_link_from_text text
 		text = text.trim!
-		throw "text is empty" if text === ''
+		throw "text is empty" if text is ''
 		let split_text = text.split(/\s+/)
 		throw "no url provided" if split_text.length < 2
 		let url = split_text.pop!
@@ -182,7 +182,7 @@ tag app
 	def handle_edit link
 		def edit_link
 			let input = window.prompt "Enter the new link name and url:", "{link.name} {link.url}"
-			return if input === null
+			return if input is null
 			try
 				await update_link link, input
 			catch e
@@ -195,7 +195,7 @@ tag app
 		let new_link = await create_link_from_text new_link_text
 		new_link.frequency = old_link.frequency
 		let result = await db.links.update old_link.id, new_link
-		throw "link id not found" if result === 0
+		throw "link id not found" if result is 0
 		await reload_db!
 		imba.commit!
 		return new_link
@@ -271,9 +271,9 @@ tag app
 	def handle_click_import e
 		loading = yes
 		let id_exists = do |newid|
-			state.links.some! do |{id}| newid === id
+			state.links.some! do |{id}| newid is id
 		let filter = do |table, value, key|
-			table === 'links' and not id_exists value.id
+			table is 'links' and not id_exists value.id
 		try
 			await reload_db!
 			await db.import(e.target.files[0], { filter })
