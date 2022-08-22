@@ -300,7 +300,7 @@ tag app
 	def handle_paste e
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
-			bang = config.default_bang
+			bang ||= config.default_bang
 			handle_bang!
 
 	get pretty_date
