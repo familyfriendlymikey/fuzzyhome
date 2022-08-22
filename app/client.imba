@@ -7,15 +7,12 @@ import fzi from 'fzi'
 import download from 'downloadjs'
 import { nanoid } from 'nanoid'
 import { parse_url } from './utils'
+import initial_config from './config'
 
 let state = {
 	query: ''
 	links: []
 	scored_links: []
-}
-
-let config = {
-	search_engine: {}
 }
 
 global._fuzzyhome_delete_everything = do
@@ -45,15 +42,15 @@ tag app
 			fatal_error = yes
 			return
 		unless global.localStorage.fuzzyhome_visited
-			add_initial_links!
+			await add_initial_links!
 			global.localStorage.fuzzyhome_visited = yes
 		await load_config!
 
 	def add_initial_links
 		let initial_links = [
-			"click here to learn how to use this tool effectively github.com/familyfriendlymikey/fuzzyhome"
-			"google google.com"
-			"youtube youtube.com"
+			"tutorial github.com/familyfriendlymikey/fuzzyhome"
+			"!brave search search.brave.com/search?q="
+			"!youtube search youtube.com/results?search_query="
 			"photopea photopea.com"
 			"twitch twitch.tv"
 			"messenger messenger.com"
@@ -67,16 +64,15 @@ tag app
 				err "adding link", e
 
 	def validate_config
-		throw 'config error' unless config..search_engine.hasOwnProperty 'url'
-		throw 'config error' unless config..search_engine.hasOwnProperty 'icon'
-		throw 'config error' unless config..search_engine.hasOwnProperty 'frequency'
+		throw _ if config.default_bang.id === null
+		throw _ if config.default_bang.url === null
+		throw _ if config.default_bang.img === null
+		throw _ if config.default_bang.name === null
+		throw _ if config.default_bang.frequency === null
 
 	def reset_config
 		p "resetting config"
-		let url = 'https://www.google.com/search?q='
-		let frequency = 0
-		let icon = await fetch_image_as_base_64 'google.com'
-		config.search_engine = { url, icon, frequency }
+		config = initial_config
 		save_config!
 
 	def save_config
@@ -87,7 +83,7 @@ tag app
 			config = JSON.parse(global.localStorage.fuzzyhome_config)
 			validate_config!
 		catch
-			await reset_config!
+			reset_config!
 
 	def err s, e
 		p e
@@ -118,19 +114,11 @@ tag app
 	def decrement_selection_index
 		selection_index = Math.max(0, selection_index - 1)
 
-	def increment_search_engine_frequency
-		config.search_engine.frequency += 1
-		save_config!
-
-	get encoded_search_query
-		"{config.search_engine.url}{window.encodeURIComponent(state.query)}"
+	get active_bang
+		return bang or config.default_bang
 
 	get encoded_bang_query
-		"{bang.url}{window.encodeURIComponent(state.query)}"
-
-	def use_search_engine
-		increment_search_engine_frequency!
-		window.location.href = encoded_search_query
+		"{active_bang.url}{window.encodeURIComponent(state.query)}"
 
 	def fetch_image_as_base_64 host
 		let fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
@@ -189,10 +177,11 @@ tag app
 		await db.links.add link
 		await reload_db!
 		imba.commit!
+		return link
 
 	def handle_edit link
 		def edit_link
-			let input = window.prompt "Enter the new link name and url:"
+			let input = window.prompt "Enter the new link name and url:", "{link.name} {link.url}"
 			return if input === null
 			try
 				await update_link link, input
@@ -209,38 +198,37 @@ tag app
 		throw "link id not found" if result === 0
 		await reload_db!
 		imba.commit!
+		return new_link
 
 	def handle_click_link link
 		await increment_link_frequency link
 		window.location.href = link.url
 
-	def handle_click_search
-		increment_search_engine_frequency!
-
 	def handle_bang
-		return unless bang
-		let url = encoded_bang_query
-		await increment_link_frequency bang
-		window.location.href = url
+		await increment_link_frequency active_bang
+		window.location.href = encoded_bang_query
 
 	def handle_click_bang
 		handle_bang!
 
-	def handle_return
-		if bang
-			handle_bang!
-		elif state.scored_links.length < 1
-			use_search_engine!
-		else
-			let link = state.scored_links[selection_index]
-			await increment_link_frequency link
-			window.location.href = link.url
+	def navigate link
+		await increment_link_frequency link
+		window.location.href = link.url
 
-	def handle_tab
-		return bang = no if bang
-		return unless state.scored_links.length > 0
-		state.query = ''
-		bang = state.scored_links[selection_index]
+	def handle_return
+		if bang or state.scored_links.length < 1
+			return handle_bang!
+		let link = state.scored_links[selection_index]
+		if link.name.startsWith '!'
+			state.query = ''
+			bang = link
+		else
+			navigate link
+
+	def handle_del
+		if state.query.length < 1
+			bang = no
+			sort_links!
 
 	def handle_click_delete link
 		handle_delete link
@@ -306,31 +294,14 @@ tag app
 		settings_active = no
 		loading = no
 
-	def handle_click_config
-
-		def edit_config
-			let input = window.prompt "Please enter the URL of your search engine."
-			return if input === null
-			try
-				var { href: url, host } = parse_url input
-			catch e
-				return err "changing search engine", e
-			let icon = await fetch_image_as_base_64 host
-			Object.assign config.search_engine, { url, icon }
-			save_config!
-
-		loading = yes
-		await edit_config!
-		settings_active = no
-		loading = no
-
 	def handle_click_github
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
 
 	def handle_paste e
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
-			use_search_engine!
+			bang = config.default_bang
+			handle_bang!
 
 	get pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
@@ -407,7 +378,7 @@ tag app
 				tt:capitalize fs:20px
 				overflow-wrap:anywhere
 
-			css .search
+			css .bang-text
 				tt:none word-break:break-all
 
 			css .link-right
@@ -453,10 +424,6 @@ tag app
 						> "EXPORT"
 						<.settings-button
 							.disabled=loading
-							@click.if(!loading)=handle_click_config
-						> "CONFIG"
-						<.settings-button
-							.disabled=loading
 							@click.if(!loading)=handle_click_github
 						> "GITHUB"
 				else
@@ -468,7 +435,7 @@ tag app
 						@hotkey('shift+backspace').capture=handle_shift_backspace
 						@hotkey('down').capture=increment_selection_index
 						@hotkey('up').capture=decrement_selection_index
-						@hotkey('tab').capture=handle_tab
+						@keydown.del=handle_del
 						@input=handle_input
 						@paste=handle_paste
 						@blur=this.focus
@@ -488,17 +455,17 @@ tag app
 					<.middle-button.disabled> "+"
 
 				<.links>
-					if bang
+					if bang or state.scored_links.length < 1
 						<a.link.selected
 							href=encoded_bang_query
 							@click=handle_click_bang
 						>
 							<.link-left>
-								<img.link-icon src=bang.img>
-								<.name.search> encoded_bang_query
+								<img.link-icon src=active_bang.img>
+								<.name.bang-text> encoded_bang_query
 							<.link-right[jc:flex-end]>
-								<.frequency> bang.frequency
-					elif state.scored_links.length > 0
+								<.frequency> active_bang.frequency
+					else
 						for link, index in state.scored_links
 							<a.link
 								href=link.url
@@ -514,16 +481,6 @@ tag app
 										<.link-button[fs:12px]@click.prevent.stop=handle_click_edit(link)> "✎"
 										<.link-button@click.prevent.stop=handle_click_delete(link)> "x"
 									<.frequency> link.frequency
-					else
-						<a.link.selected
-							href=encoded_search_query
-							@click=handle_click_search
-						>
-							<.link-left>
-								<img.link-icon src=config.search_engine.icon>
-								<.name.search> encoded_search_query
-							<.link-right[jc:flex-end]>
-								<.frequency> config.search_engine.frequency
 			$main-input.focus!
 
 imba.mount <app>
