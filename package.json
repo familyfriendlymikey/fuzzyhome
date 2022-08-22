@@ -8,7 +8,7 @@
 		"publish-preview": "npx gh-pages --no-history --dotfiles --dist dist/public --branch preview",
 		"publish-release": "npx gh-pages --no-history --dotfiles --dist dist/public --branch release",
 		"start": "imba run -SMH --baseurl . -w server.imba",
-		"static": "npm run build && cd dist/public && echo http://localhost:8000 && python3 -m http.server &>/dev/null",
+		"static": "npm run build && cd dist/public && python3 -m http.server",
 		"preview": "npm version patch && npm run build && npm run publish-preview",
 		"deploy-only-after-preview": "npm run publish-release"
 	},
