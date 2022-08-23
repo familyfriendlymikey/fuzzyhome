@@ -64,7 +64,15 @@ tag app
 			catch e
 				err "adding link", e
 
+	def load_config
+		try
+			config = JSON.parse(global.localStorage.fuzzyhome_config)
+			validate_config!
+		catch
+			reset_config!
+
 	def validate_config
+		p config
 		throw _ if config.default_bang.id is null
 		throw _ if config.default_bang.url is null
 		throw _ if config.default_bang.icon is null
@@ -79,13 +87,6 @@ tag app
 
 	def save_config
 		global.localStorage.fuzzyhome_config = JSON.stringify(config)
-
-	def load_config
-		try
-			config = JSON.parse(global.localStorage.fuzzyhome_config)
-			validate_config!
-		catch
-			reset_config!
 
 	def err s, e
 		p e
