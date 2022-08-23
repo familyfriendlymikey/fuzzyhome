@@ -30,6 +30,7 @@ tag app
 	loading = no
 	fatal_error = no
 	bang = no
+	holding_shift = no
 
 	get render? do mounted?
 
@@ -329,8 +330,14 @@ tag app
 	get pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
+	def handle_keyup e
+		if e.keyCode is 16
+			holding_shift = not holding_shift
+
 	def render
-		<self>
+		<self
+			@keyup=handle_keyup
+		>
 
 			css body
 				d:flex fld:column jc:flex-start ai:center
@@ -403,7 +410,7 @@ tag app
 
 			css .name
 				d:flex ja:center
-				c:gray4/45 ml:10px fs:14px
+				c:gray4 ml:14px fs:14px
 
 			css .bang-text
 				tt:none word-break:break-all
@@ -415,12 +422,12 @@ tag app
 				d:flex fld:row jc:flex-start ai:center pr:25px gap:5px
 
 			css .link-button
-				o:0
+				visibility:hidden
 				px:7px rd:3px c:purple4 fs:15px cursor:pointer
 				bd:1px solid purple4/50
 
 			css .selected .link-button
-				o:100
+				visibility:visible
 
 			css .frequency
 				fs:15px
@@ -498,15 +505,13 @@ tag app
 								href=link.url
 								@pointerover=(selection_index = index)
 								@click.prevent=handle_click_link(link)
-								.selected=(index == selection_index)
+								.selected=(index is selection_index)
 							>
 								<.link-left>
 									<img.link-icon src=link.icon>
 									<.display-name> link.display_name
-									if link.display_name isnt link.name
+									if index is selection_index or holding_shift
 										<.name> "{link.is_bang ? "!" : "~"}{link.name}"
-									elif link.is_bang
-										<.name> "!"
 								<.link-right>
 									<.link-buttons>
 										<.link-button[fs:12px]@click.prevent.stop=handle_click_edit(link)> "✎"
