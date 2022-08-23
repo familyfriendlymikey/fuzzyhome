@@ -4,9 +4,7 @@ fuzzyhome
 </a>
 </h1>
 
-test
-
-A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.
+A power user oriented new-tab page that enables lightning speed navigation through the dark magic of fuzzy finding.
 
 ## Installation
 1. Copy this link: `https://fuzzyho.me/`:
