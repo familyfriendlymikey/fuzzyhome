@@ -1,6 +1,6 @@
 let p = console.log
 
-import { orderBy } from 'lodash'
+import { orderBy, omit } from 'lodash'
 import { version } from '../package.json'
 import db from './db'
 import fzi from 'fzi'
@@ -50,12 +50,12 @@ tag app
 		let initial_links = [
 			"tutorial github.com/familyfriendlymikey/fuzzyhome"
 			"!brave search search.brave.com/search?q="
-			"!youtube search youtube.com/results?search_query="
+			"!youtube ~y youtube.com/results?search_query="
 			"photopea photopea.com"
 			"twitch twitch.tv"
-			"messenger messenger.com"
-			"instagram instagram.com"
-			"localhost 3000 http://localhost:3000"
+			"messenger ~m messenger.com"
+			"instagram ~in instagram.com"
+			"localhost:3000 ~3 http://localhost:3000"
 		]
 		for link in initial_links
 			try
@@ -66,9 +66,10 @@ tag app
 	def validate_config
 		throw _ if config.default_bang.id is null
 		throw _ if config.default_bang.url is null
-		throw _ if config.default_bang.img is null
+		throw _ if config.default_bang.icon is null
 		throw _ if config.default_bang.name is null
 		throw _ if config.default_bang.frequency is null
+		throw _ if config.default_bang.display_name is null
 
 	def reset_config
 		p "resetting config"
@@ -157,9 +158,17 @@ tag app
 		let url = split_text.pop!
 		let host
 		{ href:url, host } = parse_url url
-		let img = await fetch_image_as_base_64 host
-		let name = split_text.join(" ")
-		{ name, url, frequency:0, img }
+		let icon = await fetch_image_as_base_64 host
+		let name
+		if split_text[-1].startsWith "~"
+			name = split_text.pop!.slice(1)
+		let display_name = split_text.join(" ")
+		let is_bang = no
+		if display_name.startsWith "!"
+			is_bang = yes
+			display_name = display_name.slice(1)
+		name ||= display_name
+		{ name, display_name, is_bang, url, frequency:0, icon }
 
 	def handle_add
 		loading = yes
@@ -177,11 +186,20 @@ tag app
 		await db.links.add link
 		await reload_db!
 		imba.commit!
+		p omit(link, "icon")
 		return link
+
+	def construct_link_text link
+		let link_text = ""
+		link_text += "!" if link.is_bang
+		link_text += link.display_name
+		link_text += " ~{link.name}" if link.name isnt link.display_name
+		link_text += " {link.url}"
+		link_text
 
 	def handle_edit link
 		def edit_link
-			let input = window.prompt "Enter the new link name and url:", "{link.name} {link.url}"
+			let input = window.prompt "Enter the new link name and url:", construct_link_text(link)
 			return if input is null
 			try
 				await update_link link, input
@@ -198,11 +216,16 @@ tag app
 		throw "link id not found" if result is 0
 		await reload_db!
 		imba.commit!
+		p omit(old_link, "icon")
+		p omit(new_link, "icon")
 		return new_link
 
 	def handle_click_link link
-		await increment_link_frequency link
-		window.location.href = link.url
+		if link.is_bang
+			state.query = ''
+			bang = link
+		else
+			navigate link
 
 	def handle_bang
 		await increment_link_frequency active_bang
@@ -219,7 +242,7 @@ tag app
 		if bang or state.scored_links.length < 1
 			return handle_bang!
 		let link = state.scored_links[selection_index]
-		if link.name.startsWith '!'
+		if link.is_bang
 			state.query = ''
 			bang = link
 		else
@@ -236,7 +259,7 @@ tag app
 	def handle_delete link
 
 		def delete_link
-			return unless window.confirm "Do you really want to delete {link..name}?"
+			return unless window.confirm "Do you really want to delete {link..display_name}?"
 			try
 				await db.links.delete(link.id)
 			catch e
@@ -374,9 +397,13 @@ tag app
 			css .link-icon
 				w:20px h:20px mr:10px rd:3px
 
-			css .name
+			css .display-name
 				tt:capitalize fs:20px
 				overflow-wrap:anywhere
+
+			css .name
+				d:flex ja:center
+				c:gray4/45 ml:10px fs:14px
 
 			css .bang-text
 				tt:none word-break:break-all
@@ -461,8 +488,8 @@ tag app
 							@click=handle_click_bang
 						>
 							<.link-left>
-								<img.link-icon src=active_bang.img>
-								<.name.bang-text> encoded_bang_query
+								<img.link-icon src=active_bang.icon>
+								<.display-name.bang-text> encoded_bang_query
 							<.link-right[jc:flex-end]>
 								<.frequency> active_bang.frequency
 					else
@@ -474,8 +501,12 @@ tag app
 								.selected=(index == selection_index)
 							>
 								<.link-left>
-									<img.link-icon src=link.img>
-									<.name> link.name
+									<img.link-icon src=link.icon>
+									<.display-name> link.display_name
+									if link.display_name isnt link.name
+										<.name> "{link.is_bang ? "!" : "~"}{link.name}"
+									elif link.is_bang
+										<.name> "!"
 								<.link-right>
 									<.link-buttons>
 										<.link-button[fs:12px]@click.prevent.stop=handle_click_edit(link)> "✎"

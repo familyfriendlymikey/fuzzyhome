@@ -40,31 +40,69 @@ Navigate to the currently selected search result by pressing `return`.
 You can also click on a link to navigate to it.
 You can also press the up or down arrow keys to move your selection up and down.
 
-### Move Selection
-You can move your selection up and down with the arrow keys.
-
 ### Search
 If there are no matching links, a search will be performed with your query.
 
-### Quick Search
-If you paste while the input is empty, fuzzyhome will immediately make a search with your pasted query.
-
 ### Bangs
-You can easily append queries to arbitrary links, and as such use them in a similar manner as the "bang" feature from some search engines.
-Just get the query link for a website and create a link with that url. For example:
+There may be some websites you've created links for, such as amazon, where you almost always search for something.
+This means you have to go to that website, click the search bar, and type in your query.
+With fuzzyhome you can cut out the slow parts by prefixing your link name with `!` to create a "bank link":
 ```
-y https://www.youtube.com/results?search_query=
+!amazon amazon.com/s?k=
 ```
-This will create a link named `y`.
-Now all you have to do is press `tab` when the `y` link is selected.
-In practice you'll just type `y<tab>`.
-This will allow you to start typing a query which will be appended onto the url of that link.
-To navigate to the link, just press `return` or click the link.
-To cancel, just press `tab` again.
+Notice the `/s?k=` at the end,
+you'll likewise have to find the proper URL for your new bang link.
+Typing instructions for that would be too verbose, so please see the video tutorial (coming soon).
+
+When you click on or press return on a selected bang link,
+instead of navigating directly to that link,
+you'll be able to enter a search query for that link.
+Pressing enter again will bring you to the link with your encoded search query appended to it.
+
+### Effective Names
+After using fuzzyhome enough, you may come to realize
+that there are some links you'd prefer be "hardcoded"
+with certain names so to speak.
+For example, perhaps you visit `instagram` extremely often
+but also have a link named `indeed` which gets sorted above
+`instagram` when you type `in` even though you visit it much less often.
+You could change the `instagram` link's name to `in`,
+but now it looks bad.
+To solve this, fuzzyhome allows you to add an "effective name"
+to a link:
+```
+instagram ~in instagram.com
+```
+To add an effective name to a link,
+simply add the name prefixed with a tilde right before the URL.
+
+This also works for bang links.
+Let's say we wanted `a` to correspond to `!amazon`:
+```
+!amazon ~a amazon.com/s?k=
+```
+Now when you type `in` or `a`,
+you can have confidence that your
+intended link will be given priority every time.
+
+Mind you, typing `am` will no longer show `amazon` in the results,
+because that's just the display name for the link.
+The actual name is `a`.
+This might seem confusing but once you
+get the hang of it won't matter to you at all.
 
 ### Delete
 You can delete notes by clicking the purple `x` on the currently selected link.
 You can also use the hotkey `shift+backspace` to delete the currently selected link.
+
+### Edit
+You can edit notes by clicking the edit icon.
+
+### Move Selection
+You can move your selection up and down with the arrow keys.
+
+### Quick Search
+If you paste while the input is empty, fuzzyhome will immediately make a search with your pasted query.
 
 ### Customize Search Engine
 The default search engine is Google Search, however you can customize it by clicking the three dots to go to settings,
@@ -94,26 +132,13 @@ Shift + Backspace | Delete currently selected link.
 ## FAQ
 
 ### The Link I Want Is Showing Up Last
-TLDR either rename the desired link to something shorter or the undesired link to something longer.
-
-Fuzzyhome doesn't use an algorithm that attempts to be intelligent about which links it ranks first because
-having a more predictable behavior lets you work faster since you know it will do the same thing every single time.
-
-The search results are first filtered on character order.
-If the characters of a given link name are not in the same order as the query, that link will be excluded from the results.
-So if I have a link named `messenger` and I type `mgs`,
-`messenger` will be excluded from the results because the `g` does not come before the `s`.
-
-The fuzzy search [algorithm](https://github.com/jhawthorn/fzy/blob/master/ALGORITHM.md)
-prioritizes shorter strings and strings whose words begin with the letters of the query.
-
-With those factors in mind, if you encounter a situation where a certain link you access less often is showing up in search results on top of
-a link you access much more often, such as `mpv` showing up on top of a desired link `messenger`,
-either lengthen `mpv`'s name to something like `_mpv`, or shorten `messenger`'s name to something like `m`.
-
-With either of these solutions, typing `m` will always result in the desired link showing up first.
-That will be the behavior every single time, regardless of which link you accessed more recently,
-what time of day it is, or some other random variable.
+Change the effective name of the link.
+Let's say you've been typing `in` for `instagram`, but recently added `indeed` as a link,
+and `indeed` keeps showing up first.
+Simply change the effective name of the `instagram` link to `in`:
+```
+instagram ~in instagram.com
+```
 
 ### A Link Is Blocking My Search
 This happens very rarely if at all. Just throw some spaces at the end of your query.
