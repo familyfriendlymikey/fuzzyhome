@@ -50,13 +50,13 @@ tag app
 	def add_initial_links
 		let initial_links = [
 			"tutorial github.com/familyfriendlymikey/fuzzyhome"
-			"!brave search search.brave.com/search?q="
-			"!youtube ~y youtube.com/results?search_query="
+			"!brave search ~b search.brave.com/search?q="
+			"!youtube youtube.com/results?search_query="
 			"photopea photopea.com"
 			"twitch twitch.tv"
-			"messenger ~m messenger.com"
+			"messenger ~me messenger.com"
 			"instagram ~in instagram.com"
-			"localhost:3000 ~3 http://localhost:3000"
+			"localhost ~3000 http://localhost:3000"
 		]
 		for link in initial_links
 			try
@@ -331,14 +331,8 @@ tag app
 	get pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
-	def handle_keyup e
-		if e.keyCode is 16
-			holding_shift = not holding_shift
-
 	def render
-		<self
-			@keyup=handle_keyup
-		>
+		<self>
 
 			css body
 				d:flex fld:column jc:flex-start ai:center
@@ -391,7 +385,7 @@ tag app
 
 			css .link
 				d:flex fld:row jc:space-between ai:center
-				px:15px py:10px rd:5px cursor:pointer c:blue3
+				px:16px py:11px rd:5px cursor:pointer c:blue3
 
 			css .link-left
 				d:flex fl:1
@@ -411,7 +405,10 @@ tag app
 
 			css .name
 				d:flex ja:center
-				c:gray4 ml:14px fs:14px
+				c:gray4 ml:10px fs:14px
+
+			css .parens
+				fs:10px c:gray4/80
 
 			css .bang-text
 				tt:none word-break:break-all
@@ -510,9 +507,14 @@ tag app
 							>
 								<.link-left>
 									<img.link-icon src=link.icon>
-									<.display-name> link.display_name
-									if index is selection_index or holding_shift
-										<.name> "{link.is_bang ? "!" : "~"}{link.name}"
+									<.display-name
+										[c:purple3/90]=link.is_bang
+									> link.display_name
+									if link.display_name isnt link.name
+										<.name>
+											<span.parens> "("
+											<span> link.name
+											<span.parens> ")"
 								<.link-right>
 									<.link-buttons>
 										<.link-button[fs:12px]@click.prevent.stop=handle_click_edit(link)> "✎"
