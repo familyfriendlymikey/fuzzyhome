@@ -50,13 +50,13 @@ tag app
 	def add_initial_links
 		let initial_links = [
 			"tutorial github.com/familyfriendlymikey/fuzzyhome"
-			"!brave search ~b search.brave.com/search?q="
+			"!brave search `b search.brave.com/search?q="
 			"!youtube youtube.com/results?search_query="
 			"photopea photopea.com"
 			"twitch twitch.tv"
-			"messenger ~me messenger.com"
-			"instagram ~in instagram.com"
-			"localhost ~3000 http://localhost:3000"
+			"messenger `me messenger.com"
+			"instagram `in instagram.com"
+			"localhost `3000 http://localhost:3000"
 		]
 		for link in initial_links
 			try
@@ -162,7 +162,7 @@ tag app
 		{ href:url, host } = parse_url url
 		let icon = await fetch_image_as_base_64 host
 		let name
-		if split_text[-1].startsWith "~"
+		if split_text[-1].startsWith "`"
 			name = split_text.pop!.slice(1)
 		let display_name = split_text.join(" ")
 		let is_bang = no
@@ -195,7 +195,7 @@ tag app
 		let link_text = ""
 		link_text += "!" if link.is_bang
 		link_text += link.display_name
-		link_text += " ~{link.name}" if link.name isnt link.display_name
+		link_text += " `{link.name}" if link.name isnt link.display_name
 		link_text += " {link.url}"
 		link_text
 

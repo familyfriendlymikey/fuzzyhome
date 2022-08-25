@@ -69,15 +69,15 @@ but now it looks bad.
 To solve this, fuzzyhome allows you to add an "effective name"
 to a link:
 ```
-instagram ~in instagram.com
+instagram `in instagram.com
 ```
 To add an effective name to a link,
-simply add the name prefixed with a tilde right before the URL.
+simply add the name prefixed with a backtick right before the URL.
 
 This also works for bang links.
 Let's say we wanted `a` to correspond to `!amazon`:
 ```
-!amazon ~a amazon.com/s?k=
+!amazon `a amazon.com/s?k=
 ```
 Now when you type `in` or `a`,
 you can have confidence that your
@@ -135,7 +135,7 @@ Let's say you've been typing `in` for `instagram`, but recently added `indeed` a
 and `indeed` keeps showing up first.
 Simply change the effective name of the `instagram` link to `in`:
 ```
-instagram ~in instagram.com
+instagram `in instagram.com
 ```
 
 ### A Link Is Blocking My Search
