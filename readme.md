@@ -57,6 +57,8 @@ instead of navigating directly to that link,
 you'll be able to enter a search query for that link.
 Pressing enter again will bring you to the link with your encoded search query appended to it.
 
+**LIST OF BANGS FOR YOUR CONVENIENCE BELOW**
+
 ### Effective Names
 After using fuzzyhome enough, you may come to realize
 that there are some links you'd prefer be "hardcoded"
@@ -146,3 +148,11 @@ Just type a single space before you paste in text.
 
 ### My Localhost Link Isn't Working
 If you want to make a link that points to `localhost`, you likely need to specify the `http` protocol when creating your link.
+
+## Bang List
+Website | Bang Text
+- | -
+youtube | !youtube ~y https://www.youtube.com/results?search_query=
+amazon | !amazon amazon.com/s?k=
+google site:reddit.com | !google reddit https://www.google.com/search?q=site%3Areddit.com%20
+google site:reddit.com | !google stackoverflow https://www.google.com/search?q=site%3Astackoverflow.com%20
