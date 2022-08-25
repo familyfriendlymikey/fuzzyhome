@@ -1,6 +1,6 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.1.40",
+	"version": "0.1.41",
 	"scripts": {
 		"build-app": "rm -rf dist && imba build -SMH --baseurl . server.imba",
 		"build-sw": "imba build -SMH sw.imba -o dist/public",
