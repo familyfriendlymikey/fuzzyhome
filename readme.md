@@ -151,7 +151,7 @@ If you want to make a link that points to `localhost`, you likely need to specif
 
 ## Bang List
 Website | Bang Text
-- | -
+-|-
 youtube | !youtube ~y https://www.youtube.com/results?search_query=
 amazon | !amazon amazon.com/s?k=
 google site:reddit.com | !google reddit https://www.google.com/search?q=site%3Areddit.com%20
