@@ -508,7 +508,7 @@ tag app
 								<.link-left>
 									<img.link-icon src=link.icon>
 									<.display-name
-										[c:purple3/90]=link.is_bang
+										[c:#FAD4AB]=link.is_bang
 									> link.display_name
 									if link.display_name isnt link.name
 										<.name>
