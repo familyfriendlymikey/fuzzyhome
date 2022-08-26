@@ -428,7 +428,7 @@ tag app
 				visibility:visible
 
 			css .frequency
-				fs:15px
+				fs:15px ml:7px
 
 			if fatal_error
 				<.fatal>
