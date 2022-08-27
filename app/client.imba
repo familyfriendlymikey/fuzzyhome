@@ -15,8 +15,8 @@ let state = {
 	scored_links: []
 }
 
-global._fuzzyhome_delete_everything = do
-	return unless window.confirm "This will delete everything. Are you sure?"
+global._fuzzyhome_delete_everything = do |prompt=yes|
+	return if prompt and window.confirm "This will delete everything. Are you sure?"
 	indexedDB.deleteDatabase("fuzzyhome")
 	delete localStorage.fuzzyhome_config
 	delete localStorage.fuzzyhome_visited
@@ -69,16 +69,17 @@ tag app
 			config = JSON.parse(global.localStorage.fuzzyhome_config)
 			validate_config!
 		catch
+			p "resetting config"
 			reset_config!
 
 	def validate_config
 		p config
-		throw _ if config.default_bang.id is null
-		throw _ if config.default_bang.url is null
-		throw _ if config.default_bang.icon is null
-		throw _ if config.default_bang.name is null
-		throw _ if config.default_bang.frequency is null
-		throw _ if config.default_bang.display_name is null
+		throw _ if config.default_bang.id == null
+		throw _ if config.default_bang.url == null
+		throw _ if config.default_bang.icon == null
+		throw _ if config.default_bang.name == null
+		throw _ if config.default_bang.frequency == null
+		throw _ if config.default_bang.display_name == null
 
 	def reset_config
 		p "resetting config"
@@ -95,6 +96,25 @@ tag app
 	def reload_db
 		state.links = await db.links.toArray()
 		sort_links!
+
+	get tip_url
+		let split_query = state.query.trim!.split /\s+/
+		if split_query.length >= 2
+			return ' https://' + split_query.pop!
+		else
+			return ''
+
+	get tip_name
+		let split_query = state.query.trim!.split /\s+/
+		let name = split_query.join ' '
+		if split_query.length >= 2
+			split_query.pop!
+			if split_query[-1].startsWith '~'
+				split_query.pop!
+			name = split_query.join ' '
+			if name.startsWith '!'
+				name = name.slice(1)
+		name
 
 	def sort_links
 		if state.query.trim!.length > 0
@@ -281,7 +301,7 @@ tag app
 
 	def handle_shift_backspace
 		return unless state.scored_links.length > 0
-		handle_delete state.scored_links[selection_index]
+		handle_edit state.scored_links[selection_index]
 
 	def handle_shift_return
 		handle_add!
@@ -365,23 +385,36 @@ tag app
 			css .settings-container
 				d:flex fld:row jc:space-around ai:center
 				w:100% h:50px
-				bg:purple4/10 rd:5px
+				mt:10px
+				gap:10px
 
-			css .settings-button
+			css .settings-button, .settings-container button
 				d:flex fld:column jc:center ai:center fl:1
 				bg:none c:purple4 bd:none cursor:pointer fs:14px
+				bg:purple4/10 rd:5px
+				h:100%
 
 			css .middle-button
-				d:flex fld:column jc:center ai:center
-				h:35px c:purple4 fs:20px cursor:pointer
-				fs:20px
+				d:flex fld:row w:100%
+				c:purple4 fs:20px cursor:pointer
+				fs:14px pt:15px
+
+			css .tip
+				d:flex fld:column bdr:1px solid blue3/10 min-width:0 fl:1 p:5px
+				@last bd:none
+
+			css .tip-hotkey
+				fs:12px c:purple3/50
+
+			css .tip-content
+				pt:2px fs:14px c:purple3 white-space:nowrap
 
 			css .disabled
 				c:gray4 cursor:default user-select:none
 
 			css .links
 				d:flex fld:column jc:flex-start fl:1
-				w:100% ofy:auto
+				w:100% ofy:auto pt:15px
 
 			css .link
 				d:flex fld:row jc:space-between ai:center
@@ -439,52 +472,77 @@ tag app
 						Consider refreshing.
 						Check developer console for more information.
 					"""
-			else
-				if settings_active
-					<.settings-container>
-						<label.settings-button .disabled=loading>
-							"IMPORT"
-							<input[d:none]
-								disabled=loading
-								@change=handle_click_import
-								@click=(this.value = '')
-								type="file"
-							>
-						<.settings-button
-							.disabled=loading
-							@click.if(!loading)=handle_click_export
-						> "EXPORT"
-						<.settings-button
-							.disabled=loading
-							@click.if(!loading)=handle_click_github
-						> "GITHUB"
-				else
-					<input$main-input
-						bind=state.query
-						placeholder=pretty_date
-						@hotkey('return').capture=handle_return
-						@hotkey('shift+return').capture.if(can_add)=handle_shift_return
-						@hotkey('shift+backspace').capture=handle_shift_backspace
-						@hotkey('down').capture=increment_selection_index
-						@hotkey('up').capture=decrement_selection_index
-						@keydown.del=handle_del
-						@input=handle_input
-						@paste=handle_paste
-						@blur=this.focus
-						.disabled=loading
-						disabled=loading
-					>
 
-				if state.query.trim!.split(/\s+/).length < 2
-					<.middle-button
-						[mt:-10px py:5px fs:25px]
+			###
+			<[c:purple3/90 cursor:pointer fs:14px pb:20px]
+				@click.if(!loading)=toggle_settings
+			> "SETTINGS"
+			###
+
+			if settings_active
+				<.settings-container>
+					<label.settings-button .disabled=loading>
+						"IMPORT"
+						<input[d:none]
+							disabled=loading
+							@change=handle_click_import
+							@click=(this.value = '')
+							type="file"
+						>
+					<.settings-button
 						.disabled=loading
-						@click.if(!loading)=toggle_settings
-					> "..."
-				elif can_add
-					<.middle-button@click=handle_click_add> "+"
-				else
-					<.middle-button.disabled> "+"
+						@click.if(!loading)=handle_click_export
+					> "EXPORT"
+				<.settings-container>
+					<.settings-button
+						.disabled=loading
+						@click.if(!loading)=handle_click_github
+					> "TUTORIAL"
+					<.settings-button
+						.disabled=loading
+						@click.if(!loading)=handle_click_github
+					> "GITHUB"
+				<.settings-container>
+					<.settings-button>
+						config.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
+					<.settings-button
+						.disabled=loading
+						@click.if(!loading)=handle_click_github
+					> "LIGHT THEME"
+
+			else
+				<input$main-input
+					bind=state.query
+					# placeholder=pretty_date
+					@hotkey('return').capture=handle_return
+					@hotkey('shift+return').capture.if(can_add)=handle_shift_return
+					@hotkey('shift+backspace').capture=handle_shift_backspace
+					@hotkey('down').capture=increment_selection_index
+					@hotkey('up').capture=decrement_selection_index
+					@keydown.del=handle_del
+					@input=handle_input
+					@paste=handle_paste
+					@blur=this.focus
+					.disabled=loading
+					disabled=loading
+				>
+
+				if config.enable_tips
+					<.middle-button>
+						<.tip[jc:start ta:left fl:1] @click=handle_return>
+							<.tip-hotkey> "Return"
+							<.tip-content> "Navigate To Link"
+						<.tip[jc:center ta:center fl:2 px:15px]
+							@click=handle_shift_return
+						>
+							<.tip-hotkey> "Shift + Return"
+							<.tip-content[of:hidden text-overflow:ellipsis]>
+								"Add New Link \"{state.query.trim!}\""
+						<.tip[jc:end ta:right fl:1]
+							@click=handle_shift_backspace
+						>
+							<.tip-hotkey> "Shift + Backspace"
+							<.tip-content> "Edit Link"
 
 				<.links>
 					if bang or state.scored_links.length < 1
@@ -520,6 +578,7 @@ tag app
 										<.link-button[fs:12px]@click.prevent.stop=handle_click_edit(link)> "✎"
 										<.link-button@click.prevent.stop=handle_click_delete(link)> "x"
 									<.frequency> link.frequency
+				# <[c:purple3 pt:10px fs:10px]> state.scored_links.length
 			$main-input.focus!
 
 imba.mount <app>
