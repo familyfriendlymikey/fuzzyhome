@@ -1,7 +1,8 @@
 let p = console.log
 
 import { orderBy, omit } from 'lodash'
-import { version } from '../package.json'
+import pkg from '../package.json'
+let version = pkg.version
 import db from './db'
 import fzi from 'fzi'
 import download from 'downloadjs'
