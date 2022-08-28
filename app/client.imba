@@ -594,11 +594,11 @@ tag app
 											<span.parens> ")"
 								<.link-right>
 									<.link-buttons>
-										<.link-button@click.prevent.stop=handle_click_edit(link)> "E"
 										<.link-button
 											@click.if(link.is_bang).prevent.stop=handle_click_make_default_bang(link)
-											[c:purple3/20]=!link.is_bang
+											[visibility:hidden]=!link.is_bang
 										> "B"
+										<.link-button@click.prevent.stop=handle_click_edit(link)> "E"
 										<.link-button@click.prevent.stop=handle_click_delete(link)> "D"
 										<.link-button
 											@click.prevent.stop=handle_click_pin(link)
