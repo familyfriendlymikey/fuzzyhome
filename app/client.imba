@@ -121,9 +121,7 @@ tag app
 		if state.query.trim!.length > 0
 			state.scored_links = fzi state.links, state.query
 		else
-			let pinned = do |link| link.is_pinned
-			let frequency = do |link| link.frequency
-			state.scored_links = orderBy(state.links, [pinned, frequency], ['desc', 'desc'])
+			state.scored_links = orderBy(state.links, ['is_pinned', 'frequency'], ['desc', 'desc'])
 
 	def increment_link_frequency link
 		try
