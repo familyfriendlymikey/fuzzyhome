@@ -408,7 +408,7 @@ tag app
 				fs:12px c:purple3/50
 
 			css .tip-content
-				pt:2px fs:14px c:purple3 white-space:nowrap
+				pt:2px fs:14px c:purple3
 
 			css .disabled
 				c:gray4 cursor:default user-select:none
@@ -537,7 +537,7 @@ tag app
 							@click=handle_shift_return
 						>
 							<.tip-hotkey> "Shift + Return"
-							<.tip-content[of:hidden text-overflow:ellipsis]>
+							<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
 								"Add New Link \"{state.query.trim!}\""
 						<.tip[jc:end ta:right fl:1]
 							@click=handle_shift_backspace
