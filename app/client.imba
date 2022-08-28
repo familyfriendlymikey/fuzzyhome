@@ -32,6 +32,7 @@ tag app
 	fatal_error = no
 	bang = no
 	holding_shift = no
+	editing_link = no
 
 	get render? do mounted?
 
@@ -225,11 +226,13 @@ tag app
 		link_text
 
 	def handle_edit link
+		editing_link = link
+		state.query = construct_link_text(link)
+
+	def make_edit link, new_link_text
 		def edit_link
-			let input = window.prompt "Enter the new link name and url:", construct_link_text(link)
-			return if input is null
 			try
-				await update_link link, input
+				await update_link link, new_link_text
 			catch e
 				return err "editing link", e
 		loading = yes
@@ -281,12 +284,12 @@ tag app
 			sort_links!
 
 	def handle_click_delete link
+		return unless window.confirm "Do you really want to delete {link..display_name}?"
 		handle_delete link
 
 	def handle_delete link
 
 		def delete_link
-			return unless window.confirm "Do you really want to delete {link..display_name}?"
 			try
 				await db.links.delete(link.id)
 			catch e
@@ -322,11 +325,31 @@ tag app
 		window.alert "{link.display_name} is now the default bang"
 
 	def handle_shift_backspace
-		return unless state.scored_links.length > 0
-		handle_edit state.scored_links[selection_index]
+		if editing_link
+			await handle_delete editing_link
+			editing_link = no
+			state.query = ''
+			sort_links!
+		else
+			return unless state.scored_links.length > 0
+			handle_edit state.scored_links[selection_index]
 
 	def handle_shift_return
-		handle_add!
+		if editing_link
+			try
+				await update_link editing_link, state.query
+				editing_link = no
+				state.query = ''
+				sort_links!
+			catch e
+				err "updating link", e
+		else
+			handle_add!
+
+	def handle_esc
+		editing_link = no
+		state.query = ''
+		sort_links!
 
 	def handle_click_add
 		handle_add!
@@ -617,6 +640,7 @@ tag app
 						# placeholder=pretty_date
 						@hotkey('return').capture=handle_return
 						@hotkey('shift+return').capture.if(can_add)=handle_shift_return
+						@hotkey('esc').capture=handle_esc
 						@hotkey('shift+backspace').capture=handle_shift_backspace
 						@hotkey('down').capture=increment_selection_index
 						@hotkey('up').capture=decrement_selection_index
@@ -632,81 +656,105 @@ tag app
 						<svg src="./assets/settings.svg">
 
 				if config.enable_tips and not config.enable_simplify_ui
-					<.middle-button>
-						<.tip[jc:start ta:left fl:1] @click=handle_return>
-							<.tip-hotkey> "Return"
-							<.tip-content> "Navigate To Link"
-						<.tip[jc:center ta:center fl:2 px:15px]
-							@click=handle_shift_return
-						>
-							<.tip-hotkey> "Shift + Return"
-							<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
-								<span> "Add New Link"
-								<span[ws:pre]> " "
-								let sq = state.query.trim!.split /\s+/
-								if sq.length >= 2
-									let url = sq.pop!
-									<span> '"'
-									<span> sq.join ' '
-									<span[ws:pre]> ' '
-									<span[c:blue3]> url
-									<span> '"'
-								else
-									<span> '"'
-									<span> sq.join ' '
-									<span> '"'
-						<.tip[jc:end ta:right fl:1]
-							@click=handle_shift_backspace
-						>
-							<.tip-hotkey> "Shift + Backspace"
-							<.tip-content> "Edit Link"
+					if editing_link
+						<.middle-button>
 
-				<.links>
-					if bang or state.scored_links.length < 1
-						<a.link.selected
-							href=encoded_bang_query
-							@click=handle_click_bang
-						>
-							<.link-left>
-								<img.link-icon src=active_bang.icon>
-								<.display-name.bang-text> encoded_bang_query
-							<.link-right[jc:flex-end]>
-								<.frequency> active_bang.frequency
+							<.tip[jc:start ta:left fl:1]
+								@click=handle_esc
+							>
+								<.tip-hotkey> "Esc"
+								<.tip-content> "Cancel Edits"
+
+							<.tip[jc:center ta:center fl:1 px:15px]
+								@click=handle_shift_return
+							>
+								<.tip-hotkey> "Shift + Return"
+								<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
+									"Update Link"
+
+							<.tip[jc:end ta:right fl:1]
+								@click=handle_shift_backspace
+							>
+								<.tip-hotkey> "Shift + Backspace"
+								<.tip-content> "Delete Link"
+
 					else
-						for link, index in state.scored_links
-							<a.link
-								href=link.url
-								@pointerover=(selection_index = index)
-								@click.prevent=handle_click_link(link)
-								.selected=(index is selection_index)
+						<.middle-button>
+							<.tip[jc:start ta:left fl:1] @click=handle_return>
+								<.tip-hotkey> "Return"
+								<.tip-content> "Navigate To Link"
+							<.tip[jc:center ta:center fl:2 px:15px]
+								@click=handle_shift_return
+							>
+								<.tip-hotkey> "Shift + Return"
+								<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
+									<span> "Add New Link"
+									<span[ws:pre]> " "
+									let sq = state.query.trim!.split /\s+/
+									if sq.length >= 2
+										let url = sq.pop!
+										<span> '"'
+										<span> sq.join ' '
+										<span[ws:pre]> ' '
+										<span[c:blue3]> url
+										<span> '"'
+									else
+										<span> '"'
+										<span> sq.join ' '
+										<span> '"'
+							<.tip[jc:end ta:right fl:1]
+								@click=handle_shift_backspace
+							>
+								<.tip-hotkey> "Shift + Backspace"
+								<.tip-content> "Edit Link"
+
+				unless editing_link
+					<.links>
+						if bang or state.scored_links.length < 1
+							<a.link.selected
+								href=encoded_bang_query
+								@click=handle_click_bang
 							>
 								<.link-left>
-									<img.link-icon src=link.icon>
-									<.display-name
-										[c:#FAD4AB]=link.is_bang
-									> link.display_name
-									if link.display_name isnt link.name and config.enable_effective_names
-										<.name>
-											<span.parens> "("
-											<span> link.name
-											<span.parens> ")"
-								<.link-right>
-									<.link-buttons .buttons-disabled=(not config.enable_buttons or config.enable_simplify_ui)>
-										<.link-button
-											@click.if(link.is_bang).prevent.stop=handle_click_make_default_bang(link)
-											[visibility:hidden]=!link.is_bang
-										>
-											<svg src='./assets/search.svg'>
-										<.link-button@click.prevent.stop=handle_click_edit(link)>
-											<svg src='./assets/edit-2.svg'>
-										<.link-button@click.prevent.stop=handle_click_delete(link)>
-											<svg src='./assets/trash.svg'>
-										<.link-button
-											@click.prevent.stop=handle_click_pin(link)
-											[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or not config.enable_buttons or config.enable_simplify_ui))
-										>
-											<svg src='./assets/star.svg'>
-									<.frequency> link.frequency
+									<img.link-icon src=active_bang.icon>
+									<.display-name.bang-text> encoded_bang_query
+								<.link-right[jc:flex-end]>
+									<.frequency> active_bang.frequency
+						else
+							for link, index in state.scored_links
+								<a.link
+									href=link.url
+									@pointerover=(selection_index = index)
+									@click.prevent=handle_click_link(link)
+									.selected=(index is selection_index)
+								>
+									<.link-left>
+										<img.link-icon src=link.icon>
+										<.display-name
+											[c:#FAD4AB]=link.is_bang
+										> link.display_name
+										if link.display_name isnt link.name and config.enable_effective_names
+											<.name>
+												<span.parens> "("
+												<span> link.name
+												<span.parens> ")"
+									<.link-right>
+										<.link-buttons .buttons-disabled=(not config.enable_buttons or config.enable_simplify_ui)>
+											<.link-button
+												@click.if(link.is_bang).prevent.stop=handle_click_make_default_bang(link)
+												[visibility:hidden]=!link.is_bang
+											>
+												<svg src='./assets/search.svg'>
+											<.link-button@click.prevent.stop=handle_click_edit(link)>
+												<svg src='./assets/edit-2.svg'>
+											<.link-button@click.prevent.stop=handle_click_delete(link)>
+												<svg src='./assets/trash.svg'>
+											<.link-button
+												@click.prevent.stop=handle_click_pin(link)
+												[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or not config.enable_buttons or config.enable_simplify_ui))
+											>
+												<svg src='./assets/star.svg'>
+										<.frequency> link.frequency
 			$main-input.focus!
 
 imba.mount <app>
