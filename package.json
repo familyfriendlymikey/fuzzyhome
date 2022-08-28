@@ -15,7 +15,6 @@
 	"dependencies": {
 		"dexie": "^3.2.2",
 		"dexie-export-import": "^1.0.3",
-		"dexie-observable": "^3.0.0-beta.11",
 		"downloadjs": "^1.4.7",
 		"fzi": "^1.0.0",
 		"imba": "^2.0.0-alpha.218",
