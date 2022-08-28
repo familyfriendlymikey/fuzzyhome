@@ -312,10 +312,13 @@ tag app
 			return err "pinning link", e
 		await reload_db!
 		imba.commit!
-		p link
 
 	def handle_click_make_default_bang link
-		p link
+		if link.is_bang isnt true
+			return err "setting default bang", "Link is not a bang."
+		config.default_bang = link
+		save_config!
+		window.alert "{link.display_name} is now the default bang"
 
 	def handle_shift_backspace
 		return unless state.scored_links.length > 0
@@ -594,7 +597,10 @@ tag app
 								<.link-right>
 									<.link-buttons>
 										<.link-button@click.prevent.stop=handle_click_edit(link)> "E"
-										<.link-button@click.prevent.stop=handle_click_make_default_bang(link)> "B"
+										<.link-button
+											@click.if(link.is_bang).prevent.stop=handle_click_make_default_bang(link)
+											[c:purple3/20]=!link.is_bang
+										> "B"
 										<.link-button@click.prevent.stop=handle_click_delete(link)> "D"
 										<.link-button
 											@click.prevent.stop=handle_click_pin(link)
