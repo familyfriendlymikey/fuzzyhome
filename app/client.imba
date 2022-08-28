@@ -556,7 +556,20 @@ tag app
 						>
 							<.tip-hotkey> "Shift + Return"
 							<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
-								"Add New Link \"{state.query.trim!}\""
+								<span> "Add New Link"
+								<span[ws:pre]> " "
+								let sq = state.query.trim!.split /\s+/
+								if sq.length >= 2
+									let url = sq.pop!
+									<span> '"'
+									<span> sq.join ' '
+									<span[ws:pre]> ' '
+									<span[c:blue3]> url
+									<span> '"'
+								else
+									<span> '"'
+									<span> sq.join ' '
+									<span> '"'
 						<.tip[jc:end ta:right fl:1]
 							@click=handle_shift_backspace
 						>
