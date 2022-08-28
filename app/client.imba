@@ -396,6 +396,10 @@ tag app
 		save_config!
 		settings_active = no
 
+	def handle_click_toggle_simplify_ui
+		config.enable_simplify_ui = not config.enable_simplify_ui
+		save_config!
+
 	get pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
@@ -505,6 +509,9 @@ tag app
 				rd:3px c:purple4 fs:15px cursor:pointer
 				px:3px
 
+			css .link-button svg
+				w:15px
+
 			css .selected .link-button
 				visibility:visible
 
@@ -523,12 +530,11 @@ tag app
 						Consider refreshing.
 						Check developer console for more information.
 					"""
-
-			<[c:purple3/90 cursor:pointer fs:14px pb:20px]
-				@click.if(!loading)=toggle_settings
-			> "SETTINGS"
-
 			if settings_active
+				<.settings-container>
+					<.settings-button
+						@click=(settings_active = no)
+					> "BACK"
 				<.settings-container>
 					<label.settings-button .disabled=loading>
 						"IMPORT"
@@ -577,23 +583,55 @@ tag app
 						config.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
 
 			else
-				<input$main-input
-					bind=state.query
-					# placeholder=pretty_date
-					@hotkey('return').capture=handle_return
-					@hotkey('shift+return').capture.if(can_add)=handle_shift_return
-					@hotkey('shift+backspace').capture=handle_shift_backspace
-					@hotkey('down').capture=increment_selection_index
-					@hotkey('up').capture=decrement_selection_index
-					@keydown.del=handle_del
-					@input=handle_input
-					@paste=handle_paste
-					@blur=this.focus
-					.disabled=loading
-					disabled=loading
-				>
 
-				if config.enable_tips
+				<.header>
+					css
+						d:flex fld:row w:100%
+
+					css $main-input
+						fl:1
+
+					css .side
+						c:purple3/90 fs:15px
+						d:flex ja:center w:30px
+
+					css .side svg
+						w:15px cursor:pointer
+
+					css .left
+						d:flex jc:left
+
+					css .right
+						d:flex jc:right
+
+					<.side.left
+						@click=handle_click_toggle_simplify_ui
+					>
+						if config.enable_simplify_ui
+							<svg src="./assets/eye-off.svg">
+						else
+							<svg src="./assets/eye.svg">
+
+					<input$main-input
+						bind=state.query
+						# placeholder=pretty_date
+						@hotkey('return').capture=handle_return
+						@hotkey('shift+return').capture.if(can_add)=handle_shift_return
+						@hotkey('shift+backspace').capture=handle_shift_backspace
+						@hotkey('down').capture=increment_selection_index
+						@hotkey('up').capture=decrement_selection_index
+						@keydown.del=handle_del
+						@input=handle_input
+						@paste=handle_paste
+						@blur=this.focus
+						.disabled=loading
+						disabled=loading
+					>
+
+					<.side.right @click.if(!loading)=toggle_settings>
+						<svg src="./assets/settings.svg">
+
+				if config.enable_tips and not config.enable_simplify_ui
 					<.middle-button>
 						<.tip[jc:start ta:left fl:1] @click=handle_return>
 							<.tip-hotkey> "Return"
@@ -653,19 +691,22 @@ tag app
 											<span> link.name
 											<span.parens> ")"
 								<.link-right>
-									<.link-buttons .buttons-disabled=!config.enable_buttons>
+									<.link-buttons .buttons-disabled=(not config.enable_buttons or config.enable_simplify_ui)>
 										<.link-button
 											@click.if(link.is_bang).prevent.stop=handle_click_make_default_bang(link)
 											[visibility:hidden]=!link.is_bang
-										> "B"
-										<.link-button@click.prevent.stop=handle_click_edit(link)> "E"
-										<.link-button@click.prevent.stop=handle_click_delete(link)> "D"
+										>
+											<svg src='./assets/search.svg'>
+										<.link-button@click.prevent.stop=handle_click_edit(link)>
+											<svg src='./assets/edit-2.svg'>
+										<.link-button@click.prevent.stop=handle_click_delete(link)>
+											<svg src='./assets/trash.svg'>
 										<.link-button
 											@click.prevent.stop=handle_click_pin(link)
-											[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or !config.enable_buttons))
-										> "P"
+											[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or not config.enable_buttons or config.enable_simplify_ui))
+										>
+											<svg src='./assets/star.svg'>
 									<.frequency> link.frequency
-				# <[c:purple3 pt:10px fs:10px]> state.scored_links.length
 			$main-input.focus!
 
 imba.mount <app>

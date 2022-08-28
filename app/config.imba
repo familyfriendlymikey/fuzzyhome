@@ -14,5 +14,6 @@ config.enable_buttons = yes
 config.enable_search_on_paste = yes
 config.enable_dark_theme = yes
 config.enable_effective_names = yes
+config.enable_simplify_ui = no
 
 export default config
