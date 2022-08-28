@@ -383,8 +383,9 @@ tag app
 
 	get math_result
 		try
-			let result = eval_math state.query
+			let result = Number(eval_math state.query)
 			throw _ if result.toString! is state.query.trim!
+			throw _ if isNaN result
 			result
 		catch
 			no
@@ -407,7 +408,7 @@ tag app
 		return unless config.enable_search_on_paste
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
-			return if math_result
+			return if math_result isnt no
 			bang ||= config.default_bang
 			handle_bang!
 
@@ -668,7 +669,7 @@ tag app
 						disabled=loading
 					>
 
-					if let m = math_result
+					if (let m = math_result) isnt no
 						<[c:blue3 pt:15px fs:20px ml:10px]> "= {m}"
 					else
 						<.side.right @click.if(!loading)=toggle_settings>
