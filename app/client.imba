@@ -367,6 +367,11 @@ tag app
 			bang ||= config.default_bang
 			handle_bang!
 
+	def handle_click_toggle_tips
+		config.enable_tips = not config.enable_tips
+		save_config!
+		settings_active = no
+
 	get pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
@@ -492,11 +497,9 @@ tag app
 						Check developer console for more information.
 					"""
 
-			###
 			<[c:purple3/90 cursor:pointer fs:14px pb:20px]
 				@click.if(!loading)=toggle_settings
 			> "SETTINGS"
-			###
 
 			if settings_active
 				<.settings-container>
@@ -522,7 +525,9 @@ tag app
 						@click.if(!loading)=handle_click_github
 					> "GITHUB"
 				<.settings-container>
-					<.settings-button>
+					<.settings-button
+						@click=handle_click_toggle_tips
+					>
 						config.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
 					<.settings-button
 						.disabled=loading
