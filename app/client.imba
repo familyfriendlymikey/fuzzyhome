@@ -119,7 +119,10 @@ tag app
 
 	def sort_links
 		if state.query.trim!.length > 0
-			state.scored_links = fzi state.links, state.query
+			if config.enable_effective_names
+				state.scored_links = fzi state.links, state.query
+			else
+				state.scored_links = fzi state.links, state.query, "display_name"
 		else
 			state.scored_links = orderBy(state.links, ['is_pinned', 'frequency'], ['desc', 'desc'])
 
@@ -362,6 +365,7 @@ tag app
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
 
 	def handle_paste e
+		return unless config.enable_search_on_paste
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
 			bang ||= config.default_bang
@@ -374,6 +378,21 @@ tag app
 
 	def handle_click_toggle_buttons
 		config.enable_buttons = not config.enable_buttons
+		save_config!
+		settings_active = no
+
+	def handle_click_toggle_search_on_paste
+		config.enable_search_on_paste = not config.enable_search_on_paste
+		save_config!
+		settings_active = no
+
+	def handle_toggle_light_theme
+		config.enable_dark_theme = not config.enable_dark_theme
+		save_config!
+		settings_active = no
+
+	def handle_click_toggle_effective_names
+		config.enable_effective_names = not config.enable_effective_names
 		save_config!
 		settings_active = no
 
@@ -543,9 +562,19 @@ tag app
 						config.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
 				<.settings-container>
 					<.settings-button
+						@click=handle_click_toggle_search_on_paste
+					>
+						config.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
+					<.settings-button
+						@click=handle_click_toggle_effective_names
+					>
+						config.enable_effective_names ? "DISABLE EFFECTIVE NAMES" : "ENABLE EFFECTIVE NAMES"
+				<.settings-container>
+					<.settings-button
 						.disabled=loading
-						@click.if(!loading)=handle_click_github
-					> "LIGHT THEME"
+						@click.if(!loading)=handle_toggle_light_theme
+					>
+						config.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
 
 			else
 				<input$main-input
@@ -618,7 +647,7 @@ tag app
 									<.display-name
 										[c:#FAD4AB]=link.is_bang
 									> link.display_name
-									if link.display_name isnt link.name
+									if link.display_name isnt link.name and config.enable_effective_names
 										<.name>
 											<span.parens> "("
 											<span> link.name
