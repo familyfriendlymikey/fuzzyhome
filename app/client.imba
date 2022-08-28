@@ -688,7 +688,7 @@ tag app
 					if m isnt no and m.toString! isnt state.query.trim!
 						<.side.right[c:blue3 fs:20px ml:10px w:unset]
 							@click=handle_click_copy(m)
-						> "= {m}"
+						> "= {Math.round(m * 100)/100}"
 					else
 						<.side.right @click.if(!loading)=toggle_settings>
 							<svg src="./assets/settings.svg">
