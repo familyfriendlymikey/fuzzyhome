@@ -8,4 +8,5 @@ config.default_bang = {
 	"id": "FEJbsKLUMwHbazbqW3c4i"
 }
 config.enable_tips = yes
+config.enable_buttons = yes
 export default config

@@ -372,6 +372,11 @@ tag app
 		save_config!
 		settings_active = no
 
+	def handle_click_toggle_buttons
+		config.enable_buttons = not config.enable_buttons
+		save_config!
+		settings_active = no
+
 	get pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
@@ -484,6 +489,9 @@ tag app
 			css .selected .link-button
 				visibility:visible
 
+			css .buttons-disabled .link-button
+				visibility:hidden
+
 			css .frequency
 				fs:15px ml:7px
 
@@ -529,6 +537,11 @@ tag app
 						@click=handle_click_toggle_tips
 					>
 						config.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
+					<.settings-button
+						@click=handle_click_toggle_buttons
+					>
+						config.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
+				<.settings-container>
 					<.settings-button
 						.disabled=loading
 						@click.if(!loading)=handle_click_github
@@ -611,7 +624,7 @@ tag app
 											<span> link.name
 											<span.parens> ")"
 								<.link-right>
-									<.link-buttons>
+									<.link-buttons .buttons-disabled=!config.enable_buttons>
 										<.link-button
 											@click.if(link.is_bang).prevent.stop=handle_click_make_default_bang(link)
 											[visibility:hidden]=!link.is_bang
@@ -620,7 +633,7 @@ tag app
 										<.link-button@click.prevent.stop=handle_click_delete(link)> "D"
 										<.link-button
 											@click.prevent.stop=handle_click_pin(link)
-											[visibility:visible c:purple3/50]=(link.is_pinned and index isnt selection_index)
+											[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or !config.enable_buttons))
 										> "P"
 									<.frequency> link.frequency
 				# <[c:purple3 pt:10px fs:10px]> state.scored_links.length
