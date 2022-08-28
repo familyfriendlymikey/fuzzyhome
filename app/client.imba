@@ -319,12 +319,14 @@ tag app
 		await reload_db!
 		imba.commit!
 
-	def handle_click_make_default_bang link
-		if link.is_bang isnt true
+	def handle_click_set_default_bang
+		if editing_link.is_bang isnt true
 			return err "setting default bang", "Link is not a bang."
-		config.default_bang = link
+		config.default_bang = editing_link
 		save_config!
-		window.alert "{link.display_name} is now the default bang"
+		editing_link = no
+		state.query = ''
+		sort_links!
 
 	def handle_shift_backspace
 		if editing_link
@@ -682,6 +684,13 @@ tag app
 								<.tip-hotkey> "Esc"
 								<.tip-content> "Cancel Edits"
 
+							if editing_link.is_bang
+								<.tip[jc:end ta:center fl:1]
+									@click=handle_click_set_default_bang
+								>
+									<.tip-hotkey> "Click"
+									<.tip-content> "Set Default Bang"
+
 							<.tip[jc:center ta:center fl:1 px:15px]
 								@click=handle_shift_return
 							>
@@ -757,11 +766,6 @@ tag app
 												<span.parens> ")"
 									<.link-right>
 										<.link-buttons .buttons-disabled=(not config.enable_buttons or config.enable_simplify_ui)>
-											<.link-button
-												@click.if(link.is_bang).prevent.stop=handle_click_make_default_bang(link)
-												[visibility:hidden]=!link.is_bang
-											>
-												<svg src='./assets/search.svg'>
 											<.link-button@click.prevent.stop=handle_click_edit(link)>
 												<svg src='./assets/edit-2.svg'>
 											<.link-button@click.prevent.stop=handle_click_delete(link)>
