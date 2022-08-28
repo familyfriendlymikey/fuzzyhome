@@ -639,7 +639,7 @@ tag app
 						bind=state.query
 						# placeholder=pretty_date
 						@hotkey('return').capture=handle_return
-						@hotkey('shift+return').capture.if(can_add)=handle_shift_return
+						@hotkey('shift+return').capture=handle_shift_return
 						@hotkey('esc').capture=handle_esc
 						@hotkey('shift+backspace').capture=handle_shift_backspace
 						@hotkey('down').capture=increment_selection_index
