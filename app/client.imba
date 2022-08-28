@@ -384,7 +384,6 @@ tag app
 	get math_result
 		try
 			let result = Number(eval_math state.query)
-			throw _ if result.toString! is state.query.trim!
 			throw _ if isNaN result
 			result
 		catch
@@ -443,6 +442,20 @@ tag app
 
 	get pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
+
+	def handle_click_copy s
+		try
+			await window.navigator.clipboard.writeText(s)
+			state.query = ''
+			sort_links!
+
+	def handle_cut e
+		return unless e.target.selectionStart == e.target.selectionEnd
+		let s = math_result
+		s ||= state.query
+		await window.navigator.clipboard.writeText(s)
+		state.query = ''
+		sort_links!
 
 	def render
 
@@ -635,9 +648,10 @@ tag app
 					css .side
 						c:purple3/90 fs:15px
 						d:flex ja:center w:30px
+						cursor:pointer
 
 					css .side svg
-						w:15px cursor:pointer
+						w:15px
 
 					css .left
 						d:flex jc:left
@@ -666,11 +680,15 @@ tag app
 						@input.if(!loading)=handle_input
 						@paste.if(!loading)=handle_paste
 						@blur=this.focus
+						@cut=handle_cut
 						disabled=loading
 					>
 
-					if (let m = math_result) isnt no
-						<[c:blue3 pt:15px fs:20px ml:10px]> "= {m}"
+					let m = math_result
+					if m isnt no and m.toString! isnt state.query.trim!
+						<.side.right[c:blue3 fs:20px ml:10px w:unset]
+							@click=handle_click_copy(m)
+						> "= {m}"
 					else
 						<.side.right @click.if(!loading)=toggle_settings>
 							<svg src="./assets/settings.svg">
