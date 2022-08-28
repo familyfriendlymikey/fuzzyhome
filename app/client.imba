@@ -269,6 +269,7 @@ tag app
 		window.location.href = link.url
 
 	def handle_return
+		return if editing_link
 		if bang or state.scored_links.length < 1
 			return handle_bang!
 		let link = state.scored_links[selection_index]
@@ -335,16 +336,20 @@ tag app
 			handle_edit state.scored_links[selection_index]
 
 	def handle_shift_return
-		if editing_link
-			try
-				await update_link editing_link, state.query
-				editing_link = no
-				state.query = ''
-				sort_links!
-			catch e
-				err "updating link", e
-		else
-			handle_add!
+		def go
+			if editing_link
+				try
+					await update_link editing_link, state.query
+					editing_link = no
+					state.query = ''
+					sort_links!
+				catch e
+					err "updating link", e
+			else
+				handle_add!
+		loading = yes
+		await go!
+		loading = no
 
 	def handle_esc
 		editing_link = no
@@ -427,7 +432,14 @@ tag app
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
 	def render
-		<self>
+
+		css .disabled *
+			@important c:gray4 cursor:default user-select:none pointer-events:none
+
+		css .disabled $main-input
+			@important bg:gray4/10 bc:gray4
+
+		<self .disabled=loading>
 
 			css body
 				d:flex fld:column jc:flex-start ai:center
@@ -483,9 +495,6 @@ tag app
 
 			css .tip-content
 				pt:2px fs:14px c:purple3
-
-			css .disabled
-				c:gray4 cursor:default user-select:none
 
 			css .links
 				d:flex fld:column jc:flex-start fl:1
@@ -559,7 +568,7 @@ tag app
 						@click=(settings_active = no)
 					> "BACK"
 				<.settings-container>
-					<label.settings-button .disabled=loading>
+					<label.settings-button>
 						"IMPORT"
 						<input[d:none]
 							disabled=loading
@@ -568,16 +577,13 @@ tag app
 							type="file"
 						>
 					<.settings-button
-						.disabled=loading
 						@click.if(!loading)=handle_click_export
 					> "EXPORT"
 				<.settings-container>
 					<.settings-button
-						.disabled=loading
 						@click.if(!loading)=handle_click_github
 					> "TUTORIAL"
 					<.settings-button
-						.disabled=loading
 						@click.if(!loading)=handle_click_github
 					> "GITHUB"
 				<.settings-container>
@@ -600,7 +606,6 @@ tag app
 						config.enable_effective_names ? "DISABLE EFFECTIVE NAMES" : "ENABLE EFFECTIVE NAMES"
 				<.settings-container>
 					<.settings-button
-						.disabled=loading
 						@click.if(!loading)=handle_toggle_light_theme
 					>
 						config.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
@@ -638,17 +643,16 @@ tag app
 					<input$main-input
 						bind=state.query
 						# placeholder=pretty_date
-						@hotkey('return').capture=handle_return
-						@hotkey('shift+return').capture=handle_shift_return
-						@hotkey('esc').capture=handle_esc
-						@hotkey('shift+backspace').capture=handle_shift_backspace
-						@hotkey('down').capture=increment_selection_index
-						@hotkey('up').capture=decrement_selection_index
-						@keydown.del=handle_del
-						@input=handle_input
-						@paste=handle_paste
+						@hotkey('return').capture.if(!loading)=handle_return
+						@hotkey('shift+return').capture.if(!loading)=handle_shift_return
+						@hotkey('esc').capture.if(!loading)=handle_esc
+						@hotkey('shift+backspace').capture.if(!loading)=handle_shift_backspace
+						@hotkey('down').capture.if(!loading)=increment_selection_index
+						@hotkey('up').capture.if(!loading)=decrement_selection_index
+						@keydown.del.if(!loading)=handle_del
+						@input.if(!loading)=handle_input
+						@paste.if(!loading)=handle_paste
 						@blur=this.focus
-						.disabled=loading
 						disabled=loading
 					>
 
