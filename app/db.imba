@@ -31,13 +31,14 @@ db.version(3).stores({
 			link.url = parse_url(link.url).href
 
 db.version(4).stores({
-	links: "++id,display_name,name,is_bang,url,frequency,icon"
+	links: "++id,display_name,name,is_bang,is_pinned,url,frequency,icon"
 }).upgrade! do |trans|
 	p "upgrading to fuzzyhome db version 4"
 	trans.links.toCollection!.modify! do |link|
 		link.display_name = link.name
 		link.is_bang = no
 		link.icon = link.img
+		link.is_pinned = no
 		delete link.img
 
 export default db

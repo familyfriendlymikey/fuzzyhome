@@ -121,7 +121,9 @@ tag app
 		if state.query.trim!.length > 0
 			state.scored_links = fzi state.links, state.query
 		else
-			state.scored_links = orderBy(state.links, 'frequency', 'desc')
+			let pinned = do |link| link.is_pinned
+			let frequency = do |link| link.frequency
+			state.scored_links = orderBy(state.links, [pinned, frequency], ['desc', 'desc'])
 
 	def increment_link_frequency link
 		try
@@ -187,11 +189,12 @@ tag app
 			name = split_text.pop!.slice(1)
 		let display_name = split_text.join(" ")
 		let is_bang = no
+		let is_pinned = no
 		if display_name.startsWith "!"
 			is_bang = yes
 			display_name = display_name.slice(1)
 		name ||= display_name
-		{ name, display_name, is_bang, url, frequency:0, icon }
+		{ name, display_name, is_bang, is_pinned, url, frequency:0, icon }
 
 	def handle_add
 		loading = yes
@@ -301,6 +304,14 @@ tag app
 		handle_edit link
 
 	def handle_click_pin link
+		link.is_pinned = !link.is_pinned
+		try
+			let result = await db.links.update link.id, link
+			throw "link id not found" if result is 0
+		catch e
+			return err "pinning link", e
+		await reload_db!
+		imba.commit!
 		p link
 
 	def handle_click_make_default_bang link
@@ -583,9 +594,12 @@ tag app
 								<.link-right>
 									<.link-buttons>
 										<.link-button@click.prevent.stop=handle_click_edit(link)> "E"
-										<.link-button@click.prevent.stop=handle_click_pin(link)> "P"
 										<.link-button@click.prevent.stop=handle_click_make_default_bang(link)> "B"
 										<.link-button@click.prevent.stop=handle_click_delete(link)> "D"
+										<.link-button
+											@click.prevent.stop=handle_click_pin(link)
+											[visibility:visible c:purple3/50]=(link.is_pinned and index isnt selection_index)
+										> "P"
 									<.frequency> link.frequency
 				# <[c:purple3 pt:10px fs:10px]> state.scored_links.length
 			$main-input.focus!
