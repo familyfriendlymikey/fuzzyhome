@@ -19,6 +19,7 @@
 		"fzi": "^1.0.0",
 		"imba": "^2.0.0-alpha.218",
 		"lodash": "^4.17.21",
+		"mathjs": "^11.1.0",
 		"nanoid": "^4.0.0"
 	},
 	"description": "A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.",

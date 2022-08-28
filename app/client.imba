@@ -9,6 +9,7 @@ import download from 'downloadjs'
 import { nanoid } from 'nanoid'
 import { parse_url } from './utils'
 import initial_config from './config'
+import { evaluate as eval_math } from 'mathjs'
 
 let state = {
 	query: ''
@@ -378,6 +379,14 @@ tag app
 		settings_active = no
 		loading = no
 
+	get math_result
+		try
+			let result = eval_math state.query
+			throw _ if result.toString! is state.query.trim!
+			result
+		catch
+			no
+
 	def handle_click_export
 		loading = yes
 		let datetime = new Date!.toString!.split(" ")
@@ -396,6 +405,7 @@ tag app
 		return unless config.enable_search_on_paste
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
+			return if math_result
 			bang ||= config.default_bang
 			handle_bang!
 
@@ -656,8 +666,11 @@ tag app
 						disabled=loading
 					>
 
-					<.side.right @click.if(!loading)=toggle_settings>
-						<svg src="./assets/settings.svg">
+					if let m = math_result
+						<[c:blue3 pt:15px fs:20px ml:10px]> "= {m}"
+					else
+						<.side.right @click.if(!loading)=toggle_settings>
+							<svg src="./assets/settings.svg">
 
 				if config.enable_tips and not config.enable_simplify_ui
 					if editing_link
