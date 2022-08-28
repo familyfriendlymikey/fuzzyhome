@@ -300,6 +300,12 @@ tag app
 	def handle_click_edit link
 		handle_edit link
 
+	def handle_click_pin link
+		p link
+
+	def handle_click_make_default_bang link
+		p link
+
 	def handle_shift_backspace
 		return unless state.scored_links.length > 0
 		handle_edit state.scored_links[selection_index]
@@ -455,8 +461,8 @@ tag app
 
 			css .link-button
 				visibility:hidden
-				px:7px rd:3px c:purple4 fs:15px cursor:pointer
-				bd:1px solid purple4/50
+				rd:3px c:purple4 fs:15px cursor:pointer
+				px:3px
 
 			css .selected .link-button
 				visibility:visible
@@ -576,8 +582,10 @@ tag app
 											<span.parens> ")"
 								<.link-right>
 									<.link-buttons>
-										<.link-button[fs:12px]@click.prevent.stop=handle_click_edit(link)> "✎"
-										<.link-button@click.prevent.stop=handle_click_delete(link)> "x"
+										<.link-button@click.prevent.stop=handle_click_edit(link)> "E"
+										<.link-button@click.prevent.stop=handle_click_pin(link)> "P"
+										<.link-button@click.prevent.stop=handle_click_make_default_bang(link)> "B"
+										<.link-button@click.prevent.stop=handle_click_delete(link)> "D"
 									<.frequency> link.frequency
 				# <[c:purple3 pt:10px fs:10px]> state.scored_links.length
 			$main-input.focus!
