@@ -65,9 +65,9 @@ tag app
 			"instagram `in instagram.com"
 			"localhost `3000 http://localhost:3000"
 		]
-		for link in initial_links
+		for link_text in initial_links
 			try
-				add_link link
+				add_link link_text
 			catch e
 				err "adding link", e
 
@@ -196,9 +196,9 @@ tag app
 
 	def create_link_from_text text
 		text = text.trim!
-		throw "text is empty" if text is ''
+		throw "Text is empty." if text is ''
 		let split_text = text.split(/\s+/)
-		throw "no url provided" if split_text.length < 2
+		throw "No url provided." if split_text.length < 2
 		let url = split_text.pop!
 		let host
 		{ href:url, host } = parse_url url
@@ -261,7 +261,7 @@ tag app
 		let new_link = await create_link_from_text new_link_text
 		new_link.frequency = old_link.frequency
 		let result = await db.links.update old_link.id, new_link
-		throw "link id not found" if result is 0
+		throw "Link id not found." if result is 0
 		await reload_db!
 		imba.commit!
 		p omit(old_link, "icon")
@@ -336,7 +336,7 @@ tag app
 		link.is_pinned = !link.is_pinned
 		try
 			let result = await db.links.update link.id, link
-			throw "link id not found" if result is 0
+			throw "Link id not found." if result is 0
 		catch e
 			return err "pinning link", e
 		await reload_db!
@@ -401,18 +401,42 @@ tag app
 		selection_index = 0
 		sort_links!
 
+	def name_exists new_name
+		state.links.some! do |{name}| new_name is name
+
 	def handle_click_import e
+		def handle_import
+			let errors = []
+			try
+				let text = await e.target.files[0].text!
+				var links = text.split "\n"
+			catch e
+				return err "importing db", e
+			for link_text in links
+				try
+					let link = await create_link_from_text link_text
+					if name_exists link.name
+						throw "Name already exists, add manually if you don't mind duplicates."
+					add_link link_text
+				catch e
+					errors.push "{link_text}\n{e}"
+			if errors.length > 0
+				err "importing some links", errors.join("\n\n")
 		loading = yes
-		let id_exists = do |newid|
-			state.links.some! do |{id}| newid is id
-		let filter = do |table, value, key|
-			table is 'links' and not id_exists value.id
-		try
-			await reload_db!
-			await db.import(e.target.files[0], { filter })
-			await reload_db!
-		catch e
-			err "importing db", e
+		await handle_import!
+		settings_active = no
+		loading = no
+
+	def handle_click_export
+		loading = yes
+		await reload_db!
+		let links = state.links.map do |link|
+			construct_link_text link
+		let datetime = new Date!.toString!.split(" ")
+		let date = datetime.slice(1, 4).join("-").toLowerCase!
+		let time = datetime[4].split(":").join("-")
+		let filename = "fuzzyhome_v{version}_{date}_{time}.txt"
+		download(links.join("\n"), filename, "text/plain")
 		settings_active = no
 		loading = no
 
@@ -423,17 +447,6 @@ tag app
 			result
 		catch
 			no
-
-	def handle_click_export
-		loading = yes
-		let datetime = new Date!.toString!.split(" ")
-		let date = datetime.slice(1, 4).join("-").toLowerCase!
-		let time = datetime[4].split(":").join("-")
-		let filename = "fuzzyhome_v{version}_{date}_{time}.json"
-		const blob = await db.export({ prettyJson: yes })
-		download(blob, filename, "application/json")
-		settings_active = no
-		loading = no
 
 	def handle_click_github
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
