@@ -96,6 +96,7 @@ tag app
 		global.localStorage.fuzzyhome_config = JSON.stringify(config)
 
 	def err s, e
+		p "error:"
 		p e
 		window.alert("Error {s}:\n\n{e}")
 
