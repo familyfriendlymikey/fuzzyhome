@@ -10,11 +10,12 @@ import { nanoid } from 'nanoid'
 import { parse_url } from './utils'
 import initial_config from './config'
 import { evaluate as eval_math } from 'mathjs'
+import community_links from './community_links'
 
 let state = {
 	query: ''
 	links: []
-	scored_links: []
+	sorted_links: []
 }
 
 global._fuzzyhome_delete_everything = do |prompt=yes|
@@ -22,6 +23,7 @@ global._fuzzyhome_delete_everything = do |prompt=yes|
 	indexedDB.deleteDatabase("fuzzyhome")
 	delete localStorage.fuzzyhome_config
 	delete localStorage.fuzzyhome_visited
+	location.reload!
 
 p "fuzzyhome version {version}"
 
@@ -34,20 +36,22 @@ tag app
 	bang = no
 	holding_shift = no
 	editing_link = no
+	prior_query = ''
+	viewing_community_links = no
 
 	get render? do mounted?
 
 	def mount
+		unless global.localStorage.fuzzyhome_visited
+			await add_initial_links!
+			global.localStorage.fuzzyhome_visited = yes
 		try
 			await reload_db!
-			p state.links
+			p "links:", state.links
 		catch e
 			err "loading database", e
 			fatal_error = yes
 			return
-		unless global.localStorage.fuzzyhome_visited
-			await add_initial_links!
-			global.localStorage.fuzzyhome_visited = yes
 		await load_config!
 
 	def add_initial_links
@@ -72,11 +76,10 @@ tag app
 			config = JSON.parse(global.localStorage.fuzzyhome_config)
 			validate_config!
 		catch
-			p "resetting config"
 			reset_config!
 
 	def validate_config
-		p config
+		p "config:", config
 		throw _ if config.default_bang.id == null
 		throw _ if config.default_bang.url == null
 		throw _ if config.default_bang.icon == null
@@ -100,6 +103,9 @@ tag app
 		state.links = await db.links.toArray()
 		sort_links!
 
+	get selected_link
+		state.sorted_links[selection_index]
+
 	get tip_url
 		let split_query = state.query.trim!.split /\s+/
 		if split_query.length >= 2
@@ -120,13 +126,23 @@ tag app
 		name
 
 	def sort_links
+		let links
+		if viewing_community_links
+			p community_links
+			links = community_links.filter do |link|
+				not state.links.some do |my_link|
+					link.id is my_link.id
+			p links
+		else
+			links = state.links
+
 		if state.query.trim!.length > 0
 			if config.enable_effective_names
-				state.scored_links = fzi state.links, state.query
+				state.sorted_links = fzi links, state.query
 			else
-				state.scored_links = fzi state.links, state.query, "display_name"
+				state.sorted_links = fzi links, state.query, "display_name"
 		else
-			state.scored_links = orderBy(state.links, ['is_pinned', 'frequency'], ['desc', 'desc'])
+			state.sorted_links = orderBy(links, ['is_pinned', 'frequency'], ['desc', 'desc'])
 
 	def increment_link_frequency link
 		try
@@ -138,7 +154,7 @@ tag app
 		settings_active = !settings_active
 
 	def increment_selection_index
-		selection_index = Math.min(state.scored_links.length - 1, selection_index + 1)
+		selection_index = Math.min(state.sorted_links.length - 1, selection_index + 1)
 
 	def decrement_selection_index
 		selection_index = Math.max(0, selection_index - 1)
@@ -227,6 +243,7 @@ tag app
 		link_text
 
 	def handle_edit link
+		prior_query = state.query
 		editing_link = link
 		state.query = construct_link_text(link)
 
@@ -252,7 +269,9 @@ tag app
 		return new_link
 
 	def handle_click_link link
-		if link.is_bang
+		if viewing_community_links
+			add_community_link link
+		elif link.is_bang
 			state.query = ''
 			bang = link
 		else
@@ -271,9 +290,9 @@ tag app
 
 	def handle_return
 		return if editing_link
-		if bang or state.scored_links.length < 1
+		if bang or state.sorted_links.length < 1
 			return handle_bang!
-		let link = state.scored_links[selection_index]
+		let link = selected_link
 		if link.is_bang
 			state.query = ''
 			bang = link
@@ -300,10 +319,14 @@ tag app
 				await reload_db!
 			catch e
 				err "reloading db after successful delete", e
-			selection_index = Math.min selection_index, state.scored_links.length - 1
 
 		loading = yes
 		await delete_link!
+		state.query = prior_query
+		prior_query = ''
+		editing_link = no
+		sort_links!
+		selection_index = Math.min selection_index, state.sorted_links.length - 1
 		loading = no
 
 	def handle_click_edit link
@@ -325,38 +348,50 @@ tag app
 		config.default_bang = editing_link
 		save_config!
 		editing_link = no
-		state.query = ''
+		state.query = prior_query
+		prior_query = ''
 		sort_links!
 
 	def handle_shift_backspace
 		if editing_link
 			await handle_delete editing_link
-			editing_link = no
-			state.query = ''
-			sort_links!
 		else
-			return unless state.scored_links.length > 0
-			handle_edit state.scored_links[selection_index]
+			return unless state.sorted_links.length > 0
+			handle_edit selected_link
+
+	def add_community_link link
+		await db.links.add link
+		await reload_db!
+		imba.commit!
 
 	def handle_shift_return
 		def go
-			if editing_link
+			if viewing_community_links
+				try
+					await add_community_link selected_link
+				catch e
+					err "adding community link", e
+			elif editing_link
 				try
 					await update_link editing_link, state.query
-					editing_link = no
-					state.query = ''
-					sort_links!
 				catch e
 					err "updating link", e
 			else
 				handle_add!
 		loading = yes
 		await go!
+		editing_link = no
+		state.query = ''
+		sort_links!
 		loading = no
 
 	def handle_esc
-		editing_link = no
-		state.query = ''
+		if editing_link
+			editing_link = no
+			state.query = prior_query
+			prior_query = ''
+		elif viewing_community_links
+			viewing_community_links = no
 		sort_links!
 
 	def handle_click_add
@@ -455,6 +490,11 @@ tag app
 		s ||= state.query
 		await window.navigator.clipboard.writeText(s)
 		state.query = ''
+		sort_links!
+
+	def handle_click_view_community_links
+		viewing_community_links = yes
+		settings_active = no
 		sort_links!
 
 	def render
@@ -594,6 +634,11 @@ tag app
 						@click=(settings_active = no)
 					> "BACK"
 				<.settings-container>
+					<.settings-button
+						@click.if(!loading)=handle_click_view_community_links
+					>
+						"VIEW COMMUNITY LINKS"
+				<.settings-container>
 					<label.settings-button>
 						"IMPORT"
 						<input[d:none]
@@ -693,7 +738,22 @@ tag app
 						<.side.right @click.if(!loading)=toggle_settings>
 							<svg src="./assets/settings.svg">
 
-				if config.enable_tips and not config.enable_simplify_ui
+				if viewing_community_links
+						<.middle-button>
+
+							<.tip[jc:start ta:center fl:1]
+								@click=handle_esc
+							>
+								<.tip-hotkey> "Esc"
+								<.tip-content> "Exit Community Links"
+
+							<.tip[jc:end ta:center fl:1]
+								@click=handle_shift_return
+							>
+								<.tip-hotkey> "Shift + Return"
+								<.tip-content> "Add To Your Links"
+
+				elif config.enable_tips and not config.enable_simplify_ui
 					if editing_link
 						<.middle-button>
 
@@ -755,7 +815,7 @@ tag app
 
 				unless editing_link
 					<.links>
-						if bang or state.scored_links.length < 1
+						if not viewing_community_links and (bang or state.sorted_links.length < 1)
 							<a.link.selected
 								href=encoded_bang_query
 								@click=handle_click_bang
@@ -766,7 +826,7 @@ tag app
 								<.link-right[jc:flex-end]>
 									<.frequency> active_bang.frequency
 						else
-							for link, index in state.scored_links
+							for link, index in state.sorted_links
 								<a.link
 									href=link.url
 									@pointerover=(selection_index = index)
