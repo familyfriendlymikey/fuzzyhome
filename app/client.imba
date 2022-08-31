@@ -1,25 +1,28 @@
 let p = console.log
 
-import sw from './sw.imba?serviceworker'
-navigator..serviceWorker..register(sw).then! do |reg| reg.update!
+# import sw from './sw.imba?serviceworker'
+# navigator..serviceWorker..register(sw).then! do |reg| reg.update!
 
 import { orderBy, omit } from 'lodash'
-import pkg from '../package.json'
-let version = pkg.version
-import db from './db'
 import fzi from 'fzi'
 import download from 'downloadjs'
 import { nanoid } from 'nanoid'
-import { parse_url } from './utils'
-import initial_config from './config'
 import { evaluate as eval_math } from 'mathjs'
-import community_links from './community_links'
 
-let state = {
-	query: ''
-	links: []
-	sorted_links: []
-}
+import pkg from '../package.json'
+let version = pkg.version
+import { parse_url } from './utils'
+import db from './db'
+import state from './state'
+import default_config from './config'
+
+import app-community-links from './components/app-community-links'
+import app-settings from './components/app-settings'
+import app-prompt from './components/app-prompt'
+import app-edit from './components/app-edit'
+import './styles'
+
+p "fuzzyhome version {version}"
 
 global._fuzzyhome_delete_everything = do |prompt=yes|
 	return if prompt and window.confirm "This will delete everything. Are you sure?"
@@ -28,19 +31,18 @@ global._fuzzyhome_delete_everything = do |prompt=yes|
 	delete localStorage.fuzzyhome_visited
 	location.reload!
 
-p "fuzzyhome version {version}"
+extend tag element
+	get state
+		state
 
 tag app
 
 	selection_index = 0
-	settings_active = no
-	loading = no
 	fatal_error = no
 	bang = no
-	holding_shift = no
 	editing_link = no
 	prior_query = ''
-	viewing_community_links = no
+	viewing_community_links = yes
 
 	get render? do mounted?
 
@@ -52,7 +54,7 @@ tag app
 			await reload_db!
 			p "links:", state.links
 		catch e
-			err "loading database", e
+			err "state.loading database", e
 			fatal_error = yes
 			return
 		await load_config!
@@ -92,7 +94,7 @@ tag app
 
 	def reset_config
 		p "resetting config"
-		config = initial_config
+		config = default_config
 		save_config!
 
 	def save_config
@@ -130,16 +132,7 @@ tag app
 		name
 
 	def sort_links
-		let links
-		if viewing_community_links
-			p community_links
-			links = community_links.filter do |link|
-				not state.links.some do |my_link|
-					link.id is my_link.id
-			p links
-		else
-			links = state.links
-
+		let links = state.links
 		if state.query.trim!.length > 0
 			if config.enable_effective_names
 				state.sorted_links = fzi links, state.query
@@ -190,7 +183,7 @@ tag app
 			reader.readAsDataURL(blob)
 
 	get can_add
-		return no if loading
+		return no if state.loading
 		return no if settings_active
 		let query = state.query.trim!
 		return no if query is ''
@@ -220,14 +213,14 @@ tag app
 		{ name, display_name, is_bang, is_pinned, url, frequency:0, icon }
 
 	def handle_add
-		loading = yes
+		state.loading = yes
 		try
 			await add_link state.query
 			state.query = ''
 			sort_links!
 		catch e
 			err "adding link", e
-		loading = no
+		state.loading = no
 
 	def add_link text
 		let link = await create_link_from_text text
@@ -257,9 +250,9 @@ tag app
 				await update_link link, new_link_text
 			catch e
 				return err "editing link", e
-		loading = yes
+		state.loading = yes
 		await edit_link!
-		loading = no
+		state.loading = no
 
 	def update_link old_link, new_link_text
 		let new_link = await create_link_from_text new_link_text
@@ -324,14 +317,14 @@ tag app
 			catch e
 				err "reloading db after successful delete", e
 
-		loading = yes
+		state.loading = yes
 		await delete_link!
 		state.query = prior_query
 		prior_query = ''
 		editing_link = no
 		sort_links!
 		selection_index = Math.min selection_index, state.sorted_links.length - 1
-		loading = no
+		state.loading = no
 
 	def handle_click_edit link
 		handle_edit link
@@ -345,16 +338,6 @@ tag app
 			return err "pinning link", e
 		await reload_db!
 		imba.commit!
-
-	def handle_click_set_default_bang
-		if editing_link.is_bang isnt true
-			return err "setting default bang", "Link is not a bang."
-		config.default_bang = editing_link
-		save_config!
-		editing_link = no
-		state.query = prior_query
-		prior_query = ''
-		sort_links!
 
 	def handle_shift_backspace
 		if editing_link
@@ -382,12 +365,12 @@ tag app
 					err "updating link", e
 			else
 				handle_add!
-		loading = yes
+		state.loading = yes
 		await go!
 		editing_link = no
 		state.query = ''
 		sort_links!
-		loading = no
+		state.loading = no
 
 	def handle_esc
 		if editing_link
@@ -408,42 +391,6 @@ tag app
 	def name_exists new_name
 		state.links.some! do |{name}| new_name is name
 
-	def handle_click_import e
-		def handle_import
-			let errors = []
-			try
-				let text = await e.target.files[0].text!
-				var links = text.split "\n"
-			catch e
-				return err "importing db", e
-			for link_text in links
-				try
-					let link = await create_link_from_text link_text
-					if name_exists link.name
-						throw "Name already exists, add manually if you don't mind duplicates."
-					add_link link_text
-				catch e
-					errors.push "{link_text}\n{e}"
-			if errors.length > 0
-				err "importing some links", errors.join("\n\n")
-		loading = yes
-		await handle_import!
-		settings_active = no
-		loading = no
-
-	def handle_click_export
-		loading = yes
-		await reload_db!
-		let links = state.links.map do |link|
-			construct_link_text link
-		let datetime = new Date!.toString!.split(" ")
-		let date = datetime.slice(1, 4).join("-").toLowerCase!
-		let time = datetime[4].split(":").join("-")
-		let filename = "fuzzyhome_v{version}_{date}_{time}.txt"
-		download(links.join("\n"), filename, "text/plain")
-		settings_active = no
-		loading = no
-
 	get math_result
 		try
 			let result = Number(eval_math state.query)
@@ -451,9 +398,6 @@ tag app
 			result
 		catch
 			no
-
-	def handle_click_github
-		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
 
 	def handle_paste e
 		return unless config.enable_search_on_paste
@@ -463,37 +407,9 @@ tag app
 			bang ||= config.default_bang
 			handle_bang!
 
-	def handle_click_toggle_tips
-		config.enable_tips = not config.enable_tips
-		save_config!
-		settings_active = no
-
-	def handle_click_toggle_buttons
-		config.enable_buttons = not config.enable_buttons
-		save_config!
-		settings_active = no
-
-	def handle_click_toggle_search_on_paste
-		config.enable_search_on_paste = not config.enable_search_on_paste
-		save_config!
-		settings_active = no
-
-	def handle_toggle_light_theme
-		config.enable_dark_theme = not config.enable_dark_theme
-		save_config!
-		settings_active = no
-
-	def handle_click_toggle_effective_names
-		config.enable_effective_names = not config.enable_effective_names
-		save_config!
-		settings_active = no
-
 	def handle_click_toggle_simplify_ui
 		config.enable_simplify_ui = not config.enable_simplify_ui
 		save_config!
-
-	get pretty_date
-		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
 	def handle_click_copy s
 		try
@@ -516,19 +432,7 @@ tag app
 
 	def render
 
-		css .disabled *
-			@important c:gray4 cursor:default user-select:none pointer-events:none
-
-		css .disabled $main-input
-			@important bg:gray4/10 bc:gray4
-
-		<self .disabled=loading>
-
-			css body
-				d:flex fld:column jc:flex-start ai:center
-				m:0 w:100% h:100% bg:#20222f
-				ff:sans-serif fw:1
-				user-select:none
+		<self .disabled=state.loading>
 
 			css self
 				d:flex fld:column jc:flex-start ai:center
@@ -539,45 +443,10 @@ tag app
 			css .fatal
 				c:blue2
 
-			css $main-input
-				w:100% h:50px px:20px
-				fs:20px ta:center
-				bd:1px solid purple4
-				bg:purple4/10 c:blue3 caret-color:blue3
-				outline:none rd:5px
-				@placeholder fs:10px c:blue3
-
 			css .loading-container
 				d:flex fld:row jc:space-around ai:center
 				w:100% h:50px
 				bg:purple4/10 rd:5px c:gray4
-
-			css .settings-container
-				d:flex fld:row jc:space-around ai:center
-				w:100% h:50px
-				mt:10px
-				gap:10px
-
-			css .settings-button, .settings-container button
-				d:flex fld:column jc:center ai:center fl:1
-				bg:none c:purple4 bd:none cursor:pointer fs:14px
-				bg:purple4/10 rd:5px
-				h:100%
-
-			css .middle-button
-				d:flex fld:row w:100%
-				c:purple4 fs:20px cursor:pointer
-				fs:14px pt:15px
-
-			css .tip
-				d:flex fld:column bdr:1px solid blue3/10 min-width:0 fl:1 p:5px
-				@last bd:none
-
-			css .tip-hotkey
-				fs:12px c:purple3/50
-
-			css .tip-content
-				pt:2px fs:14px c:purple3
 
 			css .links
 				d:flex fld:column jc:flex-start fl:1
@@ -589,12 +458,6 @@ tag app
 
 			css .link-left
 				d:flex fl:1
-
-			css .selected
-				bg:blue3/5
-
-			css a
-				td:none
 
 			css .link-icon
 				w:20px h:20px mr:10px rd:3px
@@ -639,73 +502,27 @@ tag app
 			if fatal_error
 				<.fatal>
 					"""
-						There was an error loading the database.
+						There was an error state.loading the database.
 						This could be due to a user setting
 						disallowing local storage, or a random error.
 						Consider refreshing.
 						Check developer console for more information.
 					"""
-			if settings_active
-				<.settings-container>
-					<.settings-button
-						@click=(settings_active = no)
-					> "BACK"
-				<.settings-container>
-					<.settings-button
-						@click.if(!loading)=handle_click_view_community_links
-					>
-						"VIEW COMMUNITY LINKS"
-				<.settings-container>
-					<label.settings-button>
-						"IMPORT"
-						<input[d:none]
-							disabled=loading
-							@change=handle_click_import
-							@click=(this.value = '')
-							type="file"
-						>
-					<.settings-button
-						@click.if(!loading)=handle_click_export
-					> "EXPORT"
-				<.settings-container>
-					<.settings-button
-						@click.if(!loading)=handle_click_github
-					> "TUTORIAL"
-					<.settings-button
-						@click.if(!loading)=handle_click_github
-					> "GITHUB"
-				<.settings-container>
-					<.settings-button
-						@click=handle_click_toggle_tips
-					>
-						config.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
-					<.settings-button
-						@click=handle_click_toggle_buttons
-					>
-						config.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
-				<.settings-container>
-					<.settings-button
-						@click=handle_click_toggle_search_on_paste
-					>
-						config.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
-					<.settings-button
-						@click=handle_click_toggle_effective_names
-					>
-						config.enable_effective_names ? "DISABLE EFFECTIVE NAMES" : "ENABLE EFFECTIVE NAMES"
-				<.settings-container>
-					<.settings-button
-						@click.if(!loading)=handle_toggle_light_theme
-					>
-						config.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
+
+			if viewing_community_links
+				<app-community-links>
+
+			elif settings_active
+				<app-settings>
+
+			elif editing_link
+				<app-edit>
 
 			else
-
+				<links>
 				<.header>
 					css
 						d:flex fld:row w:100%
-
-					css $main-input
-						fl:1
 
 					css .side
 						c:purple3/90 fs:15px
@@ -732,18 +549,18 @@ tag app
 					<input$main-input
 						bind=state.query
 						# placeholder=pretty_date
-						@hotkey('return').capture.if(!loading)=handle_return
-						@hotkey('shift+return').capture.if(!loading)=handle_shift_return
-						@hotkey('esc').capture.if(!loading)=handle_esc
-						@hotkey('shift+backspace').capture.if(!loading)=handle_shift_backspace
-						@hotkey('down').capture.if(!loading)=increment_selection_index
-						@hotkey('up').capture.if(!loading)=decrement_selection_index
-						@keydown.del.if(!loading)=handle_del
-						@input.if(!loading)=handle_input
-						@paste.if(!loading)=handle_paste
+						@hotkey('return').capture.if(!state.loading)=handle_return
+						@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
+						@hotkey('esc').capture.if(!state.loading)=handle_esc
+						@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
+						@hotkey('down').capture.if(!state.loading)=increment_selection_index
+						@hotkey('up').capture.if(!state.loading)=decrement_selection_index
+						@keydown.del.if(!state.loading)=handle_del
+						@input.if(!state.loading)=handle_input
+						@paste.if(!state.loading)=handle_paste
 						@blur=this.focus
 						@cut=handle_cut
-						disabled=loading
+						disabled=state.loading
 					>
 
 					let m = math_result
@@ -752,126 +569,80 @@ tag app
 							@click=handle_click_copy(m)
 						> "= {Math.round(m * 100)/100}"
 					else
-						<.side.right @click.if(!loading)=toggle_settings>
+						<.side.right @click.if(!state.loading)=toggle_settings>
 							<svg src="./assets/settings.svg">
 
-				if viewing_community_links
-						<.middle-button>
+				if config.enable_tips and not config.enable_simplify_ui
+					<.middle-button>
+						<.tip[jc:start ta:left fl:1] @click=handle_return>
+							<.tip-hotkey> "Return"
+							<.tip-content> "Navigate To Link"
+						<.tip[jc:center ta:center fl:2 px:15px]
+							@click=handle_shift_return
+						>
+							<.tip-hotkey> "Shift + Return"
+							<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
+								<span> "Add New Link"
+								<span[ws:pre]> " "
+								let sq = state.query.trim!.split /\s+/
+								if sq.length >= 2
+									let url = sq.pop!
+									<span> '"'
+									<span> sq.join ' '
+									<span[ws:pre]> ' '
+									<span[c:blue3]> url
+									<span> '"'
+								else
+									<span> '"'
+									<span> sq.join ' '
+									<span> '"'
+						<.tip[jc:end ta:right fl:1]
+							@click=handle_shift_backspace
+						>
+							<.tip-hotkey> "Shift + Backspace"
+							<.tip-content> "Edit Link"
 
-							<.tip[jc:start ta:center fl:1]
-								@click=handle_esc
-							>
-								<.tip-hotkey> "Esc"
-								<.tip-content> "Exit Community Links"
-
-							<.tip[jc:end ta:center fl:1]
-								@click=handle_shift_return
-							>
-								<.tip-hotkey> "Shift + Return"
-								<.tip-content> "Add To Your Links"
-
-				elif config.enable_tips and not config.enable_simplify_ui
-					if editing_link
-						<.middle-button>
-
-							<.tip[jc:start ta:left fl:1]
-								@click=handle_esc
-							>
-								<.tip-hotkey> "Esc"
-								<.tip-content> "Cancel Edits"
-
-							if editing_link.is_bang
-								<.tip[jc:end ta:center fl:1]
-									@click=handle_click_set_default_bang
-								>
-									<.tip-hotkey> "Click"
-									<.tip-content> "Set Default Bang"
-
-							<.tip[jc:center ta:center fl:1 px:15px]
-								@click=handle_shift_return
-							>
-								<.tip-hotkey> "Shift + Return"
-								<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
-									"Update Link"
-
-							<.tip[jc:end ta:right fl:1]
-								@click=handle_shift_backspace
-							>
-								<.tip-hotkey> "Shift + Backspace"
-								<.tip-content> "Delete Link"
-
+				<.links>
+					if not viewing_community_links and (bang or state.sorted_links.length < 1)
+						<a.link.selected
+							href=encoded_bang_query
+							@click=handle_click_bang
+						>
+							<.link-left>
+								<img.link-icon src=active_bang.icon>
+								<.display-name.bang-text> encoded_bang_query
+							<.link-right[jc:flex-end]>
+								<.frequency> active_bang.frequency
 					else
-						<.middle-button>
-							<.tip[jc:start ta:left fl:1] @click=handle_return>
-								<.tip-hotkey> "Return"
-								<.tip-content> "Navigate To Link"
-							<.tip[jc:center ta:center fl:2 px:15px]
-								@click=handle_shift_return
-							>
-								<.tip-hotkey> "Shift + Return"
-								<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
-									<span> "Add New Link"
-									<span[ws:pre]> " "
-									let sq = state.query.trim!.split /\s+/
-									if sq.length >= 2
-										let url = sq.pop!
-										<span> '"'
-										<span> sq.join ' '
-										<span[ws:pre]> ' '
-										<span[c:blue3]> url
-										<span> '"'
-									else
-										<span> '"'
-										<span> sq.join ' '
-										<span> '"'
-							<.tip[jc:end ta:right fl:1]
-								@click=handle_shift_backspace
-							>
-								<.tip-hotkey> "Shift + Backspace"
-								<.tip-content> "Edit Link"
-
-				unless editing_link
-					<.links>
-						if not viewing_community_links and (bang or state.sorted_links.length < 1)
-							<a.link.selected
-								href=encoded_bang_query
-								@click=handle_click_bang
+						for link, index in state.sorted_links
+							<a.link
+								href=link.url
+								@pointerover=(selection_index = index)
+								@click.prevent=handle_click_link(link)
+								.selected=(index is selection_index)
 							>
 								<.link-left>
-									<img.link-icon src=active_bang.icon>
-									<.display-name.bang-text> encoded_bang_query
-								<.link-right[jc:flex-end]>
-									<.frequency> active_bang.frequency
-						else
-							for link, index in state.sorted_links
-								<a.link
-									href=link.url
-									@pointerover=(selection_index = index)
-									@click.prevent=handle_click_link(link)
-									.selected=(index is selection_index)
-								>
-									<.link-left>
-										<img.link-icon src=link.icon>
-										<.display-name
-											[c:#FAD4AB]=link.is_bang
-										> link.display_name
-										if link.display_name isnt link.name and config.enable_effective_names
-											<.name>
-												<span.parens> "("
-												<span> link.name
-												<span.parens> ")"
-									<.link-right>
-										<.link-buttons .buttons-disabled=(not config.enable_buttons or config.enable_simplify_ui)>
-											<.link-button@click.prevent.stop=handle_click_edit(link)>
-												<svg src='./assets/edit-2.svg'>
-											<.link-button@click.prevent.stop=handle_click_delete(link)>
-												<svg src='./assets/trash.svg'>
-											<.link-button
-												@click.prevent.stop=handle_click_pin(link)
-												[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or not config.enable_buttons or config.enable_simplify_ui))
-											>
-												<svg src='./assets/star.svg'>
-										<.frequency> link.frequency
+									<img.link-icon src=link.icon>
+									<.display-name
+										[c:#FAD4AB]=link.is_bang
+									> link.display_name
+									if link.display_name isnt link.name and config.enable_effective_names
+										<.name>
+											<span.parens> "("
+											<span> link.name
+											<span.parens> ")"
+								<.link-right>
+									<.link-buttons .buttons-disabled=(not config.enable_buttons or config.enable_simplify_ui)>
+										<.link-button@click.prevent.stop=handle_click_edit(link)>
+											<svg src='./assets/edit-2.svg'>
+										<.link-button@click.prevent.stop=handle_click_delete(link)>
+											<svg src='./assets/trash.svg'>
+										<.link-button
+											@click.prevent.stop=handle_click_pin(link)
+											[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or not config.enable_buttons or config.enable_simplify_ui))
+										>
+											<svg src='./assets/star.svg'>
+									<.frequency> link.frequency
 			$main-input.focus!
 
 imba.mount <app>

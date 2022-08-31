@@ -9,3 +9,6 @@ export def parse_url url
 	try
 		return get_url "https://{url}"
 	throw "invalid url"
+
+def get_pretty_date
+	Date!.toString!.split(" ").slice(0, 4).join(" ")
