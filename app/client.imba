@@ -1,9 +1,14 @@
+# TODO, deal with these 3:
+# editing_link = no
+# prior_query = ''
+# viewing_community_links = yes
+
+
 let p = console.log
 
 # import sw from './sw.imba?serviceworker'
 # navigator..serviceWorker..register(sw).then! do |reg| reg.update!
 
-import { orderBy, omit } from 'lodash'
 import fzi from 'fzi'
 import download from 'downloadjs'
 import { nanoid } from 'nanoid'
@@ -14,7 +19,8 @@ let version = pkg.version
 import { parse_url } from './utils'
 import db from './db'
 import state from './state'
-import default_config from './config'
+import api from './api'
+import { config, save_config } from './config'
 
 import app-community-links from './components/app-community-links'
 import app-settings from './components/app-settings'
@@ -34,15 +40,12 @@ global._fuzzyhome_delete_everything = do |prompt=yes|
 extend tag element
 	get state
 		state
+	get api
+		api
 
 tag app
 
-	selection_index = 0
 	fatal_error = no
-	bang = no
-	editing_link = no
-	prior_query = ''
-	viewing_community_links = yes
 
 	get render? do mounted?
 
@@ -51,13 +54,12 @@ tag app
 			await add_initial_links!
 			global.localStorage.fuzzyhome_visited = yes
 		try
-			await reload_db!
+			await api.reload_db!
 			p "links:", state.links
 		catch e
 			err "state.loading database", e
 			fatal_error = yes
 			return
-		await load_config!
 
 	def add_initial_links
 		let initial_links = [
@@ -72,42 +74,14 @@ tag app
 		]
 		for link_text in initial_links
 			try
-				add_link link_text
+				api.add_link link_text
 			catch e
 				err "adding link", e
-
-	def load_config
-		try
-			config = JSON.parse(global.localStorage.fuzzyhome_config)
-			validate_config!
-		catch
-			reset_config!
-
-	def validate_config
-		p "config:", config
-		throw _ if config.default_bang.id == null
-		throw _ if config.default_bang.url == null
-		throw _ if config.default_bang.icon == null
-		throw _ if config.default_bang.name == null
-		throw _ if config.default_bang.frequency == null
-		throw _ if config.default_bang.display_name == null
-
-	def reset_config
-		p "resetting config"
-		config = default_config
-		save_config!
-
-	def save_config
-		global.localStorage.fuzzyhome_config = JSON.stringify(config)
 
 	def err s, e
 		p "error:"
 		p e
 		window.alert("Error {s}:\n\n{e}")
-
-	def reload_db
-		state.links = await db.links.toArray()
-		sort_links!
 
 	get selected_link
 		state.sorted_links[selection_index]
@@ -130,22 +104,6 @@ tag app
 			if name.startsWith '!'
 				name = name.slice(1)
 		name
-
-	def sort_links
-		let links = state.links
-		if state.query.trim!.length > 0
-			if config.enable_effective_names
-				state.sorted_links = fzi links, state.query
-			else
-				state.sorted_links = fzi links, state.query, "display_name"
-		else
-			state.sorted_links = orderBy(links, ['is_pinned', 'frequency'], ['desc', 'desc'])
-
-	def increment_link_frequency link
-		try
-			await db.links.update link.id, { frequency: link.frequency + 1 }
-		catch e
-			err "putting link", e
 
 	def toggle_settings
 		settings_active = !settings_active
@@ -215,21 +173,12 @@ tag app
 	def handle_add
 		state.loading = yes
 		try
-			await add_link state.query
+			await api.add_link state.query
 			state.query = ''
 			sort_links!
 		catch e
 			err "adding link", e
 		state.loading = no
-
-	def add_link text
-		let link = await create_link_from_text text
-		link.id = nanoid!
-		await db.links.add link
-		await reload_db!
-		imba.commit!
-		p omit(link, "icon")
-		return link
 
 	def construct_link_text link
 		let link_text = ""
@@ -254,21 +203,8 @@ tag app
 		await edit_link!
 		state.loading = no
 
-	def update_link old_link, new_link_text
-		let new_link = await create_link_from_text new_link_text
-		new_link.frequency = old_link.frequency
-		let result = await db.links.update old_link.id, new_link
-		throw "Link id not found." if result is 0
-		await reload_db!
-		imba.commit!
-		p omit(old_link, "icon")
-		p omit(new_link, "icon")
-		return new_link
-
 	def handle_click_link link
-		if viewing_community_links
-			add_community_link link
-		elif link.is_bang
+		if link.is_bang
 			state.query = ''
 			bang = link
 		else
@@ -305,39 +241,11 @@ tag app
 		return unless window.confirm "Do you really want to delete {link..display_name}?"
 		handle_delete link
 
-	def handle_delete link
-
-		def delete_link
-			try
-				await db.links.delete(link.id)
-			catch e
-				err "deleting link", e
-			try
-				await reload_db!
-			catch e
-				err "reloading db after successful delete", e
-
-		state.loading = yes
-		await delete_link!
-		state.query = prior_query
-		prior_query = ''
-		editing_link = no
-		sort_links!
-		selection_index = Math.min selection_index, state.sorted_links.length - 1
-		state.loading = no
-
 	def handle_click_edit link
 		handle_edit link
 
 	def handle_click_pin link
-		link.is_pinned = !link.is_pinned
-		try
-			let result = await db.links.update link.id, link
-			throw "Link id not found." if result is 0
-		catch e
-			return err "pinning link", e
-		await reload_db!
-		imba.commit!
+		api.pin_link link
 
 	def handle_shift_backspace
 		if editing_link
@@ -345,11 +253,6 @@ tag app
 		else
 			return unless state.sorted_links.length > 0
 			handle_edit selected_link
-
-	def add_community_link link
-		await db.links.add link
-		await reload_db!
-		imba.commit!
 
 	def handle_shift_return
 		def go
@@ -423,11 +326,6 @@ tag app
 		s ||= state.query
 		await window.navigator.clipboard.writeText(s)
 		state.query = ''
-		sort_links!
-
-	def handle_click_view_community_links
-		viewing_community_links = yes
-		settings_active = no
 		sort_links!
 
 	def render
@@ -509,140 +407,16 @@ tag app
 						Check developer console for more information.
 					"""
 
-			if viewing_community_links
-				<app-community-links>
+			elif $acl.active
+				<app-community-links$acl>
 
-			elif settings_active
-				<app-settings>
+			elif $as.active
+				<app-settings$as>
 
-			elif editing_link
-				<app-edit>
+			elif $ae.active
+				<app-edit$ae>
 
 			else
 				<links>
-				<.header>
-					css
-						d:flex fld:row w:100%
-
-					css .side
-						c:purple3/90 fs:15px
-						d:flex ja:center w:30px
-						cursor:pointer
-
-					css .side svg
-						w:15px
-
-					css .left
-						d:flex jc:left
-
-					css .right
-						d:flex jc:right
-
-					<.side.left
-						@click=handle_click_toggle_simplify_ui
-					>
-						if config.enable_simplify_ui
-							<svg src="./assets/eye-off.svg">
-						else
-							<svg src="./assets/eye.svg">
-
-					<input$main-input
-						bind=state.query
-						# placeholder=pretty_date
-						@hotkey('return').capture.if(!state.loading)=handle_return
-						@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
-						@hotkey('esc').capture.if(!state.loading)=handle_esc
-						@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
-						@hotkey('down').capture.if(!state.loading)=increment_selection_index
-						@hotkey('up').capture.if(!state.loading)=decrement_selection_index
-						@keydown.del.if(!state.loading)=handle_del
-						@input.if(!state.loading)=handle_input
-						@paste.if(!state.loading)=handle_paste
-						@blur=this.focus
-						@cut=handle_cut
-						disabled=state.loading
-					>
-
-					let m = math_result
-					if m isnt no and m.toString! isnt state.query.trim!
-						<.side.right[c:blue3 fs:20px ml:10px w:unset]
-							@click=handle_click_copy(m)
-						> "= {Math.round(m * 100)/100}"
-					else
-						<.side.right @click.if(!state.loading)=toggle_settings>
-							<svg src="./assets/settings.svg">
-
-				if config.enable_tips and not config.enable_simplify_ui
-					<.middle-button>
-						<.tip[jc:start ta:left fl:1] @click=handle_return>
-							<.tip-hotkey> "Return"
-							<.tip-content> "Navigate To Link"
-						<.tip[jc:center ta:center fl:2 px:15px]
-							@click=handle_shift_return
-						>
-							<.tip-hotkey> "Shift + Return"
-							<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
-								<span> "Add New Link"
-								<span[ws:pre]> " "
-								let sq = state.query.trim!.split /\s+/
-								if sq.length >= 2
-									let url = sq.pop!
-									<span> '"'
-									<span> sq.join ' '
-									<span[ws:pre]> ' '
-									<span[c:blue3]> url
-									<span> '"'
-								else
-									<span> '"'
-									<span> sq.join ' '
-									<span> '"'
-						<.tip[jc:end ta:right fl:1]
-							@click=handle_shift_backspace
-						>
-							<.tip-hotkey> "Shift + Backspace"
-							<.tip-content> "Edit Link"
-
-				<.links>
-					if not viewing_community_links and (bang or state.sorted_links.length < 1)
-						<a.link.selected
-							href=encoded_bang_query
-							@click=handle_click_bang
-						>
-							<.link-left>
-								<img.link-icon src=active_bang.icon>
-								<.display-name.bang-text> encoded_bang_query
-							<.link-right[jc:flex-end]>
-								<.frequency> active_bang.frequency
-					else
-						for link, index in state.sorted_links
-							<a.link
-								href=link.url
-								@pointerover=(selection_index = index)
-								@click.prevent=handle_click_link(link)
-								.selected=(index is selection_index)
-							>
-								<.link-left>
-									<img.link-icon src=link.icon>
-									<.display-name
-										[c:#FAD4AB]=link.is_bang
-									> link.display_name
-									if link.display_name isnt link.name and config.enable_effective_names
-										<.name>
-											<span.parens> "("
-											<span> link.name
-											<span.parens> ")"
-								<.link-right>
-									<.link-buttons .buttons-disabled=(not config.enable_buttons or config.enable_simplify_ui)>
-										<.link-button@click.prevent.stop=handle_click_edit(link)>
-											<svg src='./assets/edit-2.svg'>
-										<.link-button@click.prevent.stop=handle_click_delete(link)>
-											<svg src='./assets/trash.svg'>
-										<.link-button
-											@click.prevent.stop=handle_click_pin(link)
-											[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt selection_index or not config.enable_buttons or config.enable_simplify_ui))
-										>
-											<svg src='./assets/star.svg'>
-									<.frequency> link.frequency
-			$main-input.focus!
 
 imba.mount <app>

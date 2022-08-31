@@ -24,6 +24,11 @@ tag app-community-links
 		let rest = split_text.join " "
 		{ url, rest }
 
+	def add_community_link link
+		await db.links.add link
+		await reload_db!
+		imba.commit!
+
 	def render
 
 		<self
@@ -71,6 +76,7 @@ tag app-community-links
 				<.link
 					.selected=(selection_index == index)
 					@pointerover=(selection_index = index)
+					@click=(add_community_link(link_text))
 				>
 					let { url, rest } = get_link_obj link_text
 					<.link-left .bang=rest.startsWith("!")> rest
