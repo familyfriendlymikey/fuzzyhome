@@ -1,6 +1,8 @@
 import db from './db'
 import state from './state'
 import { omit, orderBy } from 'lodash'
+import { parse_url } from './utils'
+import { nanoid } from 'nanoid'
 
 export default new class api
 
@@ -69,3 +71,45 @@ export default new class api
 		if config.enable_effective_names
 			return state.sorted_links = fzi state.links, state.query
 		state.sorted_links = fzi state.links, state.query, "display_name"
+
+	def create_link_from_text text
+		text = text.trim!
+		throw "Text is empty." if text is ''
+		let split_text = text.split(/\s+/)
+		throw "No url provided." if split_text.length < 2
+		let url = split_text.pop!
+		let host
+		{ href:url, host } = parse_url url
+		let icon = await fetch_image_as_base_64 host
+		let name
+		if split_text[-1].startsWith "`"
+			name = split_text.pop!.slice(1)
+		let display_name = split_text.join(" ")
+		let is_bang = no
+		let is_pinned = no
+		if display_name.startsWith "!"
+			is_bang = yes
+			display_name = display_name.slice(1)
+		name ||= display_name
+		{ name, display_name, is_bang, is_pinned, url, frequency:0, icon }
+
+	def fetch_image_as_base_64 host
+		let fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
+		return new Promise! do |resolve|
+			let res
+			try
+				res = await global.fetch("https://icon.horse/icon/{host}")
+			catch
+				p "Failed to get icon from icon horse."
+				return resolve fallback
+			# todo: can i use .text() on this or something
+			let blob = await res.blob!
+			let reader = new FileReader!
+			reader.onload = do
+				resolve this.result
+			reader.onerror = do
+				p "Failed to get data from reader."
+				resolve fallback
+				return
+			reader.readAsDataURL(blob)
+

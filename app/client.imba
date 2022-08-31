@@ -3,7 +3,6 @@
 # prior_query = ''
 # viewing_community_links = yes
 
-
 let p = console.log
 
 # import sw from './sw.imba?serviceworker'
@@ -16,7 +15,6 @@ import { evaluate as eval_math } from 'mathjs'
 
 import pkg from '../package.json'
 let version = pkg.version
-import { parse_url } from './utils'
 import db from './db'
 import state from './state'
 import api from './api'
@@ -26,6 +24,7 @@ import app-community-links from './components/app-community-links'
 import app-settings from './components/app-settings'
 import app-prompt from './components/app-prompt'
 import app-edit from './components/app-edit'
+import app-links from './components/app-links'
 import './styles'
 
 p "fuzzyhome version {version}"
@@ -42,6 +41,10 @@ extend tag element
 		state
 	get api
 		api
+	get config
+		config
+	get p
+		console.log
 
 tag app
 
@@ -105,41 +108,6 @@ tag app
 				name = name.slice(1)
 		name
 
-	def toggle_settings
-		settings_active = !settings_active
-
-	def increment_selection_index
-		selection_index = Math.min(state.sorted_links.length - 1, selection_index + 1)
-
-	def decrement_selection_index
-		selection_index = Math.max(0, selection_index - 1)
-
-	get active_bang
-		return bang or config.default_bang
-
-	get encoded_bang_query
-		"{active_bang.url}{window.encodeURIComponent(state.query)}"
-
-	def fetch_image_as_base_64 host
-		let fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
-		return new Promise! do |resolve|
-			let res
-			try
-				res = await global.fetch("https://icon.horse/icon/{host}")
-			catch
-				p "Failed to get icon from icon horse."
-				resolve fallback
-				return
-			let blob = await res.blob!
-			let reader = new FileReader!
-			reader.onload = do
-				resolve this.result
-			reader.onerror = do
-				p "Failed to get data from reader."
-				resolve fallback
-				return
-			reader.readAsDataURL(blob)
-
 	get can_add
 		return no if state.loading
 		return no if settings_active
@@ -148,27 +116,6 @@ tag app
 		let split_query = query.split /\s+/
 		return no if split_query.length < 2
 		yes
-
-	def create_link_from_text text
-		text = text.trim!
-		throw "Text is empty." if text is ''
-		let split_text = text.split(/\s+/)
-		throw "No url provided." if split_text.length < 2
-		let url = split_text.pop!
-		let host
-		{ href:url, host } = parse_url url
-		let icon = await fetch_image_as_base_64 host
-		let name
-		if split_text[-1].startsWith "`"
-			name = split_text.pop!.slice(1)
-		let display_name = split_text.join(" ")
-		let is_bang = no
-		let is_pinned = no
-		if display_name.startsWith "!"
-			is_bang = yes
-			display_name = display_name.slice(1)
-		name ||= display_name
-		{ name, display_name, is_bang, is_pinned, url, frequency:0, icon }
 
 	def handle_add
 		state.loading = yes
@@ -294,14 +241,6 @@ tag app
 	def name_exists new_name
 		state.links.some! do |{name}| new_name is name
 
-	get math_result
-		try
-			let result = Number(eval_math state.query)
-			throw _ if isNaN result
-			result
-		catch
-			no
-
 	def handle_paste e
 		return unless config.enable_search_on_paste
 		return if state.query.length > 0
@@ -330,7 +269,7 @@ tag app
 
 	def render
 
-		<self .disabled=state.loading>
+		<self.disabled=state.loading>
 
 			css self
 				d:flex fld:column jc:flex-start ai:center
@@ -338,67 +277,8 @@ tag app
 				bxs:0px 0px 10px rgba(0,0,0,0.35)
 				box-sizing:border-box p:30px rd:10px mt:10vh
 
-			css .fatal
-				c:blue2
-
-			css .loading-container
-				d:flex fld:row jc:space-around ai:center
-				w:100% h:50px
-				bg:purple4/10 rd:5px c:gray4
-
-			css .links
-				d:flex fld:column jc:flex-start fl:1
-				w:100% ofy:auto pt:15px
-
-			css .link
-				d:flex fld:row jc:space-between ai:center
-				px:16px py:11px rd:5px cursor:pointer c:blue3
-
-			css .link-left
-				d:flex fl:1
-
-			css .link-icon
-				w:20px h:20px mr:10px rd:3px
-
-			css .display-name
-				tt:capitalize fs:20px
-				overflow-wrap:anywhere
-
-			css .name
-				d:flex ja:center
-				c:gray4 ml:10px fs:14px
-
-			css .parens
-				fs:10px c:gray4/80
-
-			css .bang-text
-				tt:none word-break:break-all
-
-			css .link-right
-				d:flex fld:row jc:space-between ai:center
-
-			css .link-buttons
-				d:flex fld:row jc:flex-start ai:center pr:25px gap:5px
-
-			css .link-button
-				visibility:hidden
-				rd:3px c:purple4 fs:15px cursor:pointer
-				px:3px
-
-			css .link-button svg
-				w:15px
-
-			css .selected .link-button
-				visibility:visible
-
-			css .buttons-disabled .link-button
-				visibility:hidden
-
-			css .frequency
-				fs:15px ml:7px
-
 			if fatal_error
-				<.fatal>
+				<[c:blue2]>
 					"""
 						There was an error state.loading the database.
 						This could be due to a user setting
@@ -417,6 +297,6 @@ tag app
 				<app-edit$ae>
 
 			else
-				<links>
+				<app-links>
 
 imba.mount <app>
