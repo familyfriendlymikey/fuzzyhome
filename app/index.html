@@ -7,13 +7,6 @@
 		<style src='*'></style>
 	</head>
 	<body>
-		<script type="module">
-			if ('serviceWorker' in navigator) {
-				navigator.serviceWorker.register('./sw.js').then(function(reg){
-					reg.update()
-				})
-			}
-		</script>
 		<script type="module" src="./client.imba"></script>
 	</body>
 </html>

@@ -2,9 +2,7 @@
 	"name": "fuzzyhome",
 	"version": "0.1.42",
 	"scripts": {
-		"build-app": "imba build app/index.html",
-		"build-sw": "imba build -k sw.imba -o dist",
-		"build": "npm run build-app && npm run build-sw",
+		"build": "imba build app/index.html",
 		"publish-preview": "npx gh-pages --no-history --dotfiles --dist dist/ --branch preview",
 		"publish-release": "npx gh-pages --no-history --dotfiles --dist dist/ --branch release",
 		"start": "imba -w app/index.html",
@@ -17,7 +15,7 @@
 		"dexie-export-import": "^1.0.3",
 		"downloadjs": "^1.4.7",
 		"fzi": "^1.0.0",
-		"imba": "^2.0.0-alpha.218",
+		"imba": "^2.0.0-alpha.219",
 		"lodash": "^4.17.21",
 		"mathjs": "^11.1.0",
 		"nanoid": "^4.0.0"

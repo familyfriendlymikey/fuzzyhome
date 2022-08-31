@@ -1,5 +1,8 @@
 let p = console.log
 
+import sw from './sw.imba?serviceworker'
+navigator..serviceWorker..register(sw).then! do |reg| reg.update!
+
 import { orderBy, omit } from 'lodash'
 import pkg from '../package.json'
 let version = pkg.version

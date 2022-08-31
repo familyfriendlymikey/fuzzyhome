@@ -1,15 +1,12 @@
 const app_name = "fuzzyhome"
-import { version } from './package.json'
+import { version } from '../package.json'
 const app_prefix = "{app_name}_cache"
 const cache_name = "sw-{app_prefix}-{version}"
 let p = do |s| console.log "{cache_name} {s}"
 p "loaded"
 
 let urls = [
-	'./',
-	'./__assets__/all.css'
-	'./__assets__/app/client.js'
-	'./__assets__/app/client.css'
+	'./'
 ]
 
 self.addEventListener('fetch') do |e|
