@@ -28,11 +28,6 @@ tag app-settings
 		save_config!
 		settings_active = no
 
-	def handle_click_toggle_effective_names
-		config.enable_effective_names = not config.enable_effective_names
-		save_config!
-		settings_active = no
-
 	def handle_click_import e
 		def handle_import
 			let errors = []
@@ -126,15 +121,13 @@ tag app-settings
 						@click=handle_click_toggle_buttons
 					>
 						config.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
+
 				<.settings-container>
 					<.settings-button
 						@click=handle_click_toggle_search_on_paste
 					>
 						config.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
-					<.settings-button
-						@click=handle_click_toggle_effective_names
-					>
-						config.enable_effective_names ? "DISABLE EFFECTIVE NAMES" : "ENABLE EFFECTIVE NAMES"
+
 				<.settings-container>
 					<.settings-button
 						@click.if(!loading)=handle_toggle_light_theme

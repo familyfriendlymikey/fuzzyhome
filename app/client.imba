@@ -231,10 +231,6 @@ tag app
 			viewing_community_links = no
 		sort_links!
 
-	def handle_input
-		selection_index = 0
-		sort_links!
-
 	def name_exists new_name
 		state.links.some! do |{name}| new_name is name
 

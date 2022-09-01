@@ -1,5 +1,6 @@
 import db from './db'
 import state from './state'
+import { config, save_config } from './config'
 import { omit, orderBy } from 'lodash'
 import { parse_url } from './utils'
 import { nanoid } from 'nanoid'
@@ -112,4 +113,8 @@ export default new class api
 				resolve fallback
 				return
 			reader.readAsDataURL(blob)
+
+	def toggle_effective_names
+		config.enable_effective_names = !config.enable_effective_names
+		save_config!
 

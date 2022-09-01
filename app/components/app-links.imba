@@ -27,8 +27,9 @@ tag app-links
 		catch
 			no
 
-	def toggle_effective_names
-		config.enable_effective_names = !config.enable_effective_names
+	def handle_input
+		selection_index = 0
+		sort_links!
 
 	def render
 
@@ -100,7 +101,7 @@ tag app-links
 
 			<.header>
 
-				<.side.left@click=toggle_effective_names>
+				<.side.left@click=api.toggle_effective_names>
 					if config.enable_effective_names
 						<svg src="../assets/eye.svg">
 					else
@@ -109,7 +110,7 @@ tag app-links
 				<input$links-input
 					bind=state.query
 					@hotkey('return').capture.if(!state.loading)=handle_return
-					@hotkey('tab').capture.if(!state.loading)=toggle_effective_names
+					@hotkey('tab').capture.if(!state.loading)=api.toggle_effective_names
 					@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
 					@hotkey('esc').capture.if(!state.loading)=handle_esc
 					@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
