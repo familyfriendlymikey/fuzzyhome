@@ -231,9 +231,6 @@ tag app
 			viewing_community_links = no
 		sort_links!
 
-	def handle_click_add
-		handle_add!
-
 	def handle_input
 		selection_index = 0
 		sort_links!

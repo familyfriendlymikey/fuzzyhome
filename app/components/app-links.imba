@@ -22,6 +22,7 @@ tag app-links
 		try
 			let result = Number(eval_math state.query)
 			throw _ if isNaN result
+			throw _ if result.toString! is state.query.trim!
 			result
 		catch
 			no
@@ -122,8 +123,7 @@ tag app-links
 					disabled=state.loading
 				>
 
-				let m = math_result
-				if m isnt no and m.toString! isnt state.query.trim!
+				if (let m = math_result) isnt no
 					<.side.right[c:blue3 fs:20px ml:10px w:unset]
 						@click=handle_click_copy(m)
 					> "= {Math.round(m * 100)/100}"
