@@ -60,7 +60,7 @@ tag app-community-links
 			css .selected
 				bg:blue3/5
 
-			<.middle-button>
+			<.tips>
 				<.tip[jc:start ta:center fl:1]
 					@click=handle_esc
 				>

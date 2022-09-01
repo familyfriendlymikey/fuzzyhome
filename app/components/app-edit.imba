@@ -12,25 +12,25 @@ tag app-edit < app-prompt
 
 	def render
 		<self>
-			<.middle-button>
-				<.tip[jc:start ta:left fl:1]
+			<.tips>
+				<.tip
 					@click=handle_esc
 				>
 					<.tip-hotkey> "Esc"
 					<.tip-content> "Cancel Edits"
 				if editing_link.is_bang
-					<.tip[jc:end ta:center fl:1]
+					<.tip
 						@click=handle_click_set_default_bang
 					>
 						<.tip-hotkey> "Click"
 						<.tip-content> "Set Default Bang"
-				<.tip[jc:center ta:center fl:1 px:15px]
+				<.tip
 					@click=handle_shift_return
 				>
 					<.tip-hotkey> "Shift + Return"
 					<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
 						"Update Link"
-				<.tip[jc:end ta:right fl:1]
+				<.tip
 					@click=handle_shift_backspace
 				>
 					<.tip-hotkey> "Shift + Backspace"

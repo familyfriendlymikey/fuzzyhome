@@ -20,10 +20,13 @@ global css .disabled *
 global css .disabled $main-input
 	@important bg:gray4/10 bc:gray4
 
-global css .middle-button
-	d:flex fld:row w:100%
+global css .tips
+	d:flex fld:row w:100% fl:1
 	c:purple4 fs:20px cursor:pointer
 	fs:14px pt:15px
+	jc:end ta:center
+	@first jc:start ta:left
+	@last jc:end ta:right
 
 global css .tip
 	d:flex fld:column bdr:1px solid blue3/10 min-width:0 fl:1 p:5px
@@ -38,3 +41,5 @@ global css .tip-content
 global css .selected
 	bg:blue3/5
 
+global css .ellipsis
+	of:hidden text-overflow:ellipsis white-space:nowrap

@@ -24,6 +24,8 @@ import app-settings from './components/app-settings'
 import app-prompt from './components/app-prompt'
 import app-edit from './components/app-edit'
 import app-links from './components/app-links'
+import app-link from './components/app-link'
+import app-bang from './components/app-bang'
 import './styles'
 
 p "fuzzyhome version {version}"
