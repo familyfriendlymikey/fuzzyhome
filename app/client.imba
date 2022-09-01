@@ -8,7 +8,6 @@ let p = console.log
 # import sw from './sw.imba?serviceworker'
 # navigator..serviceWorker..register(sw).then! do |reg| reg.update!
 
-import fzi from 'fzi'
 import download from 'downloadjs'
 import { nanoid } from 'nanoid'
 import { evaluate as eval_math } from 'mathjs'
@@ -18,7 +17,7 @@ let version = pkg.version
 import db from './db'
 import state from './state'
 import api from './api'
-import { config, save_config } from './config'
+import config from './config'
 
 import app-community-links from './components/app-community-links'
 import app-settings from './components/app-settings'
@@ -36,6 +35,8 @@ global._fuzzyhome_delete_everything = do |prompt=yes|
 	delete localStorage.fuzzyhome_visited
 	location.reload!
 
+let refs = {}
+
 extend tag element
 	get state
 		state
@@ -45,6 +46,8 @@ extend tag element
 		config
 	get p
 		console.log
+	get refs
+		refs
 
 tag app
 
@@ -53,6 +56,9 @@ tag app
 	get render? do mounted?
 
 	def mount
+		refs.settings = $as
+		refs.edit = $ae
+		refs.community-links = $acl
 		unless global.localStorage.fuzzyhome_visited
 			await add_initial_links!
 			global.localStorage.fuzzyhome_visited = yes
@@ -135,93 +141,6 @@ tag app
 		link_text += " {link.url}"
 		link_text
 
-	def handle_edit link
-		prior_query = state.query
-		editing_link = link
-		state.query = construct_link_text(link)
-
-	def make_edit link, new_link_text
-		def edit_link
-			try
-				await update_link link, new_link_text
-			catch e
-				return err "editing link", e
-		state.loading = yes
-		await edit_link!
-		state.loading = no
-
-	def handle_click_link link
-		if link.is_bang
-			state.query = ''
-			bang = link
-		else
-			navigate link
-
-	def handle_bang
-		await increment_link_frequency active_bang
-		window.location.href = encoded_bang_query
-
-	def handle_click_bang
-		handle_bang!
-
-	def navigate link
-		await increment_link_frequency link
-		window.location.href = link.url
-
-	def handle_return
-		return if editing_link
-		if bang or state.sorted_links.length < 1
-			return handle_bang!
-		let link = selected_link
-		if link.is_bang
-			state.query = ''
-			bang = link
-		else
-			navigate link
-
-	def handle_del
-		if state.query.length < 1
-			bang = no
-			sort_links!
-
-	def handle_click_delete link
-		return unless window.confirm "Do you really want to delete {link..display_name}?"
-		handle_delete link
-
-	def handle_click_edit link
-		handle_edit link
-
-	def handle_click_pin link
-		api.pin_link link
-
-	def handle_shift_backspace
-		if editing_link
-			await handle_delete editing_link
-		else
-			return unless state.sorted_links.length > 0
-			handle_edit selected_link
-
-	def handle_shift_return
-		def go
-			if viewing_community_links
-				try
-					await add_community_link selected_link
-				catch e
-					err "adding community link", e
-			elif editing_link
-				try
-					await update_link editing_link, state.query
-				catch e
-					err "updating link", e
-			else
-				handle_add!
-		state.loading = yes
-		await go!
-		editing_link = no
-		state.query = ''
-		sort_links!
-		state.loading = no
-
 	def handle_esc
 		if editing_link
 			editing_link = no
@@ -235,11 +154,11 @@ tag app
 		state.links.some! do |{name}| new_name is name
 
 	def handle_paste e
-		return unless config.enable_search_on_paste
+		return unless config.data.enable_search_on_paste
 		return if state.query.length > 0
 		global.setTimeout(&, 0) do
 			return if math_result isnt no
-			bang ||= config.default_bang
+			bang ||= config.data.default_bang
 			handle_bang!
 
 	def handle_click_copy s

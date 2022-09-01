@@ -2,8 +2,11 @@ tag app-settings
 
 	active = no
 
-	def end
+	def close
 		active = no
+
+	def open
+		active = yes
 
 	def handle_click_github
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
@@ -66,7 +69,7 @@ tag app-settings
 
 	def render
 
-		<self>
+		<self[w:100%]>
 
 			css .settings-container
 				d:flex fld:row jc:space-around ai:center
@@ -80,13 +83,13 @@ tag app-settings
 				bg:purple4/10 rd:5px
 				h:100%
 
-			if $community-links.active
-				<community-links>
+			if refs.community-links.active
+				<app-community-links>
 			else
 				<.settings-container>
 					<.settings-button
-						@click=end
-						@hotkey("esc")=end
+						@click=close
+						@hotkey("esc")=close
 					> "BACK"
 				<.settings-container>
 					<.settings-button
@@ -127,8 +130,6 @@ tag app-settings
 						@click=handle_click_toggle_search_on_paste
 					>
 						config.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
-
-				<.settings-container>
 					<.settings-button
 						@click.if(!loading)=handle_toggle_light_theme
 					>

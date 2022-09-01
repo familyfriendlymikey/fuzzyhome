@@ -1,9 +1,14 @@
+let p = console.log
+
 import db from './db'
 import state from './state'
-import { config, save_config } from './config'
+
+import config from './config'
+p config
 import { omit, orderBy } from 'lodash'
 import { parse_url } from './utils'
 import { nanoid } from 'nanoid'
+import fzi from 'fzi'
 
 export default new class api
 
@@ -69,7 +74,7 @@ export default new class api
 	def sort_links
 		if state.query.trim!.length <= 0
 			return state.sorted_links = orderBy(state.links, ['is_pinned', 'frequency'], ['desc', 'desc'])
-		if config.enable_effective_names
+		if config.data.enable_effective_names
 			return state.sorted_links = fzi state.links, state.query
 		state.sorted_links = fzi state.links, state.query, "display_name"
 
@@ -115,6 +120,7 @@ export default new class api
 			reader.readAsDataURL(blob)
 
 	def toggle_effective_names
-		config.enable_effective_names = !config.enable_effective_names
-		save_config!
+		config.data.enable_effective_names = !config.data.enable_effective_names
+		config.save!
+		sort_links!
 

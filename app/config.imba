@@ -1,4 +1,4 @@
-let { data, save } = new class config
+export default new class config
 
 	def constructor
 		this.data = {}
@@ -21,8 +21,3 @@ let { data, save } = new class config
 
 	def save
 		global.localStorage.fuzzyhome_config = JSON.stringify(this.data)
-
-export {
-	data as config
-	save as save_config
-}
