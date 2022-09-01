@@ -228,4 +228,9 @@ tag app-links
 						<app-bang data=active_bang>
 					else
 						for link, index in state.sorted_links
-							<app-link data=link index=index>
+							<app-link
+								data=link
+								set_selection_index=(do |index| selection_index = index)
+								index=index
+								selection_index=selection_index
+							>
