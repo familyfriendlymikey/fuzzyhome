@@ -10,7 +10,6 @@ let { data, save } = new class config
 		this.data.enable_search_on_paste ??= yes
 		this.data.enable_dark_theme ??= yes
 		this.data.enable_effective_names ??= yes
-		this.data.enable_simplify_ui ??= no
 
 		this.data.default_bang ??= {}
 		this.data.default_bang.name ??= "!google"

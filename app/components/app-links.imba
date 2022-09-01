@@ -26,13 +26,12 @@ tag app-links
 		catch
 			no
 
+	def toggle_effective_names
+		config.enable_effective_names = !config.enable_effective_names
+
 	def render
 
 		<self>
-
-			css .links
-				d:flex fld:column jc:flex-start fl:1
-				w:100% ofy:auto pt:15px
 
 			css .link
 				d:flex fld:row jc:space-between ai:center
@@ -100,17 +99,16 @@ tag app-links
 
 			<.header>
 
-				<.side.left
-					@click=handle_click_toggle_simplify_ui
-				>
-					if config.enable_simplify_ui
-						<svg src="../assets/eye-off.svg">
-					else
+				<.side.left@click=toggle_effective_names>
+					if config.enable_effective_names
 						<svg src="../assets/eye.svg">
+					else
+						<svg src="../assets/eye-off.svg">
 
 				<input$links-input
 					bind=state.query
 					@hotkey('return').capture.if(!state.loading)=handle_return
+					@hotkey('tab').capture.if(!state.loading)=toggle_effective_names
 					@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
 					@hotkey('esc').capture.if(!state.loading)=handle_esc
 					@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
@@ -163,7 +161,9 @@ tag app-links
 						<.tip-hotkey> "Shift + Backspace"
 						<.tip-content> "Edit Link"
 
-			<.links>
+			<div>
+				css d:flex fld:column jc:flex-start fl:1 w:100% ofy:auto pt:15px
+
 				if not viewing_community_links and (bang or state.sorted_links.length < 1)
 					<a.link.selected
 						href=encoded_bang_query

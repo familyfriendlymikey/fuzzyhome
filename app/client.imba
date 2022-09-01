@@ -249,10 +249,6 @@ tag app
 			bang ||= config.default_bang
 			handle_bang!
 
-	def handle_click_toggle_simplify_ui
-		config.enable_simplify_ui = not config.enable_simplify_ui
-		save_config!
-
 	def handle_click_copy s
 		try
 			await window.navigator.clipboard.writeText(s)
@@ -270,9 +266,7 @@ tag app
 	def render
 
 		<self.disabled=state.loading>
-
-			css self
-				d:flex fld:column jc:flex-start ai:center
+			css d:flex fld:column jc:flex-start ai:center
 				w:80vw max-width:700px max-height:80vh
 				bxs:0px 0px 10px rgba(0,0,0,0.35)
 				box-sizing:border-box p:30px rd:10px mt:10vh
