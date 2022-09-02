@@ -15,6 +15,7 @@ let refs = {}
 import api from './api'
 import config from './config'
 
+import './components/app-home'
 import './components/app-community-links'
 import './components/app-settings'
 import './components/app-prompt'
@@ -52,7 +53,7 @@ tag app
 		refs.settings = $as
 		refs.edit = $ae
 		refs.community-links = $acl
-		refs.links = $al
+		refs.links = $ah
 
 		unless global.localStorage.fuzzyhome_visited
 			await api.add_initial_links!
@@ -69,7 +70,7 @@ tag app
 	def render
 
 		<self.disabled=state.loading>
-			css d:flex fld:column jc:flex-start ai:center
+			css d:flex fld:column jc:start ai:center
 				w:80vw max-width:700px max-height:80vh
 				bxs:0px 0px 10px rgba(0,0,0,0.35)
 				box-sizing:border-box p:30px rd:10px mt:10vh
@@ -95,6 +96,6 @@ tag app
 				<app-edit$ae>
 
 			else
-				<app-links$al>
+				<app-home$ah>
 
 imba.mount <app>

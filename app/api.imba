@@ -8,6 +8,7 @@ import config from './config'
 import { omit, orderBy } from 'lodash'
 import { nanoid } from 'nanoid'
 import fzi from 'fzi'
+import { evaluate as eval_math } from 'mathjs'
 
 export default new class api
 
@@ -177,3 +178,30 @@ export default new class api
 	def navigate link
 		await increment_link_frequency link
 		window.location.href = link.url
+
+	get math_result
+		try
+			let result = Number(eval_math state.query)
+			throw _ if isNaN result
+			throw _ if result.toString! is state.query.trim!
+			result
+		catch
+			no
+
+	def handle_cut e
+		return unless e.target.selectionStart == e.target.selectionEnd
+		let s = math_result
+		s ||= state.query
+		await window.navigator.clipboard.writeText(s)
+		state.query = ''
+		sort_links!
+
+	def handle_add_link
+		state.loading = yes
+		try
+			await add_link state.query
+			state.query = ''
+			sort_links!
+		catch e
+			err "adding link", e
+		state.loading = no

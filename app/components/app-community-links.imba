@@ -38,7 +38,7 @@ tag app-community-links
 		>
 
 			css self
-				d:flex fld:column jc:flex-start fl:1
+				d:flex fld:column jc:start fl:1
 				w:100% ofy:auto pt:15px
 
 			css .link

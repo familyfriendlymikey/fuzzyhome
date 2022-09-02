@@ -1,5 +1,5 @@
 global css body
-	d:flex fld:column jc:flex-start ai:center
+	d:flex fld:column jc:start ai:center
 	m:0 w:100% h:100% bg:#20222f
 	ff:sans-serif fw:1
 	user-select:none

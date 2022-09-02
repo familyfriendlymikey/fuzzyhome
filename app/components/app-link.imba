@@ -33,7 +33,7 @@ tag app-link
 				css .selected .link-button visibility:visible
 
 				<.link-buttons .buttons-disabled=!config.data.enable_buttons>
-					css d:flex fld:row jc:flex-start ai:center pr:25px gap:5px
+					css d:flex fld:row jc:start ai:center pr:25px gap:5px
 					css .link-button visibility:hidden rd:3px c:purple4 fs:15px cursor:pointer px:3px
 					css .link-button svg w:15px
 
