@@ -18,7 +18,7 @@ tag app-edit
 	def handle_click_set_default_bang
 		if link.is_bang isnt true
 			return err "setting default bang", "Link is not a bang."
-		config.default_bang = link
+		config.data.default_bang = link
 		save_config!
 		state.query = prior_query
 		prior_query = ''
@@ -56,42 +56,44 @@ tag app-edit
 		<self>
 			css d:flex fld:column gap:20px w:100%
 
-			<.tips>
+			<app-tips>
 
-				<.tip
-					@click=close
-					@hotkey('esc').capture.if(!state.loading)=close
-				>
-					<.tip-hotkey> "Esc"
-					<.tip-content> "Cancel"
+				<.tip-row>
 
-				<.tip
-					@click=handle_delete
-					@hotkey('shift+backspace').capture.if(!state.loading)=handle_delete
-				>
-					css fl:2
-					<.tip-hotkey> "Shift + Backspace"
-					<.tip-content> "Delete Link"
+					<.tip
+						@click=close
+						@hotkey('esc').capture.if(!state.loading)=close
+					>
+						<.tip-hotkey> "Esc"
+						<.tip-content> "Cancel"
 
-				if link.is_bang
-					<.tip @click=handle_click_set_default_bang>
+					<.tip
+						@click=handle_delete
+						@hotkey('shift+backspace').capture.if(!state.loading)=handle_delete
+					>
 						css fl:2
-						<.tip-hotkey> "Click"
-						<.tip-content> "Set Default Bang"
+						<.tip-hotkey> "Shift + Backspace"
+						<.tip-content> "Delete Link"
 
-				<.tip
-					@click=save
-					@hotkey('shift+return').capture.if(!state.loading)=save
-				>
-					css fl:2
-					<.tip-hotkey> "Return"
-					<.tip-content> "Update Link"
+					if link.is_bang
+						<.tip @click=handle_click_set_default_bang>
+							css fl:2
+							<.tip-hotkey> "Click"
+							<.tip-content> "Set Default Bang"
 
-				<.tip.noclick
-					@hotkey('tab').capture.if(!state.loading)=cycle_focus
-				>
-					<.tip-hotkey> "Tab"
-					<.tip-content> "Next"
+					<.tip
+						@click=save
+						@hotkey('shift+return').capture.if(!state.loading)=save
+					>
+						css fl:2
+						<.tip-hotkey> "Return"
+						<.tip-content> "Update Link"
+
+					<.tip.noclick
+						@hotkey('tab').capture.if(!state.loading)=cycle_focus
+					>
+						<.tip-hotkey> "Tab"
+						<.tip-content> "Next"
 
 			<.inputs>
 				css d:flex fld:column gap:20px

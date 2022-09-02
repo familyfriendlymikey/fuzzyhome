@@ -1,15 +1,14 @@
 let p = console.log
+import pkg from '../package.json'
+let version = pkg.version
+p "fuzzyhome version {version}"
 
 # import sw from './sw.imba?serviceworker'
 # navigator..serviceWorker..register(sw).then! do |reg| reg.update!
 
-import download from 'downloadjs'
 import { nanoid } from 'nanoid'
 import { err } from './utils'
 
-import pkg from '../package.json'
-let version = pkg.version
-p "fuzzyhome version {version}"
 import db from './db'
 import state from './state'
 let refs = {}
@@ -33,12 +32,14 @@ extend tag element
 		api
 	get config
 		config
-	get p
-		console.log
 	get refs
 		refs
 	get err
 		err
+	get version
+		version
+	get p
+		console.log
 
 tag app
 

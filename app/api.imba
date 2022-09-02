@@ -5,7 +5,6 @@ import db from './db'
 import state from './state'
 
 import config from './config'
-p config
 import { omit, orderBy } from 'lodash'
 import { nanoid } from 'nanoid'
 import fzi from 'fzi'

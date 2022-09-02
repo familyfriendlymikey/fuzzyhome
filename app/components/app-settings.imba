@@ -1,3 +1,5 @@
+import download from 'downloadjs'
+
 tag app-settings
 
 	active = no
@@ -12,24 +14,24 @@ tag app-settings
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
 
 	def handle_click_toggle_tips
-		config.enable_tips = not config.enable_tips
-		save_config!
-		settings_active = no
+		config.data.enable_tips = not config.data.enable_tips
+		config.save!
+		active = no
 
 	def handle_click_toggle_buttons
-		config.enable_buttons = not config.enable_buttons
-		save_config!
-		settings_active = no
+		config.data.enable_buttons = not config.data.enable_buttons
+		config.save!
+		active = no
 
 	def handle_click_toggle_search_on_paste
-		config.enable_search_on_paste = not config.enable_search_on_paste
-		save_config!
-		settings_active = no
+		config.data.enable_search_on_paste = not config.data.enable_search_on_paste
+		config.save!
+		active = no
 
 	def handle_toggle_light_theme
-		config.enable_dark_theme = not config.enable_dark_theme
-		save_config!
-		settings_active = no
+		config.data.enable_dark_theme = not config.data.enable_dark_theme
+		config.save!
+		active = no
 
 	def handle_click_import e
 
@@ -56,7 +58,7 @@ tag app-settings
 
 		loading = yes
 		await handle_import!
-		settings_active = no
+		active = no
 		loading = no
 
 	def handle_click_export
@@ -69,7 +71,7 @@ tag app-settings
 		let time = datetime[4].split(":").join("-")
 		let filename = "fuzzyhome_v{version}_{date}_{time}.txt"
 		download(links.join("\n"), filename, "text/plain")
-		settings_active = no
+		active = no
 		loading = no
 
 	def render
@@ -87,6 +89,7 @@ tag app-settings
 				bg:none c:purple4 bd:none cursor:pointer fs:14px
 				bg:purple4/10 rd:5px
 				h:100%
+				@hover bg:blue
 
 			if refs.community-links.active
 				<app-community-links>
@@ -124,18 +127,18 @@ tag app-settings
 					<.settings-button
 						@click=handle_click_toggle_tips
 					>
-						config.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
+						config.data.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
 					<.settings-button
 						@click=handle_click_toggle_buttons
 					>
-						config.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
+						config.data.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
 
 				<.settings-container>
 					<.settings-button
 						@click=handle_click_toggle_search_on_paste
 					>
-						config.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
+						config.data.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
 					<.settings-button
 						@click.if(!loading)=handle_toggle_light_theme
 					>
-						config.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
+						config.data.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"

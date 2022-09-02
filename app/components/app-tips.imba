@@ -3,7 +3,7 @@ tag app-tips
 	css >>> .tip-row
 		d:flex fld:row w:100% fl:1
 		fs:20px
-		fs:14px pt:15px
+		fs:14px
 		jc:end ta:center
 		bg:#20222f c:purple4
 
@@ -28,8 +28,8 @@ tag app-tips
 	css >>> .tip-content
 		pt:2px fs:14px c:purple3
 
-	<self>
-			<slot>
+	<self[d:none]=config.data.enable_tips>
+		<slot>
 
 tag app-tips-more < app-tips
 
@@ -38,11 +38,12 @@ tag app-tips-more < app-tips
 	def toggle
 		active = !active
 
-	<self>
+	<self[d:none]=config.data.enable_tips>
+		css d:flex fld:column gap:10px
 
 		<@click=toggle>
 			css w:100% d:flex ja:center c:purple3 rdb:4px cursor:pointer
-				my:7px py:2px transition:background 100ms
+				transition:background 100ms
 				@hover bg:purple3/3
 			if active
 				css rd:0
@@ -53,7 +54,8 @@ tag app-tips-more < app-tips
 			else
 				<svg src="../assets/chevron-up.svg">
 
-		css >>> .hide .tip-row d:none
-		css >>> .more .tip-row @first pt:0
-		<.more .hide=hide>
+		<.more>
+			css d:flex fld:column gap:10px
+			if hide
+				css d:none
 			<slot>
