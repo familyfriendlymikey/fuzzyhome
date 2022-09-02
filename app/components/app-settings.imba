@@ -32,6 +32,10 @@ tag app-settings
 		settings_active = no
 
 	def handle_click_import e
+
+		def name_exists new_name
+			state.links.some! do |{name}| new_name is name
+
 		def handle_import
 			let errors = []
 			try
@@ -49,6 +53,7 @@ tag app-settings
 					errors.push "{link_text}\n{e}"
 			if errors.length > 0
 				err "importing some links", errors.join("\n\n")
+
 		loading = yes
 		await handle_import!
 		settings_active = no
@@ -58,7 +63,7 @@ tag app-settings
 		loading = yes
 		await reload_db!
 		let links = state.links.map do |link|
-			construct_link_text link
+			api.construct_link_text link
 		let datetime = new Date!.toString!.split(" ")
 		let date = datetime.slice(1, 4).join("-").toLowerCase!
 		let time = datetime[4].split(":").join("-")

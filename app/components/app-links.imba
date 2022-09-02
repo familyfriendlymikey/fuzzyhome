@@ -1,3 +1,5 @@
+import { evaluate as eval_math } from 'mathjs'
+
 tag app-links
 
 	selection_index = 0
@@ -7,11 +9,43 @@ tag app-links
 		p document
 		$links-input.focus!
 
+	def handle_paste e
+		return unless config.data.enable_search_on_paste
+		return if state.query.length > 0
+		global.setTimeout(&, 0) do
+			return if math_result isnt no
+			bang ||= config.data.default_bang
+			handle_bang!
+
+	def handle_click_copy s
+		try
+			await window.navigator.clipboard.writeText(s)
+			state.query = ''
+			sort_links!
+
+	def handle_cut e
+		return unless e.target.selectionStart == e.target.selectionEnd
+		let s = math_result
+		s ||= state.query
+		await window.navigator.clipboard.writeText(s)
+		state.query = ''
+		sort_links!
+
 	def increment_selection_index
 		selection_index = Math.min(state.sorted_links.length - 1, selection_index + 1)
 
 	def decrement_selection_index
 		selection_index = Math.max(0, selection_index - 1)
+
+	def handle_add
+		state.loading = yes
+		try
+			await api.add_link state.query
+			state.query = ''
+			sort_links!
+		catch e
+			err "adding link", e
+		state.loading = no
 
 	get math_result
 		try
@@ -29,7 +63,7 @@ tag app-links
 	def handle_edit link
 		prior_query = state.query
 		editing_link = link
-		state.query = construct_link_text(link)
+		state.query = api.construct_link_text(link)
 
 	def make_edit link, new_link_text
 		def edit_link
@@ -117,10 +151,11 @@ tag app-links
 				<.header>
 					css d:flex fld:row w:100%
 					css .side c:purple3/90 fs:15px d:flex ja:center w:30px cursor:pointer
-					css .side svg w:15px
+					css .side svg w:15px d:flex
+					css .left jc:left
+					css .right jc:right
 
-					<.side@click=api.toggle_effective_names>
-						css d:flex jc:left
+					<.side.left@click=api.toggle_effective_names>
 
 						if config.data.enable_effective_names
 							<svg src="../assets/eye.svg">
@@ -147,9 +182,9 @@ tag app-links
 					>
 
 					if (let m = math_result) isnt no
-						<.side @click=handle_click_copy(m)>
+						<.side.right@click=handle_click_copy(m)>
 							"= {Math.round(m * 100)/100}"
-							css d:flex jc:right c:blue3 fs:20px ml:10px w:unset
+							css c:blue3 fs:20px ml:10px w:unset
 
 					else
 						<.side.right @click.if(!state.loading)=toggle_settings>
@@ -214,7 +249,7 @@ tag app-links
 										<span[c:blue3 ws:pre]> " {url}"
 										<span> '"'
 									else
-										<span> '"{sq.join " "}"'
+										<span> "\"{sq.join " "}\""
 
 							<.tip @click=handle_shift_backspace>
 								<.tip-hotkey> "Shift + Backspace"

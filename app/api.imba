@@ -1,4 +1,5 @@
 let p = console.log
+import { err } from './utils'
 
 import db from './db'
 import state from './state'
@@ -6,7 +7,6 @@ import state from './state'
 import config from './config'
 p config
 import { omit, orderBy } from 'lodash'
-import { parse_url } from './utils'
 import { nanoid } from 'nanoid'
 import fzi from 'fzi'
 
@@ -78,6 +78,23 @@ export default new class api
 			return state.sorted_links = fzi state.links, state.query
 		state.sorted_links = fzi state.links, state.query, "display_name"
 
+	def add_initial_links
+		let initial_links = [
+			"tutorial github.com/familyfriendlymikey/fuzzyhome"
+			"!brave search `b search.brave.com/search?q="
+			"!youtube youtube.com/results?search_query="
+			"photopea photopea.com"
+			"twitch twitch.tv"
+			"messenger `me messenger.com"
+			"instagram `in instagram.com"
+			"localhost `3000 http://localhost:3000"
+		]
+		for link_text in initial_links
+			try
+				add_link link_text
+			catch e
+				err "adding link", e
+
 	def create_link_from_text text
 		text = text.trim!
 		throw "Text is empty." if text is ''
@@ -124,3 +141,25 @@ export default new class api
 		config.save!
 		sort_links!
 
+	def construct_link_text link
+		let link_text = ""
+		link_text += "!" if link.is_bang
+		link_text += link.display_name
+		link_text += " `{link.name}" if link.name isnt link.display_name
+		link_text += " {link.url}"
+		link_text
+
+	def parse_url url
+		throw "invalid url" if url === null
+		let get_url = do |s|
+			let url = new URL s
+			throw _ unless (url.host and url.href)
+			url
+		try
+			return get_url url
+		try
+			return get_url "https://{url}"
+		throw "invalid url"
+
+	def get_pretty_date
+		Date!.toString!.split(" ").slice(0, 4).join(" ")

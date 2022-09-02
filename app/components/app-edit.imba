@@ -14,7 +14,7 @@ tag app-edit < app-prompt
 		<self>
 			<.tips>
 				<.tip
-					@click=handle_esc
+					@click=(active = no)
 				>
 					<.tip-hotkey> "Esc"
 					<.tip-content> "Cancel Edits"

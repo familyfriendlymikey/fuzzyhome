@@ -2,6 +2,7 @@ let p = console.log
 import Dexie from 'dexie'
 import 'dexie-export-import'
 import { nanoid } from 'nanoid'
+import api from './api'
 
 let db = new Dexie 'fuzzyhome'
 
@@ -21,7 +22,6 @@ db.version(2).stores({
 		let img = link.img
 		this.value = { id, name, url, frequency, img }
 
-import { parse_url } from './utils'
 db.version(3).stores({
 	links: "++id,name,url,frequency,img"
 }).upgrade! do |trans|

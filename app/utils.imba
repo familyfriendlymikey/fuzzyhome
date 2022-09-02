@@ -1,14 +1,11 @@
-export def parse_url url
-	throw "invalid url" if url === null
-	let get_url = do |s|
-		let url = new URL s
-		throw _ unless (url.host and url.href)
-		url
-	try
-		return get_url url
-	try
-		return get_url "https://{url}"
-	throw "invalid url"
+export def err s, e
+	p "error:"
+	p e
+	window.alert("Error {s}:\n\n{e}")
 
-def get_pretty_date
-	Date!.toString!.split(" ").slice(0, 4).join(" ")
+global._fuzzyhome_delete_everything = do |prompt=yes|
+	return if prompt and window.confirm "This will delete everything. Are you sure?"
+	indexedDB.deleteDatabase("fuzzyhome")
+	delete localStorage.fuzzyhome_config
+	delete localStorage.fuzzyhome_visited
+	location.reload!
