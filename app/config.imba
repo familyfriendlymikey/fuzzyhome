@@ -1,5 +1,7 @@
 let p = console.log
 
+import { err } from './utils'
+
 export default new class config
 
 	def constructor
@@ -23,8 +25,10 @@ export default new class config
 
 		p "config:", this.data
 
-	def set_default_bang bang
-		data.default_bang = bang
+	def set_default_bang link
+		unless link.is_bang
+			return err "setting default bang", "Link is not a bang."
+		data.default_bang = link
 		save!
 
 	def save
