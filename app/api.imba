@@ -205,3 +205,11 @@ export default new class api
 		catch e
 			err "adding link", e
 		state.loading = no
+
+	def handle_click_link
+		let link = selected_link
+		if link.is_bang
+			state.query = ''
+			state.active_bang = link
+		else
+			navigate link

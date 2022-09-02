@@ -1,5 +1,16 @@
 tag app-links
 
+	def handle_click_delete link
+		return unless window.confirm "Do you really want to delete {link..display_name}?"
+		handle_delete link
+
+	def handle_click_pin link
+		api.pin_link link
+
+	def handle_edit
+		return unless state.sorted_links.length > 0
+		refs.edit.open api.selected_link
+
 	def render
 
 		<self>
@@ -10,8 +21,8 @@ tag app-links
 				<.tip-row>
 
 					<.tip
-						@click=handle_click_link
-						@hotkey('return').force.if(!loading)=handle_click_link
+						@click=api.handle_click_link
+						@hotkey('return').force.if(!loading)=api.handle_click_link
 					>
 						<.tip-hotkey> "Return"
 						<.tip-content> "Navigate To Link"
@@ -34,8 +45,8 @@ tag app-links
 								<span> "\"{sq.join " "}\""
 
 					<.tip
-						@click=handle_shift_backspace
-						@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
+						@click=handle_edit
+						@hotkey('shift+backspace').capture.if(!state.loading)=handle_edit
 					>
 						<.tip-hotkey> "Shift + Backspace"
 						<.tip-content> "Edit Link"
@@ -53,9 +64,9 @@ tag app-links
 
 					<.tip
 						@click.if(!state.loading)=refs.settings.open
-						@hotkey('esc').capture.if(!state.loading)=refs.settings.open
+						@hotkey('shift+tab').capture.if(!state.loading)=refs.settings.open
 					>
-						<.tip-hotkey> "Esc"
+						<.tip-hotkey> "Shift + Tab"
 						<.tip-content> "Toggle Settings"
 
 					<.tip.noclick

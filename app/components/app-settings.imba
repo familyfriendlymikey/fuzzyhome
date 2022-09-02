@@ -98,6 +98,7 @@ tag app-settings
 					<.settings-button
 						@click=close
 						@hotkey("esc")=close
+						@hotkey("shift+tab")=close
 					> "BACK"
 				<.settings-container>
 					<.settings-button

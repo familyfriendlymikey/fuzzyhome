@@ -1,8 +1,7 @@
 tag app-bang
 
 	get bang
-		return active_bang if state.active_bang
-		config.data.default_bang
+		state.active_bang or config.data.default_bang
 
 	get encoded_bang_query
 		"{bang.url}{window.encodeURIComponent(state.query)}"
@@ -22,8 +21,8 @@ tag app-bang
 				<.tip-row>
 
 					<.tip
-						@click=(state.active_bang = no)
-						@hotkey('esc').capture.if(!state.loading)=(state.active_bang = no)
+						@click=handle_bang
+						@hotkey('return').capture.if(!state.loading)=handle_bang
 					>
 						<.tip-hotkey> "Return"
 						<.tip-content> "Search"
@@ -53,12 +52,9 @@ tag app-bang
 							<.tip-hotkey> "Esc"
 							<.tip-content> "Back"
 					else
-						<.tip
-							@click.if(!state.loading)=refs.settings.open
-							@hotkey('esc').capture.if(!state.loading)=refs.settings.open
-						>
-							<.tip-hotkey> "Esc"
-							<.tip-content> "Toggle Settings"
+						<.tip.noclick>
+							<.tip-hotkey> "Paste (If Input Empty)"
+							<.tip-content> "Instant Search"
 
 			<app-tips-more$tips-more>
 
@@ -81,9 +77,12 @@ tag app-bang
 							<.tip-hotkey> "Cut (If No Selection)"
 							<.tip-content> "Cut All Text"
 
-					<.tip.noclick>
-						<.tip-hotkey> "Paste (If Input Empty)"
-						<.tip-content> "Instant Search"
+					if state.active_bang
+						<.tip.noclick>
+							<.tip-hotkey> "Paste (If Input Empty)"
+							<.tip-content> "Instant Search"
+					else
+						<.tip.placeholder>
 
 			unless $tips-more.active
 				<.bang.selected@click=handle_bang>

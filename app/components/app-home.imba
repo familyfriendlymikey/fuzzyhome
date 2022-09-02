@@ -21,27 +21,6 @@ tag app-home
 		api.set_link_selection_index 0
 		api.sort_links!
 
-	def handle_click_link
-		if state.active_bang or state.sorted_links.length < 1
-			return handle_bang!
-		let link = api.selected_link
-		if link.is_bang
-			state.query = ''
-			state.active_bang = link
-		else
-			api.navigate link
-
-	def handle_click_delete link
-		return unless window.confirm "Do you really want to delete {link..display_name}?"
-		handle_delete link
-
-	def handle_click_pin link
-		api.pin_link link
-
-	def handle_shift_backspace
-		return unless state.sorted_links.length > 0
-		refs.edit.open api.selected_link
-
 	def render
 
 		<self>
