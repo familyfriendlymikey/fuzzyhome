@@ -2,7 +2,6 @@ import { evaluate as eval_math } from 'mathjs'
 
 tag app-links
 
-	selection_index = 0
 	active_bang = no
 
 	def mount
@@ -31,12 +30,6 @@ tag app-links
 		state.query = ''
 		sort_links!
 
-	def increment_selection_index
-		selection_index = Math.min(state.sorted_links.length - 1, selection_index + 1)
-
-	def decrement_selection_index
-		selection_index = Math.max(0, selection_index - 1)
-
 	def handle_add
 		state.loading = yes
 		try
@@ -57,23 +50,8 @@ tag app-links
 			no
 
 	def handle_input
-		selection_index = 0
+		api.set_link_selection_index 0
 		api.sort_links!
-
-	def handle_edit link
-		prior_query = state.query
-		editing_link = link
-		state.query = api.construct_link_text(link)
-
-	def make_edit link, new_link_text
-		def edit_link
-			try
-				await update_link link, new_link_text
-			catch e
-				return err "editing link", e
-		state.loading = yes
-		await edit_link!
-		state.loading = no
 
 	def handle_click_link link
 		navigate link
@@ -83,10 +61,9 @@ tag app-links
 		window.location.href = link.url
 
 	def handle_return
-		return if editing_link
 		if active_bang or state.sorted_links.length < 1
 			return handle_bang!
-		let link = selected_link
+		let link = api.selected_link
 		if link.is_bang
 			state.query = ''
 			active_bang = link
@@ -102,31 +79,20 @@ tag app-links
 		return unless window.confirm "Do you really want to delete {link..display_name}?"
 		handle_delete link
 
-	def handle_click_edit link
-		handle_edit link
-
 	def handle_click_pin link
 		api.pin_link link
 
 	def handle_shift_backspace
-		if editing_link
-			await handle_delete editing_link
-		else
-			return unless state.sorted_links.length > 0
-			handle_edit selected_link
+		return unless state.sorted_links.length > 0
+		refs.edit.open api.selected_link
 
 	def handle_shift_return
 		def go
 			if viewing_community_links
 				try
-					await add_community_link selected_link
+					await add_community_link api.selected_link
 				catch e
 					err "adding community link", e
-			elif editing_link
-				try
-					await update_link editing_link, state.query
-				catch e
-					err "updating link", e
 			else
 				handle_add!
 		state.loading = yes
@@ -171,8 +137,8 @@ tag app-links
 						@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
 						@hotkey('esc').capture.if(!state.loading)=handle_esc
 						@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
-						@hotkey('down').capture.if(!state.loading)=increment_selection_index
-						@hotkey('up').capture.if(!state.loading)=decrement_selection_index
+						@hotkey('down').capture.if(!state.loading)=api.increment_link_selection_index
+						@hotkey('up').capture.if(!state.loading)=api.decrement_link_selection_index
 						@keydown.del.if(!state.loading)=handle_del
 						@input.if(!state.loading)=handle_input
 						@paste.if(!state.loading)=handle_paste
@@ -263,9 +229,4 @@ tag app-links
 						<app-bang data=active_bang>
 					else
 						for link, index in state.sorted_links
-							<app-link
-								data=link
-								set_selection_index=(do |index| selection_index = index)
-								index=index
-								selection_index=selection_index
-							>
+							<app-link link=link index=index>

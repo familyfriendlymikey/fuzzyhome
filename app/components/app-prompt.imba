@@ -1,9 +1,9 @@
+import { cloneDeep } from 'lodash'
+
 tag app-prompt
 
-	active = no
-
-	def get_input s
-		input_text = s
+	def get_input d
+		data = cloneDeep d
 		active = yes
 		let result = await new Promise! do |resolve|
 			self.addEventListener('end') do |e|
@@ -13,9 +13,4 @@ tag app-prompt
 		result
 
 	def end
-		emit('end', input_text)
-
-	def render
-		<self>
-			<input bind=input_text>
-			<button@click=end> 'Done.'
+		emit('end', data)

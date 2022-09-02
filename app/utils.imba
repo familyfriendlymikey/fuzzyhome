@@ -1,3 +1,5 @@
+let p = console.log
+
 export def err s, e
 	p "error:"
 	p e

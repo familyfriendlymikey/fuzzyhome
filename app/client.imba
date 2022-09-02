@@ -50,6 +50,7 @@ tag app
 		refs.settings = $as
 		refs.edit = $ae
 		refs.community-links = $acl
+		refs.links = $al
 
 		unless global.localStorage.fuzzyhome_visited
 			await api.add_initial_links!
@@ -92,6 +93,6 @@ tag app
 				<app-edit$ae>
 
 			else
-				<app-links>
+				<app-links$al>
 
 imba.mount <app>

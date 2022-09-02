@@ -25,12 +25,16 @@ global css .tips
 	c:purple4 fs:20px cursor:pointer
 	fs:14px pt:15px
 	jc:end ta:center
-	@first jc:start ta:left
-	@last jc:end ta:right
 
 global css .tip
-	d:flex fld:column bdr:1px solid blue3/10 min-width:0 fl:1 p:5px
-	@last bd:none
+	d:flex fld:column jc:start fl:1
+	bdr:1px solid blue3/10
+	min-width:0 p:5px ta:center
+	@first ta:left
+	@last ta:right bd:none
+
+global css .tip.noclick
+	cursor:auto
 
 global css .tip-hotkey
 	fs:12px c:purple3/50

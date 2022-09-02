@@ -32,23 +32,19 @@ export default new class api
 		p omit(new_link, "icon")
 		return new_link
 
-	def handle_delete link
-		def delete_link
+	def delete_link link
+		def go
 			try
 				await db.links.delete(link.id)
 			catch e
-				err "deleting link", e
+				return err "deleting link", e
 			try
 				await reload_db!
 			catch e
-				err "reloading db after successful delete", e
+				return err "reloading db after successful delete", e
 		state.loading = yes
-		await delete_link!
-		state.query = prior_query
-		prior_query = ''
-		editing_link = no
-		sort_links!
-		selection_index = Math.min selection_index, state.sorted_links.length - 1
+		await go!
+		state.link_selection_index = Math.min state.link_selection_index, state.sorted_links.length - 1
 		state.loading = no
 
 	def pin_link link
@@ -142,6 +138,9 @@ export default new class api
 		sort_links!
 
 	def construct_link_text link
+		link.display_name = link.display_name.trim!
+		link.name = link.name.trim!
+		link.url = link.url.trim!
 		let link_text = ""
 		link_text += "!" if link.is_bang
 		link_text += link.display_name
@@ -163,3 +162,16 @@ export default new class api
 
 	def get_pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
+
+	get selected_link
+		state.sorted_links[state.link_selection_index]
+
+	def set_link_selection_index index
+		state.link_selection_index = index
+
+	def increment_link_selection_index
+		set_link_selection_index Math.min(state.sorted_links.length - 1, state.link_selection_index + 1)
+
+	def decrement_link_selection_index
+		set_link_selection_index Math.max(0, state.link_selection_index - 1)
+
