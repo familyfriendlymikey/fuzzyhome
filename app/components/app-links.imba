@@ -2,8 +2,6 @@ import { evaluate as eval_math } from 'mathjs'
 
 tag app-links
 
-	active_bang = no
-
 	def mount
 		p document
 		$links-input.focus!
@@ -53,26 +51,19 @@ tag app-links
 		api.set_link_selection_index 0
 		api.sort_links!
 
-	def handle_click_link link
-		navigate link
-
-	def navigate link
-		await increment_link_frequency link
-		window.location.href = link.url
-
-	def handle_return
-		if active_bang or state.sorted_links.length < 1
+	def handle_click_link
+		if state.active_bang or state.sorted_links.length < 1
 			return handle_bang!
 		let link = api.selected_link
 		if link.is_bang
 			state.query = ''
-			active_bang = link
+			state.active_bang = link
 		else
-			navigate link
+			api.navigate link
 
 	def handle_del
 		if state.query.length < 1
-			active_bang = no
+			state.active_bang = no
 			api.sort_links!
 
 	def handle_click_delete link
@@ -142,7 +133,6 @@ tag app-links
 						@keydown.del.if(!state.loading)=handle_del
 						@input.if(!state.loading)=handle_input
 						@paste.if(!state.loading)=handle_paste
-						@blur=this.focus
 						@cut=handle_cut
 						disabled=state.loading
 					>
@@ -157,49 +147,25 @@ tag app-links
 							<svg src="../assets/settings.svg">
 
 				if config.data.enable_tips
-					if active_bang
+					if state.active_bang
 
 						<.tips>
 
-							<.tip@click=handle_search>
-								<.tip-hotkey> "Return"
-								<.tip-content> "Search With Query"
-
-							<.tip@click=exit_bang>
+							<.tip
+								@click=(state.active_bang = no)
+								@hotkey('esc').capture.if(!state.loading)=(state.active_bang = no)
+							>
 								<.tip-hotkey> "Esc"
-								<.tip-content> "Exit Bang"
-
-							<.tip[jc:center ta:center fl:2 px:15px]
-								@click=handle_shift_return
-							>
-								<.tip-hotkey> "Shift + Return"
-								<.tip-content[of:hidden text-overflow:ellipsis white-space:nowrap]>
-									<span> "Add New Link"
-									<span[ws:pre]> " "
-									let sq = state.query.trim!.split /\s+/
-									if sq.length >= 2
-										let url = sq.pop!
-										<span> '"'
-										<span> sq.join ' '
-										<span[ws:pre]> ' '
-										<span[c:blue3]> url
-										<span> '"'
-									else
-										<span> '"'
-										<span> sq.join ' '
-										<span> '"'
-
-							<.tip[jc:end ta:right fl:1]
-								@click=handle_shift_backspace
-							>
-								<.tip-hotkey> "Tab"
-								<.tip-content> "Select Next History Item"
+								<.tip-content> "Back"
 
 					else
 
 						<.tips>
 
-							<.tip @click=handle_return>
+							<.tip
+								@click=handle_click_link
+								@hotkey('return').force.if(!loading)=handle_click_link
+							>
 								<.tip-hotkey> "Return"
 								<.tip-content> "Navigate To Link"
 
@@ -225,8 +191,8 @@ tag app-links
 					css d:flex fld:column jc:flex-start
 						fl:1 w:100% ofy:auto pt:15px
 
-					if not viewing_community_links and (active_bang or state.sorted_links.length < 1)
-						<app-bang data=active_bang>
+					if not viewing_community_links and (state.active_bang or state.sorted_links.length < 1)
+						<app-bang data=state.active_bang>
 					else
 						for link, index in state.sorted_links
 							<app-link link=link index=index>

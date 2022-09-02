@@ -175,3 +175,6 @@ export default new class api
 	def decrement_link_selection_index
 		set_link_selection_index Math.max(0, state.link_selection_index - 1)
 
+	def navigate link
+		await increment_link_frequency link
+		window.location.href = link.url

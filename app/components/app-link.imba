@@ -3,7 +3,7 @@ tag app-link
 	def render
 		<self
 			@pointerover=api.set_link_selection_index(index)
-			@click.prevent=handle_click_link(link)
+			@click=handle_click
 			.selected=(index is state.link_selection_index)
 		>
 			css d:flex fld:row jc:space-between ai:center
