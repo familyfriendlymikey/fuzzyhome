@@ -88,8 +88,9 @@ tag app-settings
 				d:flex fld:column jc:center ai:center fl:1
 				bg:none c:purple4 bd:none cursor:pointer fs:14px
 				bg:purple4/10 rd:5px
+				transition:background 100ms
 				h:100%
-				@hover bg:blue
+				@hover bg:purple4/20
 
 			if refs.community-links.active
 				<app-community-links>
@@ -109,7 +110,7 @@ tag app-settings
 					<label.settings-button>
 						"IMPORT"
 						<input[d:none]
-							disabled=loading
+							disabled=state.loading
 							@change=handle_click_import
 							@click=(this.value = '')
 							type="file"

@@ -8,6 +8,8 @@ tag app-link
 		>
 			css d:flex fld:row jc:space-between ai:center
 				px:16px py:11px rd:5px cursor:pointer c:blue3
+			if link.is_bang
+				css c:#FAD4AB
 
 			<.link-left>
 				css d:flex fl:1
@@ -15,7 +17,7 @@ tag app-link
 				<img.link-icon src=link.icon>
 					css w:20px h:20px mr:10px rd:3px
 
-				<.display-name [c:#FAD4AB]=link.is_bang> link.display_name
+				<.display-name> link.display_name
 					css tt:capitalize fs:20px overflow-wrap:anywhere
 
 				if link.display_name isnt link.name and config.data.enable_effective_names
