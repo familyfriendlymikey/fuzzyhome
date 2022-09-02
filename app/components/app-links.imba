@@ -26,14 +26,14 @@ tag app-links
 		s ||= state.query
 		await window.navigator.clipboard.writeText(s)
 		state.query = ''
-		sort_links!
+		api.sort_links!
 
 	def handle_add
 		state.loading = yes
 		try
 			await api.add_link state.query
 			state.query = ''
-			sort_links!
+			api.sort_links!
 		catch e
 			err "adding link", e
 		state.loading = no
@@ -60,11 +60,6 @@ tag app-links
 			state.active_bang = link
 		else
 			api.navigate link
-
-	def handle_del
-		if state.query.length < 1
-			state.active_bang = no
-			api.sort_links!
 
 	def handle_click_delete link
 		return unless window.confirm "Do you really want to delete {link..display_name}?"
@@ -122,15 +117,6 @@ tag app-links
 
 					<input$links-input
 						bind=state.query
-						@hotkey('return').capture.if(!state.loading)=handle_return
-						@hotkey('tab').capture.if(!state.loading)=api.toggle_effective_names
-						@hotkey('esc').capture.if(!state.loading)=toggle_settings
-						@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
-						@hotkey('esc').capture.if(!state.loading)=handle_esc
-						@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
-						@hotkey('down').capture.if(!state.loading)=api.increment_link_selection_index
-						@hotkey('up').capture.if(!state.loading)=api.decrement_link_selection_index
-						@keydown.del.if(!state.loading)=handle_del
 						@input.if(!state.loading)=handle_input
 						@paste.if(!state.loading)=handle_paste
 						@cut=handle_cut
@@ -149,7 +135,7 @@ tag app-links
 				if config.data.enable_tips
 					if state.active_bang
 
-						<.tips>
+						<app-tips>
 
 							<.tip
 								@click=(state.active_bang = no)
@@ -160,39 +146,91 @@ tag app-links
 
 					else
 
-						<.tips>
+						<app-tips>
 
-							<.tip
-								@click=handle_click_link
-								@hotkey('return').force.if(!loading)=handle_click_link
-							>
-								<.tip-hotkey> "Return"
-								<.tip-content> "Navigate To Link"
+							<.tip-row>
 
-							<.tip[fl:2] @click=handle_shift_return>
-								<.tip-hotkey> "Shift + Return"
-								<.tip-content.ellipsis>
-									<span[ws:pre]> "Add New Link "
-									let sq = state.query.trim!.split /\s+/
-									if sq.length >= 2
-										let url = sq.pop!
-										<span> '"'
-										<span> sq.join " "
-										<span[c:blue3 ws:pre]> " {url}"
-										<span> '"'
+								<.tip
+									@click=handle_click_link
+									@hotkey('return').force.if(!loading)=handle_click_link
+								>
+									<.tip-hotkey> "Return"
+									<.tip-content> "Navigate To Link"
+
+								<.tip
+									@click=handle_shift_return
+									@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
+								>
+									<.tip-hotkey> "Shift + Return"
+									<.tip-content.ellipsis>
+										<span[ws:pre]> "Create Link "
+										let sq = state.query.trim!.split /\s+/
+										if sq.length >= 2
+											let url = sq.pop!
+											<span> '"'
+											<span> sq.join " "
+											<span[c:blue3 ws:pre]> " {url}"
+											<span> '"'
+										else
+											<span> "\"{sq.join " "}\""
+
+								<.tip
+									@click=handle_shift_backspace
+									@hotkey('shift+backspace').capture.if(!state.loading)=handle_shift_backspace
+								>
+									<.tip-hotkey> "Shift + Backspace"
+									<.tip-content> "Edit Link"
+
+						<app-tips-more$tips-more>
+
+							<.tip-row>
+
+								<.tip
+									@click.if(!state.loading)=api.toggle_effective_names
+									@hotkey('tab').capture.if(!state.loading)=api.toggle_effective_names
+								>
+									<.tip-hotkey> "Tab"
+									<.tip-content> "Toggle Effective Names"
+
+								<.tip
+									@click.if(!state.loading)=api.toggle_settings
+									@hotkey('esc').capture.if(!state.loading)=toggle_settings
+								>
+									<.tip-hotkey> "Esc"
+									<.tip-content> "Toggle Settings"
+
+								<.tip.noclick
+									@hotkey('down').capture.if(!state.loading)=api.increment_link_selection_index
+									@hotkey('up').capture.if(!state.loading)=api.decrement_link_selection_index
+								>
+									<.tip-hotkey> "Up/Down Arrow"
+									<.tip-content> "Move Selection"
+
+							<.tip-row>
+
+								<.tip
+									@click.if(!loading)=handle_cut
+								>
+									if math_result
+										<.tip-hotkey> "Cut (Math, If No Selection)"
+										<.tip-content> "Cut Math Result"
 									else
-										<span> "\"{sq.join " "}\""
+										<.tip-hotkey> "Cut (If No Selection)"
+										<.tip-content> "Cut All Text"
 
-							<.tip @click=handle_shift_backspace>
-								<.tip-hotkey> "Shift + Backspace"
-								<.tip-content> "Edit Link"
+								<.tip.noclick>
+									<.tip-hotkey> "Paste (If Input Empty)"
+									<.tip-content> "Instant Search"
 
-				<.links>
-					css d:flex fld:column jc:flex-start
-						fl:1 w:100% ofy:auto pt:15px
+								<.tip.placeholder>
 
-					if not viewing_community_links and (state.active_bang or state.sorted_links.length < 1)
-						<app-bang data=state.active_bang>
-					else
-						for link, index in state.sorted_links
-							<app-link link=link index=index>
+				unless $tips-more.active
+					<.links>
+						css d:flex fld:column jc:flex-start
+							fl:1 w:100% ofy:auto
+
+						if not viewing_community_links and (state.active_bang or state.sorted_links.length < 1)
+							<app-bang data=state.active_bang>
+						else
+							for link, index in state.sorted_links
+								<app-link link=link index=index>

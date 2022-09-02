@@ -16,13 +16,14 @@ let refs = {}
 import api from './api'
 import config from './config'
 
-import app-community-links from './components/app-community-links'
-import app-settings from './components/app-settings'
-import app-prompt from './components/app-prompt'
-import app-edit from './components/app-edit'
-import app-links from './components/app-links'
-import app-link from './components/app-link'
-import app-bang from './components/app-bang'
+import './components/app-community-links'
+import './components/app-settings'
+import './components/app-prompt'
+import './components/app-edit'
+import './components/app-links'
+import './components/app-link'
+import './components/app-bang'
+import './components/app-tips'
 import './styles'
 
 extend tag element

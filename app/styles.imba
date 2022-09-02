@@ -20,28 +20,6 @@ global css .disabled *
 global css .disabled $main-input
 	@important bg:gray4/10 bc:gray4
 
-global css .tips
-	d:flex fld:row w:100% fl:1
-	c:purple4 fs:20px cursor:pointer
-	fs:14px pt:15px
-	jc:end ta:center
-
-global css .tip
-	d:flex fld:column jc:start fl:1
-	bdr:1px solid blue3/10
-	min-width:0 p:5px ta:center
-	@first ta:left
-	@last ta:right bd:none
-
-global css .tip.noclick
-	cursor:auto
-
-global css .tip-hotkey
-	fs:12px c:purple3/50
-
-global css .tip-content
-	pt:2px fs:14px c:purple3
-
 global css .selected
 	bg:blue3/5
 
