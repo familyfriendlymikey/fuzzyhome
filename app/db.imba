@@ -28,7 +28,7 @@ db.version(3).stores({
 	p "upgrading to fuzzyhome db version 3"
 	trans.links.toCollection!.modify! do |link|
 		try
-			link.url = parse_url(link.url).href
+			link.url = api.parse_url(link.url).href
 
 db.version(4).stores({
 	links: "++id,display_name,name,is_bang,is_pinned,url,frequency,icon"

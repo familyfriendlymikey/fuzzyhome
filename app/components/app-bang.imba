@@ -4,7 +4,7 @@ tag app-bang
 		"{active_bang.url}{window.encodeURIComponent(state.query)}"
 
 	def handle_bang
-		await increment_link_frequency state.active_bang
+		await api.increment_link_frequency state.active_bang
 		window.location.href = encoded_bang_query
 
 	def render

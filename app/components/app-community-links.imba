@@ -26,7 +26,7 @@ tag app-community-links
 
 	def add_community_link link
 		await db.links.add link
-		await reload_db!
+		await api.reload_db!
 		imba.commit!
 
 	def render

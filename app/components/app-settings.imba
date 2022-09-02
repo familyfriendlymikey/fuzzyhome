@@ -45,10 +45,10 @@ tag app-settings
 				return err "importing db", e
 			for link_text in links
 				try
-					let link = await create_link_from_text link_text
+					let link = await api.create_link_from_text link_text
 					if name_exists link.name
 						throw "Name already exists, add manually if you don't mind duplicates."
-					add_link link_text
+					api.add_link link_text
 				catch e
 					errors.push "{link_text}\n{e}"
 			if errors.length > 0
@@ -61,7 +61,7 @@ tag app-settings
 
 	def handle_click_export
 		loading = yes
-		await reload_db!
+		await api.reload_db!
 		let links = state.links.map do |link|
 			api.construct_link_text link
 		let datetime = new Date!.toString!.split(" ")

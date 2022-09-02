@@ -18,7 +18,7 @@ tag app-links
 		try
 			await window.navigator.clipboard.writeText(s)
 			state.query = ''
-			sort_links!
+			api.sort_links!
 
 	def handle_cut e
 		return unless e.target.selectionStart == e.target.selectionEnd

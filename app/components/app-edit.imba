@@ -22,7 +22,7 @@ tag app-edit
 		save_config!
 		state.query = prior_query
 		prior_query = ''
-		sort_links!
+		api.sort_links!
 
 	def handle_delete
 		try
