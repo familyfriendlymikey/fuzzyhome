@@ -57,6 +57,9 @@ tag app
 
 		unless global.localStorage.fuzzyhome_visited
 			await api.add_initial_links!
+			try
+				let default_bang = await api.add_link '!google search https://www.google.com/search?q='
+				config.data.default_bang = default_bang
 			global.localStorage.fuzzyhome_visited = yes
 
 		try

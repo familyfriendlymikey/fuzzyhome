@@ -125,21 +125,23 @@ tag app-settings
 					<.settings-button
 						@click.if(!loading)=handle_click_github
 					> "GITHUB"
+
 				<.settings-container>
-					<.settings-button
-						@click=handle_click_toggle_tips
-					>
+
+					<.settings-button @click=handle_click_toggle_tips>
+						let t= p config.data
 						config.data.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
-					<.settings-button
-						@click=handle_click_toggle_buttons
-					>
+
+					<.settings-button @click=handle_click_toggle_buttons>
 						config.data.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
 
 				<.settings-container>
+
 					<.settings-button
 						@click=handle_click_toggle_search_on_paste
 					>
 						config.data.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
+
 					<.settings-button
 						@click.if(!loading)=handle_toggle_light_theme
 					>

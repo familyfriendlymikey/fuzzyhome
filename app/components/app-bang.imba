@@ -1,5 +1,9 @@
 tag app-bang
 
+	def unset_active_bang
+		state.active_bang = no
+		api.sort_links!
+
 	get bang
 		state.active_bang or config.data.default_bang
 
@@ -13,8 +17,7 @@ tag app-bang
 	def render
 
 		<self>
-			css w:100% d:flex fld:column gap:10px
-
+			css w:100% d:flex fld:column gap:15px
 
 			<app-tips>
 
@@ -46,8 +49,8 @@ tag app-bang
 
 					if state.active_bang
 						<.tip
-							@click=(state.active_bang = no)
-							@hotkey('esc').capture.if(!state.loading)=(state.active_bang = no)
+							@click=unset_active_bang
+							@hotkey('esc').capture.if(!state.loading)=unset_active_bang
 						>
 							<.tip-hotkey> "Esc"
 							<.tip-content> "Back"
@@ -87,7 +90,7 @@ tag app-bang
 			unless $tips-more.active
 				<.bang.selected@click=handle_bang>
 					css d:flex fld:row jc:space-between ai:center
-						px:16px py:11px rd:5px cursor:pointer c:blue3
+						px:16px py:11px rd:5px cursor:pointer c:#FAD4AB
 
 					<.link-left>
 						css d:flex fl:1
@@ -96,7 +99,7 @@ tag app-bang
 							css w:20px h:20px mr:10px rd:3px
 
 						<.display-name> encoded_bang_query
-							css c:#FAD4AB fs:20px word-break:break-all
+							css fs:20px word-break:break-all
 
 					<.link-right>
 						css d:flex fld:row jc:space-between ai:center

@@ -28,18 +28,24 @@ tag app-tips
 	css >>> .tip-content
 		pt:2px fs:14px c:purple3
 
-	<self[d:none]=config.data.enable_tips>
+	<self[d:none]=!config.data.enable_tips>
 		<slot>
 
 tag app-tips-more < app-tips
 
-	active = no
-	get hide do !active
-	def toggle
-		active = !active
+	get render? do mounted?
 
-	<self[d:none]=config.data.enable_tips>
-		css d:flex fld:column gap:10px
+	def mount
+		active = no
+		imba.commit!
+
+	get hidden do !active
+	toggle = do active = !active
+	open = do active = yes
+	close = do active = no
+
+	<self[d:none]=!config.data.enable_tips>
+		css d:flex fld:column gap:15px
 
 		<@click=toggle>
 			css w:100% d:flex ja:center c:purple3 rdb:4px cursor:pointer
@@ -55,7 +61,7 @@ tag app-tips-more < app-tips
 				<svg src="../assets/chevron-up.svg">
 
 		<.more>
-			css d:flex fld:column gap:10px
-			if hide
+			css d:flex fld:column gap:15px
+			if hidden
 				css d:none
 			<slot>

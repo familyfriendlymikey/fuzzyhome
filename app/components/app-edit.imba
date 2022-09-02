@@ -16,13 +16,12 @@ tag app-edit
 		imba.commit!
 
 	def handle_click_set_default_bang
-		if link.is_bang isnt true
+		unless link.is_bang
 			return err "setting default bang", "Link is not a bang."
 		config.data.default_bang = link
-		save_config!
-		state.query = prior_query
-		prior_query = ''
+		config.save!
 		api.sort_links!
+		close!
 
 	def handle_delete
 		try
@@ -78,7 +77,6 @@ tag app-edit
 					if link.is_bang
 						<.tip @click=handle_click_set_default_bang>
 							css fl:2
-							<.tip-hotkey> "Click"
 							<.tip-content> "Set Default Bang"
 
 					<.tip

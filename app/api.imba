@@ -9,6 +9,7 @@ import { omit, orderBy } from 'lodash'
 import { nanoid } from 'nanoid'
 import fzi from 'fzi'
 import { evaluate as eval_math } from 'mathjs'
+import { cloneDeep } from 'lodash'
 
 export default new class api
 
@@ -31,6 +32,15 @@ export default new class api
 		p omit(old_link, "icon")
 		p omit(new_link, "icon")
 		return new_link
+
+	def put_link link
+		try
+			await db.links.update link.id, link
+			if config.data.default_bang.id is link.id
+				config.set_default_bang link
+			await reload_db!
+		catch e
+			err "putting link", e
 
 	def delete_link link
 		def go
@@ -62,8 +72,9 @@ export default new class api
 		sort_links!
 
 	def increment_link_frequency link
+		link.frequency += 1
 		try
-			await db.links.update link.id, { frequency: link.frequency + 1 }
+			await put_link link
 		catch e
 			err "putting link", e
 

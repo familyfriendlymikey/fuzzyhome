@@ -14,7 +14,7 @@ tag app-links
 	def render
 
 		<self>
-			css w:100% d:flex fld:column gap:10px ofy:hidden
+			css w:100% d:flex fld:column gap:15px ofy:hidden
 
 			<app-tips>
 
@@ -69,15 +69,6 @@ tag app-links
 						<.tip-hotkey> "Shift + Tab"
 						<.tip-content> "Toggle Settings"
 
-					<.tip.noclick
-						@hotkey('down').capture.if(!state.loading)=api.increment_link_selection_index
-						@hotkey('up').capture.if(!state.loading)=api.decrement_link_selection_index
-					>
-						<.tip-hotkey> "Up/Down Arrow"
-						<.tip-content> "Move Selection"
-
-				<.tip-row>
-
 					<.tip
 						@click.if(!loading)=api.handle_cut
 					>
@@ -87,6 +78,15 @@ tag app-links
 						else
 							<.tip-hotkey> "Cut (If No Selection)"
 							<.tip-content> "Cut All Text"
+
+				<.tip-row>
+
+					<.tip.noclick
+						@hotkey('down').capture.if(!state.loading)=api.increment_link_selection_index
+						@hotkey('up').capture.if(!state.loading)=api.decrement_link_selection_index
+					>
+						<.tip-hotkey> "Up/Down Arrow"
+						<.tip-content> "Move Selection"
 
 					<.tip.noclick>
 						<.tip-hotkey> "Paste (If Input Empty)"

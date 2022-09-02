@@ -23,5 +23,9 @@ export default new class config
 
 		p "config:", this.data
 
+	def set_default_bang bang
+		data.default_bang = bang
+		save!
+
 	def save
 		global.localStorage.fuzzyhome_config = JSON.stringify(this.data)

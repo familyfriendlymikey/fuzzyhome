@@ -24,7 +24,7 @@ tag app-home
 	def render
 
 		<self>
-			css w:100% d:flex fld:column gap:10px ofy:hidden
+			css w:100% d:flex fld:column ofy:hidden gap:20px
 
 			<.header>
 				css d:flex fld:row w:100%
