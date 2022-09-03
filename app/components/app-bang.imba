@@ -1,9 +1,9 @@
 tag app-bang
 
 	get tips
-		let tips = []
+		let result = []
 
-		tips.push <>
+		result.push <>
 			<.tip
 				@click=api.handle_bang
 				@hotkey('return').capture.if(!state.loading)=api.handle_bang
@@ -11,7 +11,7 @@ tag app-bang
 				<.tip-hotkey> "Return"
 				<.tip-content> "Search"
 
-		tips.push <>
+		result.push <>
 			<.tip
 				@click=api.handle_add_link
 				@hotkey('shift+return').capture.if(!state.loading)=api.handle_add_link
@@ -29,7 +29,7 @@ tag app-bang
 					else
 						<span> "\"{sq.join " "}\""
 
-		tips.push <>
+		result.push <>
 			if state.active_bang
 				<.tip
 					@click=api.unset_active_bang
@@ -42,7 +42,7 @@ tag app-bang
 					<.tip-hotkey> "Paste (If Input Empty)"
 					<.tip-content> "Instant Search"
 
-		tips.push <>
+		result.push <>
 			<.tip
 				@click.if(!state.loading)=api.toggle_effective_names
 				@hotkey('tab').capture.if(!state.loading)=api.toggle_effective_names
@@ -50,7 +50,7 @@ tag app-bang
 				<.tip-hotkey> "Tab"
 				<.tip-content> "Toggle Effective Names"
 
-		tips.push <>
+		result.push <>
 			<.tip @click.if(!loading)=api.handle_cut>
 				if api.math_result
 					<.tip-hotkey> "Cut (Math, If No Selection)"
@@ -59,7 +59,7 @@ tag app-bang
 					<.tip-hotkey> "Cut (If No Selection)"
 					<.tip-content> "Cut All Text"
 
-		tips.push <>
+		result.push <>
 			<.tip
 				@click.if(!state.loading)=refs.settings.open
 				@hotkey('shift+tab').capture.if(!state.loading)=refs.settings.open
@@ -68,12 +68,12 @@ tag app-bang
 				<.tip-content> "Toggle Settings"
 
 		if state.active_bang
-			tips.push <>
+			result.push <>
 				<.tip.noclick>
 					<.tip-hotkey> "Paste (If Input Empty)"
 					<.tip-content> "Instant Search"
 
-		tips
+		result
 
 	def render
 

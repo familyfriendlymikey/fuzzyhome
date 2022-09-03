@@ -33,9 +33,9 @@ tag app-edit
 			err "saving link", e
 
 	get tips
-		let tips = []
+		let result = []
 
-		tips.push <>
+		result.push <>
 			<.tip
 				@click=handle_delete
 				@hotkey('shift+backspace').capture.if(!state.loading)=handle_delete
@@ -43,7 +43,7 @@ tag app-edit
 				<.tip-hotkey> "Shift + Backspace"
 				<.tip-content> "Delete Link"
 
-		tips.push <>
+		result.push <>
 			<.tip
 				@click=save
 				@hotkey('return').capture.if(!state.loading)=save
@@ -52,12 +52,12 @@ tag app-edit
 				<.tip-content> "Update Link"
 
 		if link.is_bang
-			tips.push <>
+			result.push <>
 				<.tip @click=handle_click_set_default_bang>
 					<.tip-hotkey> "Click"
 					<.tip-content> "Set Default Bang"
 
-		tips.push <>
+		result.push <>
 			<.tip
 				@click=close
 				@hotkey('esc').capture.if(!state.loading)=close
@@ -65,7 +65,7 @@ tag app-edit
 				<.tip-hotkey> "Esc"
 				<.tip-content> "Cancel"
 
-		tips
+		result
 
 	def render
 

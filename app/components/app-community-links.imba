@@ -1,10 +1,14 @@
 let p = console.log
 import links from '../assets/community_links'
+import fzi from 'fzi'
 
 tag app-community-links
 
-	active = no
+	active = yes
 	selection_index = 0
+
+	def mount
+		$cli.focus!
 
 	def open
 		active = yes
@@ -29,55 +33,57 @@ tag app-community-links
 		await api.reload_db!
 		imba.commit!
 
+	get tips
+		let result = []
+
+		result.push <>
+			<.tip @click=close>
+				<.tip-hotkey> "Esc"
+				<.tip-content> "Exit Community Links"
+
+		result.push <>
+			<.tip @click=handle_shift_return>
+				<.tip-hotkey> "Shift + Return Or Click"
+				<.tip-content> "Add To Your Links"
+
+		result.push <>
+			<.tip.noclick
+				@hotkey('down').capture.if(!state.loading)=increment_selection_index
+				@hotkey('up').capture.if(!state.loading)=decrement_selection_index
+			>
+				<.tip-hotkey> "Up/Down Arrow"
+				<.tip-content> "Move Selection"
+
+		result
+
 	def render
 
-		<self
-			@hotkey('esc').capture.if(!loading)=close
-			@hotkey('down').capture.if(!loading)=increment_selection_index
-			@hotkey('up').capture.if(!loading)=decrement_selection_index
-		>
+		<self>
+			css d:flex fld:column jc:start gap:15px fl:1 w:100% ofy:hidden
 
-			css self
-				d:flex fld:column jc:start fl:1
-				w:100% ofy:auto pt:15px
+			<div>
+				<input$cli autofocus>
 
-			css .link
-				d:flex fld:row jc:space-between ai:center
-				px:16px py:11px rd:5px cursor:pointer c:blue3
-				min-height:35px
+			<app-tips tips=tips>
 
-			css .link-left
-				fl:1
+			<.links>
+				css ofy:auto
 
-			css .link-right
-				fl:1
-				overflow-wrap:anywhere
-				word-break:break-all
+				for link_text, index in links
+					<.link
+						.selected=(selection_index == index)
+						@pointerover=(selection_index = index)
+						@click=(add_community_link(link_text))
+					>
+						css d:flex fld:row jc:space-between ai:center px:16px
+							py:11px rd:5px cursor:pointer c:blue3 min-height:35px
 
-			css .bang
-				c:#FAD4AB
+						let { url, rest } = get_link_obj link_text
 
-			css .selected
-				bg:blue3/5
+						<.link-left> rest
+							css fl:1
+							if rest.startsWith("!")
+								css c:#FAD4AB
 
-			<.tips>
-				<.tip[jc:start ta:center fl:1]
-					@click=handle_esc
-				>
-					<.tip-hotkey> "Esc"
-					<.tip-content> "Exit Community Links"
-				<.tip[jc:end ta:center fl:1]
-					@click=handle_shift_return
-				>
-					<.tip-hotkey> "Shift + Return"
-					<.tip-content> "Add To Your Links"
-
-			for link_text, index in links
-				<.link
-					.selected=(selection_index == index)
-					@pointerover=(selection_index = index)
-					@click=(add_community_link(link_text))
-				>
-					let { url, rest } = get_link_obj link_text
-					<.link-left .bang=rest.startsWith("!")> rest
-					<.link-right> url
+						<.link-right> url
+							css fl:1 overflow-wrap:anywhere word-break:break-all

@@ -76,7 +76,8 @@ tag app-settings
 
 	def render
 
-		<self[w:100%]>
+		<self>
+			css w:100%
 
 			css .settings-container
 				d:flex fld:row jc:space-around ai:center
@@ -94,19 +95,23 @@ tag app-settings
 
 			if refs.community-links.active
 				<app-community-links>
+
 			else
 				<.settings-container>
+
 					<.settings-button
 						@click=close
 						@hotkey("esc")=close
 						@hotkey("shift+tab")=close
 					> "BACK"
+
 				<.settings-container>
-					<.settings-button
-						@click.if(!loading)=$community-links.open
-					>
+
+					<.settings-button @click.if(!loading)=(refs.community-links.open! and close!)>
 						"VIEW COMMUNITY LINKS"
+
 				<.settings-container>
+
 					<label.settings-button>
 						"IMPORT"
 						<input[d:none]
@@ -115,21 +120,21 @@ tag app-settings
 							@click=(this.value = '')
 							type="file"
 						>
-					<.settings-button
-						@click.if(!loading)=handle_click_export
-					> "EXPORT"
+
+					<.settings-button @click.if(!loading)=handle_click_export>
+						"EXPORT"
+
 				<.settings-container>
-					<.settings-button
-						@click.if(!loading)=handle_click_github
-					> "TUTORIAL"
-					<.settings-button
-						@click.if(!loading)=handle_click_github
-					> "GITHUB"
+
+					<.settings-button @click.if(!loading)=handle_click_github>
+						"TUTORIAL"
+
+					<.settings-button @click.if(!loading)=handle_click_github>
+						"GITHUB"
 
 				<.settings-container>
 
 					<.settings-button @click=handle_click_toggle_tips>
-						let t= p config.data
 						config.data.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
 
 					<.settings-button @click=handle_click_toggle_buttons>
@@ -137,12 +142,8 @@ tag app-settings
 
 				<.settings-container>
 
-					<.settings-button
-						@click=handle_click_toggle_search_on_paste
-					>
+					<.settings-button @click=handle_click_toggle_search_on_paste>
 						config.data.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
 
-					<.settings-button
-						@click.if(!loading)=handle_toggle_light_theme
-					>
+					<.settings-button @click.if(!loading)=handle_toggle_light_theme>
 						config.data.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
