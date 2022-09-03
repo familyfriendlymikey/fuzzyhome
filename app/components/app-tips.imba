@@ -1,3 +1,5 @@
+import { chunk, fill } from 'lodash'
+
 tag app-tips
 
 	css >>> .tip-row
@@ -29,7 +31,9 @@ tag app-tips
 		pt:2px fs:14px c:purple3
 
 	<self[d:none]=!config.data.enable_tips>
-		<slot>
+		<.tip-row>
+			for tip in tips
+				<> tip
 
 tag app-tips-more < app-tips
 
@@ -43,6 +47,22 @@ tag app-tips-more < app-tips
 	toggle = do active = !active
 	open = do active = yes
 	close = do active = no
+
+	get placeholder
+		<.tip.placeholder>
+
+	def pad arr
+		p arr
+		let i = arr.length
+		while i < 3
+			arr.push placeholder
+			i += 1
+		p arr
+
+	get chunks
+		let chunks = chunk(tips, 3)
+		pad(chunks[-1])
+		chunks
 
 	<self[d:none]=!config.data.enable_tips>
 		css d:flex fld:column gap:15px
@@ -64,4 +84,8 @@ tag app-tips-more < app-tips
 			css d:flex fld:column gap:15px
 			if hidden
 				css d:none
-			<slot>
+
+			for row in chunks
+				<.tip-row>
+					for tip in row
+						<> tip
