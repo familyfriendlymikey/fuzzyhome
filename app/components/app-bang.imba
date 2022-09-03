@@ -33,7 +33,7 @@ tag app-bang
 			if state.active_bang
 				<.tip
 					@click=api.unset_active_bang
-					@hotkey('esc').capture.if(!state.loading)=unset_active_bang
+					@hotkey('esc').capture.if(!state.loading)=api.unset_active_bang
 				>
 					<.tip-hotkey> "Esc"
 					<.tip-content> "Back"
@@ -58,6 +58,14 @@ tag app-bang
 				else
 					<.tip-hotkey> "Cut (If No Selection)"
 					<.tip-content> "Cut All Text"
+
+		tips.push <>
+			<.tip
+				@click.if(!state.loading)=refs.settings.open
+				@hotkey('shift+tab').capture.if(!state.loading)=refs.settings.open
+			>
+				<.tip-hotkey> "Shift + Tab"
+				<.tip-content> "Toggle Settings"
 
 		if state.active_bang
 			tips.push <>

@@ -1,7 +1,10 @@
 tag app-edit
 
-	get render? do mounted?
 	active = no
+
+	def mount
+		$dn.setSelectionRange 0, 0
+		$dn.focus!
 
 	def open data
 		link = data
@@ -10,11 +13,6 @@ tag app-edit
 
 	def close
 		active = no
-
-	def mount
-		setTimeout(&, 40) do
-			$dn.focus!
-		imba.commit!
 
 	def handle_click_set_default_bang
 		config.set_default_bang link
@@ -59,23 +57,13 @@ tag app-edit
 					<.tip-hotkey> "Click"
 					<.tip-content> "Set Default Bang"
 
-		else
-			tips.push <>
-				<.tip
-					@click=close
-					@hotkey('esc').capture.if(!state.loading)=close
-				>
-					<.tip-hotkey> "Esc"
-					<.tip-content> "Cancel"
-
-		if link.is_bang
-			tips.push <>
-				<.tip
-					@click=close
-					@hotkey('esc').capture.if(!state.loading)=close
-				>
-					<.tip-hotkey> "Esc"
-					<.tip-content> "Cancel"
+		tips.push <>
+			<.tip
+				@click=close
+				@hotkey('esc').capture.if(!state.loading)=close
+			>
+				<.tip-hotkey> "Esc"
+				<.tip-content> "Cancel"
 
 		tips
 
@@ -85,6 +73,6 @@ tag app-edit
 			css d:flex fld:column gap:20px w:100%
 
 			<div>
-				<input$dn bind=new_link_text>
+				<input$dn autofocus bind=new_link_text>
 
 			<app-tips tips=tips>

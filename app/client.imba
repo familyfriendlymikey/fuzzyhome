@@ -6,6 +6,8 @@ p "fuzzyhome version {version}"
 # import sw from './sw.imba?serviceworker'
 # navigator..serviceWorker..register(sw).then! do |reg| reg.update!
 
+p "hehe"
+
 import { nanoid } from 'nanoid'
 import { err } from './utils'
 

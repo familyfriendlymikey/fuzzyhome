@@ -2,7 +2,8 @@ import { chunk, fill } from 'lodash'
 
 tag app-tips
 
-	show_more = no
+	def unmount
+		show_more = no
 
 	def toggle
 		show_more = not show_more

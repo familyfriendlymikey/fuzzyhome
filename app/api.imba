@@ -237,4 +237,4 @@ export default new class api
 
 	def unset_active_bang
 		state.active_bang = no
-		api.sort_links!
+		sort_links!

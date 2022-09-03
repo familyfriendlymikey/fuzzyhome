@@ -16,14 +16,6 @@ tag app-links
 
 		tips.push <>
 			<.tip
-				@click=api.handle_click_link
-				@hotkey('return').force.if(!loading)=api.handle_click_link
-			>
-				<.tip-hotkey> "Return"
-				<.tip-content> "Navigate To Link"
-
-		tips.push <>
-			<.tip
 				@click=api.handle_add_link
 				@hotkey('shift+return').capture.if(!state.loading)=api.handle_add_link
 			>
@@ -39,6 +31,14 @@ tag app-links
 						<span> '"'
 					else
 						<span> "\"{sq.join " "}\""
+
+		tips.push <>
+			<.tip
+				@click=api.handle_click_link
+				@hotkey('return').force.if(!loading)=api.handle_click_link
+			>
+				<.tip-hotkey> "Return"
+				<.tip-content> "Navigate To Link"
 
 		tips.push <>
 			<.tip

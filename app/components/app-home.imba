@@ -1,7 +1,10 @@
 tag app-home
 
 	def mount
-		$links-input.focus!
+		$home-input.focus!
+
+	def blur
+		setTimeout(&, 100) do $home-input.focus!
 
 	def handle_paste e
 		return unless config.data.enable_search_on_paste
@@ -41,12 +44,14 @@ tag app-home
 					else
 						<svg src="../assets/eye-off.svg">
 
-				<input$links-input
+				<input$home-input
+					autofocus
 					bind=state.query
 					@input.if(!state.loading)=handle_input
 					@paste.if(!state.loading)=handle_paste
 					@cut=api.handle_cut
 					disabled=state.loading
+					@blur=blur
 				>
 
 				if (let m = api.math_result) isnt no
