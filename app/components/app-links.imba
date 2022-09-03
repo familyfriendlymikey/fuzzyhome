@@ -24,8 +24,8 @@ tag app-links
 
 		tips.push <>
 			<.tip
-				@click=handle_shift_return
-				@hotkey('shift+return').capture.if(!state.loading)=handle_shift_return
+				@click=api.handle_add_link
+				@hotkey('shift+return').capture.if(!state.loading)=api.handle_add_link
 			>
 				<.tip-hotkey> "Shift + Return"
 				<.tip-content.ellipsis>
@@ -48,12 +48,7 @@ tag app-links
 				<.tip-hotkey> "Shift + Backspace"
 				<.tip-content> "Edit Link"
 
-		tips
-
-	get tips_more
-		let tips_more = []
-
-		tips_more.push <>
+		tips.push <>
 			<.tip
 				@click.if(!state.loading)=api.toggle_effective_names
 				@hotkey('tab').capture.if(!state.loading)=api.toggle_effective_names
@@ -61,7 +56,7 @@ tag app-links
 				<.tip-hotkey> "Tab"
 				<.tip-content> "Toggle Effective Names"
 
-		tips_more.push <>
+		tips.push <>
 			<.tip
 				@click.if(!state.loading)=refs.settings.open
 				@hotkey('shift+tab').capture.if(!state.loading)=refs.settings.open
@@ -69,7 +64,7 @@ tag app-links
 				<.tip-hotkey> "Shift + Tab"
 				<.tip-content> "Toggle Settings"
 
-		tips_more.push <>
+		tips.push <>
 			<.tip @click.if(!loading)=api.handle_cut>
 				if api.math_result
 					<.tip-hotkey> "Cut (Math, If No Selection)"
@@ -78,7 +73,7 @@ tag app-links
 					<.tip-hotkey> "Cut (If No Selection)"
 					<.tip-content> "Cut All Text"
 
-		tips_more.push <>
+		tips.push <>
 			<.tip.noclick
 				@hotkey('down').capture.if(!state.loading)=api.increment_link_selection_index
 				@hotkey('up').capture.if(!state.loading)=api.decrement_link_selection_index
@@ -86,22 +81,21 @@ tag app-links
 				<.tip-hotkey> "Up/Down Arrow"
 				<.tip-content> "Move Selection"
 
-		tips_more.push <>
+		tips.push <>
 			<.tip.noclick>
 				<.tip-hotkey> "Paste (If Input Empty)"
 				<.tip-content> "Instant Search"
 
-		tips_more
+		tips
 
 	def render
 
 		<self>
 			css w:100% d:flex fld:column gap:15px ofy:hidden
 
-			<app-tips tips=tips>
-			<app-tips-more$tips-more tips=tips_more>
+			<app-tips$tips tips=tips>
 
-			unless $tips-more.active
+			unless $tips.show_more
 				<.links>
 					css ofy:scroll
 					for link, index in state.sorted_links

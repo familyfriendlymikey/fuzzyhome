@@ -34,6 +34,51 @@ tag app-edit
 		catch e
 			err "saving link", e
 
+	get tips
+		let tips = []
+
+		tips.push <>
+			<.tip
+				@click=handle_delete
+				@hotkey('shift+backspace').capture.if(!state.loading)=handle_delete
+			>
+				<.tip-hotkey> "Shift + Backspace"
+				<.tip-content> "Delete Link"
+
+		tips.push <>
+			<.tip
+				@click=save
+				@hotkey('return').capture.if(!state.loading)=save
+			>
+				<.tip-hotkey> "Return"
+				<.tip-content> "Update Link"
+
+		if link.is_bang
+			tips.push <>
+				<.tip @click=handle_click_set_default_bang>
+					<.tip-hotkey> "Click"
+					<.tip-content> "Set Default Bang"
+
+		else
+			tips.push <>
+				<.tip
+					@click=close
+					@hotkey('esc').capture.if(!state.loading)=close
+				>
+					<.tip-hotkey> "Esc"
+					<.tip-content> "Cancel"
+
+		if link.is_bang
+			tips.push <>
+				<.tip
+					@click=close
+					@hotkey('esc').capture.if(!state.loading)=close
+				>
+					<.tip-hotkey> "Esc"
+					<.tip-content> "Cancel"
+
+		tips
+
 	def render
 
 		<self>
@@ -42,49 +87,4 @@ tag app-edit
 			<div>
 				<input$dn bind=new_link_text>
 
-			<app-tips>
-
-				<.tip-row>
-
-					<.tip
-						@click=handle_delete
-						@hotkey('shift+backspace').capture.if(!state.loading)=handle_delete
-					>
-						<.tip-hotkey> "Shift + Backspace"
-						<.tip-content> "Delete Link"
-
-					<.tip
-						@click=save
-						@hotkey('return').capture.if(!state.loading)=save
-					>
-						<.tip-hotkey> "Return"
-						<.tip-content> "Update Link"
-
-					if link.is_bang
-						<.tip @click=handle_click_set_default_bang>
-							<.tip-hotkey> "Click"
-							<.tip-content> "Set Default Bang"
-					else
-						<.tip
-							@click=close
-							@hotkey('esc').capture.if(!state.loading)=close
-						>
-							<.tip-hotkey> "Esc"
-							<.tip-content> "Cancel"
-
-			if link.is_bang
-
-				<app-tips-more>
-
-					<.tip-row>
-
-						<.tip
-							@click=close
-							@hotkey('esc').capture.if(!state.loading)=close
-						>
-							<.tip-hotkey> "Esc"
-							<.tip-content> "Cancel"
-
-						<.tip.placeholder>
-
-						<.tip.placeholder>
+			<app-tips tips=tips>

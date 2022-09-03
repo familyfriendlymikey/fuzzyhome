@@ -224,3 +224,17 @@ export default new class api
 			state.active_bang = link
 		else
 			navigate link
+
+	get bang
+		state.active_bang or config.data.default_bang
+
+	get encoded_bang_query
+		"{bang.url}{window.encodeURIComponent(state.query)}"
+
+	def handle_bang
+		await increment_link_frequency bang
+		window.location.href = encoded_bang_query
+
+	def unset_active_bang
+		state.active_bang = no
+		api.sort_links!
