@@ -35,9 +35,6 @@ tag app-settings
 
 	def handle_click_import e
 
-		def name_exists new_name
-			state.links.some! do |{name}| new_name is name
-
 		def handle_import
 			let errors = []
 			try
@@ -48,7 +45,7 @@ tag app-settings
 			for link_text in links
 				try
 					let link = await api.create_link_from_text link_text
-					if name_exists link.name
+					if api.name_exists link.name
 						throw "Name already exists, add manually if you don't mind duplicates."
 					api.add_link link_text
 				catch e

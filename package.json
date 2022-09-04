@@ -14,8 +14,8 @@
 		"dexie": "^3.2.2",
 		"dexie-export-import": "^1.0.3",
 		"downloadjs": "^1.4.7",
-		"fzi": "^1.0.0",
-		"imba": "^2.0.0-alpha.219",
+		"fzi": "^1.1.0",
+		"imba": "^2.0.0-alpha.220",
 		"lodash": "^4.17.21",
 		"mathjs": "^11.1.0",
 		"nanoid": "^4.0.0"

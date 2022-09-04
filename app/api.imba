@@ -80,10 +80,14 @@ export default new class api
 
 	def sort_links
 		if state.query.trim!.length <= 0
-			return state.sorted_links = orderBy(state.links, ['is_pinned', 'frequency'], ['desc', 'desc'])
-		if config.data.enable_effective_names
-			return state.sorted_links = fzi state.links, state.query
-		state.sorted_links = fzi state.links, state.query, "display_name"
+			state.sorted_links = orderBy(state.links, ['is_pinned', 'frequency'], ['desc', 'desc'])
+		elif config.data.enable_effective_names
+			state.sorted_links = fzi.sort state.query, state.links, do |x| x.name
+		else
+			state.sorted_links = fzi.sort state.query, state.links, do |x| x.display_name
+
+	def name_exists new_name
+		state.links.some! do |{name}| new_name is name
 
 	def add_initial_links
 		let initial_links = [
@@ -102,7 +106,7 @@ export default new class api
 			catch e
 				err "adding link", e
 
-	def create_link_from_text text
+	def create_link_from_text text, get_icon=yes
 		text = text.trim!
 		throw "Text is empty." if text is ''
 		let split_text = text.split(/\s+/)
@@ -110,7 +114,6 @@ export default new class api
 		let url = split_text.pop!
 		let host
 		{ href:url, host } = parse_url url
-		let icon = await fetch_image_as_base_64 host
 		let name
 		if split_text[-1].startsWith "`"
 			name = split_text.pop!.slice(1)
@@ -121,7 +124,10 @@ export default new class api
 			is_bang = yes
 			display_name = display_name.slice(1)
 		name ||= display_name
-		{ name, display_name, is_bang, is_pinned, url, frequency:0, icon }
+		let link = { name, display_name, is_bang, is_pinned, url, frequency:0 }
+		if get_icon
+			link.icon = await fetch_image_as_base_64 host
+		return link
 
 	def fetch_image_as_base_64 host
 		let fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mO8seXffwYqAsZRA0cNHDVw1MBRA0eqgQCDRkbJSQHxEQAAAABJRU5ErkJggg=='
