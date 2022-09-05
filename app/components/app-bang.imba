@@ -23,6 +23,15 @@ tag app-bang
 					<.tip-hotkey> "Return"
 					<.tip-content> "Search"
 
+		if state.bang_selection_index > -1
+			result.push <>
+				<.tip
+					@click=api.delete_bang_history_item
+					@hotkey('shift+backspace').capture.if(!state.loading)=api.delete_bang_history_item
+				>
+					<.tip-hotkey> "Shift + Backspace"
+					<.tip-content> "Delete History Item"
+
 		result.push <>
 			<.tip.ellipsis
 				@click=api.handle_add_link

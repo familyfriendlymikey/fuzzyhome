@@ -257,7 +257,9 @@ export default new class api
 		catch e
 			err "updating bang history", e
 
-	def delete_bang_history_item text
+	def delete_bang_history_item
+		let text = sorted_bang_history[state.bang_selection_index]
+		return unless text
 		let i = bang.history.indexOf(text)
 		return unless i > -1
 		bang.history.splice(i, 1)
