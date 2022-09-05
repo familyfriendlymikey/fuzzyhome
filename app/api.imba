@@ -124,7 +124,7 @@ export default new class api
 			is_bang = yes
 			display_name = display_name.slice(1)
 		name ||= display_name
-		let link = { name, display_name, is_bang, is_pinned, url, frequency:0 }
+		let link = { name, display_name, is_bang, is_pinned, url, frequency:0, history:[] }
 		if get_icon
 			link.icon = await fetch_image_as_base_64 host
 		return link
@@ -235,12 +235,52 @@ export default new class api
 		state.active_bang or config.data.default_bang
 
 	get encoded_bang_query
-		"{bang.url}{window.encodeURIComponent(state.query)}"
+		let history_item = sorted_bang_history[state.bang_selection_index]
+		"{bang.url}{window.encodeURIComponent(history_item or state.query)}"
+
+	get encoded_bang_query_nourl
+		let history_item = sorted_bang_history[state.bang_selection_index]
+		"{window.encodeURIComponent(history_item or state.query)}"
+
+	def update_history bang
+		let text
+		if state.bang_selection_index > -1
+			text = sorted_bang_history.splice(state.bang_selection_index, 1)[0]
+		text ||= state.query.trim!
+		return unless text
+		let i = bang.history.indexOf(text)
+		if i > -1
+			bang.history.splice(i, 1)
+		bang.history.unshift text
+		try
+			await put_link bang
+		catch e
+			err "updating bang history", e
+
+	def delete_bang_history_item text
+		let i = bang.history.indexOf(text)
+		return unless i > -1
+		bang.history.splice(i, 1)
+		try
+			await put_link bang
+		catch e
+			err "updating bang history", e
 
 	def handle_bang
 		await increment_link_frequency bang
-		window.location.href = encoded_bang_query
+		let to_navigate = encoded_bang_query
+		await update_history bang
+		window.location.href = to_navigate
 
 	def unset_active_bang
 		state.active_bang = no
 		sort_links!
+
+	def increment_bang_selection_index
+		state.bang_selection_index = Math.min(sorted_bang_history.length - 1, state.bang_selection_index + 1)
+
+	def decrement_bang_selection_index
+		state.bang_selection_index = Math.max(-1, state.bang_selection_index - 1)
+
+	get sorted_bang_history
+		fzi.sort state.query, bang.history

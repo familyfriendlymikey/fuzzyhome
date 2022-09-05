@@ -21,6 +21,7 @@ tag app-home
 			api.sort_links!
 
 	def handle_input
+		state.bang_selection_index = -1
 		api.set_link_selection_index 0
 		api.sort_links!
 

@@ -39,6 +39,7 @@ db.version(4).stores({
 		link.is_bang = no
 		link.icon = link.img
 		link.is_pinned = no
+		link.history = []
 		delete link.img
 
 export default db
