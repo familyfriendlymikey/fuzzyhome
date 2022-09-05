@@ -10,32 +10,23 @@ tag app-bang
 			result.push <>
 				<.tip
 					@click=api.handle_bang
-					@hotkey('return').capture.if(!state.loading)=api.handle_bang
+					@hotkey('return').force=api.handle_bang
 				>
 					<.tip-hotkey> "Return"
-					<.tip-content> "Search History Item"
+					<.tip-content> "Use History Item"
 		else
 			result.push <>
 				<.tip
 					@click=api.handle_bang
-					@hotkey('return').capture.if(!state.loading)=api.handle_bang
+					@hotkey('return').force=api.handle_bang
 				>
 					<.tip-hotkey> "Return"
 					<.tip-content> "Search"
 
-		if state.bang_selection_index > -1
-			result.push <>
-				<.tip
-					@click=api.delete_bang_history_item
-					@hotkey('shift+backspace').capture.if(!state.loading)=api.delete_bang_history_item
-				>
-					<.tip-hotkey> "Shift + Backspace"
-					<.tip-content> "Delete History Item"
-
 		result.push <>
 			<.tip.ellipsis
 				@click=api.handle_add_link
-				@hotkey('shift+return').capture.if(!state.loading)=api.handle_add_link
+				@hotkey('shift+return').force=api.handle_add_link
 			>
 				<.tip-hotkey> "Shift + Return"
 				<.tip-content.ellipsis>
@@ -50,21 +41,31 @@ tag app-bang
 					else
 						<span> "\"{sq.join " "}\""
 
-		result.push <>
-			if state.active_bang
+		if state.bang_selection_index > -1
+			result.push <>
+				<.tip
+					@click=api.delete_bang_history_item
+					@hotkey('shift+backspace').force=api.delete_bang_history_item
+				>
+					<.tip-hotkey> "Shift + Backspace"
+					<.tip-content> "Delete History Item"
+
+		if state.active_bang
+			result.push <>
 				<.tip
 					@click=api.unset_active_bang
-					@hotkey('esc').capture.if(!state.loading)=api.unset_active_bang
+					@hotkey('esc').force=api.unset_active_bang
 				>
 					<.tip-hotkey> "Esc"
 					<.tip-content> "Back"
-			else
-				<.tip.noclick>
-					<.tip-hotkey> "Paste (If Input Empty)"
-					<.tip-content> "Instant Search"
 
 		result.push <>
-			<.tip @click.if(!loading)=api.handle_cut>
+			<.tip@click=(api.delete_bang_history! and $tips.show_more = no)>
+				<.tip-hotkey> "Click"
+				<.tip-content> "Delete Bang History"
+
+		result.push <>
+			<.tip @click=api.handle_cut>
 				if api.math_result
 					<.tip-hotkey> "Cut (Math, If No Selection)"
 					<.tip-content> "Cut Math Result"
@@ -72,11 +73,10 @@ tag app-bang
 					<.tip-hotkey> "Cut (If No Selection)"
 					<.tip-content> "Cut All Text"
 
-		if state.active_bang
-			result.push <>
-				<.tip.noclick>
-					<.tip-hotkey> "Paste (If Input Empty)"
-					<.tip-content> "Instant Search"
+		result.push <>
+			<.tip.noclick>
+				<.tip-hotkey> "Paste (If Input Empty)"
+				<.tip-content> "Instant Search"
 
 		result
 
@@ -88,17 +88,20 @@ tag app-bang
 			@hotkey("down").force=api.increment_bang_selection_index
 			@hotkey("shift+tab").force=api.decrement_bang_selection_index
 		>
-			css w:100% d:flex fld:column gap:15px
+			css w:100% d:flex fld:column gap:15px ofy:hidden
 
 			<app-tips$tips tips=tips>
 
 			unless $tips.show_more
 
-				<.bang.selected
+				<.bang
+					.selected=(state.bang_selection_index is -1)
+					[c:#FAD4AB]=(state.bang_selection_index is -1)
+					@pointerover=(state.bang_selection_index = -1)
 					@click=api.handle_bang
 				>
 					css d:flex fld:row jc:space-between ai:center
-						px:16px py:11px rd:5px cursor:pointer c:#FAD4AB
+						px:16px py:11px rd:5px cursor:pointer c:blue3
 
 					<.link-left>
 						css d:flex fl:1 ofy:hidden
@@ -106,7 +109,7 @@ tag app-bang
 						<img.link-icon src=api.bang.icon>
 							css w:20px h:20px mr:10px rd:3px
 
-						<.display-name> api.encoded_bang_query_nourl
+						<.display-name> "...{api.encoded_bang_query_nourl}"
 							css fs:20px of:hidden text-overflow:ellipsis
 
 					<.link-right>
@@ -116,9 +119,14 @@ tag app-bang
 							css fs:15px ml:7px
 
 				<.history>
-					css d:flex fld:column jc:start ai:center
+					css d:flex fld:column jc:start ai:center ofy:auto
 
 					for item, index in api.sorted_bang_history
-						<.item [c:#FAD4AB]=(state.bang_selection_index is index)> item
+						<.item
+							@pointerover=(state.bang_selection_index = index)
+							@click=api.handle_bang
+							[c:#FAD4AB]=(state.bang_selection_index is index)
+							.selected=(state.bang_selection_index is index)
+						> item
 							css w:100% fs:17px c:blue3 rd:5px p:10px 10px
-								box-sizing:border-box
+								box-sizing:border-box cursor:pointer

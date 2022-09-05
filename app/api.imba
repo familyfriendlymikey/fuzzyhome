@@ -5,7 +5,7 @@ import db from './db'
 import state from './state'
 
 import config from './config'
-import { omit, orderBy } from 'lodash'
+import { find, omit, orderBy } from 'lodash'
 import { nanoid } from 'nanoid'
 import fzi from 'fzi'
 import { evaluate as eval_math } from 'mathjs'
@@ -36,7 +36,7 @@ export default new class api
 	def put_link link
 		try
 			await db.links.update link.id, link
-			if config.data.default_bang.id is link.id
+			if link.is_bang and config.data.default_bang.id is link.id
 				config.set_default_bang link
 			await reload_db!
 		catch e
@@ -69,6 +69,14 @@ export default new class api
 
 	def reload_db
 		state.links = await db.links.toArray()
+		if state.active_bang
+			let id = state.active_bang.id
+			state.active_bang = find state.links, { id }
+		let id = config.data.default_bang.id
+		let link = find state.links, { id }
+		if link
+			config.data.default_bang = link
+			config.save!
 		sort_links!
 
 	def increment_link_frequency link
@@ -235,12 +243,10 @@ export default new class api
 		state.active_bang or config.data.default_bang
 
 	get encoded_bang_query
-		let history_item = sorted_bang_history[state.bang_selection_index]
-		"{bang.url}{window.encodeURIComponent(history_item or state.query)}"
+		"{bang.url}{window.encodeURIComponent(state.query)}"
 
 	get encoded_bang_query_nourl
-		let history_item = sorted_bang_history[state.bang_selection_index]
-		"{window.encodeURIComponent(history_item or state.query)}"
+		"{window.encodeURIComponent(state.query)}"
 
 	def update_history bang
 		let text
@@ -265,14 +271,19 @@ export default new class api
 		bang.history.splice(i, 1)
 		try
 			await put_link bang
+			state.bang_selection_index = Math.min state.bang_selection_index, sorted_bang_history.length - 1
 		catch e
 			err "updating bang history", e
 
 	def handle_bang
+		return if state.loading
+		if state.bang_selection_index > -1
+			state.query = sorted_bang_history[state.bang_selection_index]
+			state.bang_selection_index = -1
+			return
 		await increment_link_frequency bang
-		let to_navigate = encoded_bang_query
 		await update_history bang
-		window.location.href = to_navigate
+		window.location.href = encoded_bang_query
 
 	def unset_active_bang
 		state.active_bang = no
@@ -286,3 +297,22 @@ export default new class api
 
 	get sorted_bang_history
 		fzi.sort state.query, bang.history
+
+	def delete_bang_history
+		bang.history = []
+		try
+			await put_link bang
+			state.bang_selection_index = -1
+		catch e
+			err "deleting bang history", e
+		config.data.default_bang.history = []
+		config.save!
+
+	def delete_all_bang_history
+		return unless window.confirm "Are you sure you want to delete all bang history?"
+		try
+			await db.links.toCollection!.modify! do |link| link.history = []
+			await reload_db!
+		catch e
+			err "deleting some link histories", e
+		imba.commit!

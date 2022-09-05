@@ -144,3 +144,8 @@ tag app-settings
 
 					<.settings-button @click.if(!loading)=handle_toggle_light_theme>
 						config.data.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
+
+				<.settings-container>
+
+					<.settings-button @click=api.delete_all_bang_history>
+						"DELETE ALL BANG HISTORY"
