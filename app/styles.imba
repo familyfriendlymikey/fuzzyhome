@@ -1,7 +1,3 @@
-global css html
-	$effective-name-c:gray4
-	$effective-name-parens-c:gray4/80
-
 global css .dark
 	$appbg:#20222f
 	$bodybg:#20222f
@@ -40,8 +36,14 @@ global css .light
 	$button-bg:blue4/10
 	$button-hover-bg:blue4/20
 
+global css html
+	$effective-name-c:gray4
+	$effective-name-parens-c:gray4/80
+	bg:#20222f
+
 global css body
 	m:0 bd:0 p:0
+	bg:#20222f
 
 global css input
 	w:100% h:50px px:20px fl:1
