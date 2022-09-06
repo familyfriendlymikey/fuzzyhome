@@ -49,8 +49,8 @@ tag app-home
 				<input$home-input
 					autofocus
 					bind=state.query
-					@input.if(!state.loading)=handle_input
-					@paste.if(!state.loading)=handle_paste
+					@input=handle_input
+					@paste=handle_paste
 					@cut=api.handle_cut
 					disabled=state.loading
 					@blur=blur
@@ -64,7 +64,7 @@ tag app-home
 						css c:$text-c fs:20px ml:10px w:unset
 
 				else
-					<.side.right @click.if(!state.loading)=refs.settings.open>
+					<.side.right @click=refs.settings.open>
 						<svg src="../assets/settings.svg">
 
 			if state.active_bang or state.sorted_links.length < 1
