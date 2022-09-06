@@ -56,30 +56,43 @@ tag app-community-links
 
 	get tips
 		let result = []
+		let temp
 
-		result.push <>
-			<.tip
-				@click=close
-				@hotkey("esc").force=close
-			>
-				<.tip-hotkey> "Esc"
-				<.tip-content> "Exit Community Links"
+		temp = {
+				click_handler: close.bind(this)
+				hotkey_handler: close.bind(this)
+				hotkey: "esc"
+				hotkey_display_name: "Esc"
+				content: "Exit Community Links"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip
-				@click=add_community_link
-				@hotkey("shift+return").force=add_community_link
-			>
-				<.tip-hotkey> "Shift + Return Or Click"
-				<.tip-content> "Add To Your Links"
+		temp = {
+				click_handler: add_community_link.bind(this)
+				hotkey_handler: add_community_link.bind(this)
+				hotkey: "shift+return"
+				hotkey_display_name: "Shift + Return Or Click"
+				content: "Add To Your Links"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip.noclick
-				@hotkey('down').force=increment_selection_index
-				@hotkey('up').force=decrement_selection_index
-			>
-				<.tip-hotkey> "Up/Down Arrow"
-				<.tip-content> "Move Selection"
+		temp = {
+				click_handler: increment_selection_index.bind(this)
+				hotkey_handler: increment_selection_index.bind(this)
+				hotkey: 'down'
+				hotkey_display_name: "Down Arrow"
+				content: "Move Selection Down"
+		}
+		result.push temp
+
+		temp = {
+				click_handler: decrement_selection_index.bind(this)
+				hotkey_handler: decrement_selection_index.bind(this)
+				hotkey: 'up'
+				hotkey_display_name: "Up Arrow"
+				content: "Move Selection Up"
+		}
+		result.push temp
 
 		result
 
