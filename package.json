@@ -1,6 +1,6 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.1.42",
+	"version": "0.1.43",
 	"scripts": {
 		"build": "imba build app/index.html",
 		"publish-preview": "npx gh-pages --no-history --dotfiles --dist dist/ --branch preview",
