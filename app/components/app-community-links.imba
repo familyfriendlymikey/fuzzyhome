@@ -109,7 +109,7 @@ tag app-community-links
 							py:2px rd:5px cursor:pointer c:$text-c min-height:35px
 
 						if link.is_bang
-							css c:$bang-color
+							css c:$bang-c
 
 						<.link-left> link.name
 							css fl:1

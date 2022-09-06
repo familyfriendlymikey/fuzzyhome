@@ -20,7 +20,7 @@ tag app-link
 			css d:flex fld:row jc:space-between ai:center
 				px:16px py:11px rd:5px cursor:pointer c:$text-c
 			if link.is_bang
-				css c:$bang-color
+				css c:$bang-c
 
 			<.link-left>
 				css d:flex fl:3

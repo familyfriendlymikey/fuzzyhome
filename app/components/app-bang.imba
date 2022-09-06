@@ -96,7 +96,7 @@ tag app-bang
 
 				<.bang
 					.selected=(state.bang_selection_index is -1)
-					[c:$bang-color]=(state.bang_selection_index is -1)
+					[c:$bang-c]=(state.bang_selection_index is -1)
 					@pointerover=(state.bang_selection_index = -1)
 					@click=api.handle_bang
 				>
@@ -125,7 +125,7 @@ tag app-bang
 						<.item
 							@pointerover=(state.bang_selection_index = index)
 							@click=api.handle_bang
-							[c:$bang-color]=(state.bang_selection_index is index)
+							[c:$bang-c]=(state.bang_selection_index is index)
 							.selected=(state.bang_selection_index is index)
 						> item
 							css w:100% fs:17px c:$text-c rd:5px p:10px 10px

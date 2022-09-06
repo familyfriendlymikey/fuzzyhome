@@ -55,6 +55,8 @@ tag app-home
 					disabled=state.loading
 					@blur=blur
 				>
+					if state.query.startsWith "!"
+						css c:$bang-c
 
 				if (let m = api.math_result) isnt no
 					<.side.right@click=handle_click_copy(m)>
