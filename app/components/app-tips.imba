@@ -1,5 +1,32 @@
 import { chunk, fill } from 'lodash'
 
+tag app-tip
+
+	<self
+		@click.if(tip.click_handler)=tip.click_handler
+	>
+		css d:flex fld:column jc:start fl:1
+			bdr:1px solid
+			bc:$tip-bc
+			min-width:0 ta:center p:10px
+			cursor:pointer transition:background 100ms
+			@first ta:left rdl:3px
+			@last ta:right bd:none rdr:3px
+			@hover bg:$tip-hover-c
+		if tip.placeholder or not tip.click_handler
+			css
+				@hover @important cursor:auto bg:none
+
+		if tip.hotkey_handler and tip.hotkey
+			<@hotkey(tip.hotkey).force=tip.hotkey_handler>
+				css d:none
+
+		<.tip-hotkey> tip.hotkey_display_name
+			css fs:12px c:$tip-hotkey-c
+
+		<.tip-content> tip.content
+			css pt:2px fs:14px c:$tip-content-c
+
 tag app-tips
 
 	def unmount
@@ -19,45 +46,20 @@ tag app-tips
 		pad(chunks[-1])
 		chunks
 
-	css >>> .tip-row
-		d:flex fld:row w:100% fl:1
-		fs:20px fs:14px
-		jc:end ta:center
-
-	css >>> .tip
-		d:flex fld:column jc:start fl:1
-		bdr:1px solid
-		bc:$tip-bc
-		min-width:0 ta:center p:10px
-		cursor:pointer transition:background 100ms
-		@first ta:left rdl:3px
-		@last ta:right bd:none rdr:3px
-		@hover bg:$tip-hover-c
-
-	css >>> .tip.noclick, .tip.placeholder
-		@hover bg:none cursor:auto
-
-	css >>> .tip-hotkey
-		fs:12px c:$tip-hotkey-c
-
-	css >>> .tip-content
-		pt:2px fs:14px c:$tip-content-c
-
 	def render
 		let chunks = get_chunks!
 
 		<self[d:none]=!config.data.enable_tips>
 			css d:flex fld:column gap:15px
 
+			css .tip-row
+				d:flex fld:row w:100% fl:1
+				fs:20px fs:14px
+				jc:end ta:center
+
 			<.tip-row>
 				for tip in chunks[0]
-					<.tip
-						.noclick=(not tip.click_handler)
-						@click.if(tip.click_handler)=tip.click_handler
-						@hotkey(tip.hotkey).if(tip.hotkey_handler and tip.hotkey).force=tip.hotkey_handler
-					>
-						<.tip-hotkey> tip.hotkey_display_name
-						<.tip-content> tip.content
+					<app-tip tip=tip>
 
 			if chunks.length > 1
 
@@ -82,10 +84,4 @@ tag app-tips
 					for row in chunks.slice(1)
 						<.tip-row>
 							for tip in row
-								<.tip
-									.noclick=(not tip.click_handler)
-									@click.if(tip.click_handler)=tip.click_handler
-									@hotkey(tip.hotkey).if(tip.hotkey_handler and tip.hotkey).force=tip.hotkey_handler
-								>
-									<.tip-hotkey> tip.hotkey_display_name
-									<.tip-content> tip.content
+								<app-tip tip=tip>

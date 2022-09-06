@@ -34,36 +34,42 @@ tag app-edit
 
 	get tips
 		let result = []
+		let temp
 
-		result.push <>
-			<.tip
-				@click=handle_delete
-				@hotkey('shift+backspace').force=handle_delete
-			>
-				<.tip-hotkey> "Shift + Backspace"
-				<.tip-content> "Delete Link"
+		temp = {
+				click_handler: handle_delete.bind(this)
+				hotkey_handler: handle_delete.bind(this)
+				hotkey: 'shift+backspace'
+				hotkey_display_name: "Shift + Backspace"
+				content: "Delete Link"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip
-				@click=save
-				@hotkey('return').force=save
-			>
-				<.tip-hotkey> "Return"
-				<.tip-content> "Update Link"
+		temp = {
+				click_handler: save.bind(this)
+				hotkey_handler: save.bind(this)
+				hotkey: 'return'
+				hotkey_display_name: "Return"
+				content: "Update Link"
+		}
+		result.push temp
 
 		if link.is_bang
-			result.push <>
-				<.tip @click=handle_click_set_default_bang>
-					<.tip-hotkey> "Click"
-					<.tip-content> "Set Default Bang"
+			temp = {
+					click_handler: handle_click_set_default_bang.bind(this)
+					hotkey_display_name: "Click"
+					content: "Set Default Bang"
+			}
+			result.push temp
 
-		result.push <>
-			<.tip
-				@click=close
-				@hotkey('esc').force=close
-			>
-				<.tip-hotkey> "Esc"
-				<.tip-content> "Cancel"
+		temp = {
+				click_handler: close.bind(this)
+				hotkey_handler: close.bind(this)
+				hotkey: 'esc'
+				hotkey_display_name: "Esc"
+				content: "Cancel"
+		}
+		result.push temp
 
 		result
 

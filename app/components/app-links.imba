@@ -95,9 +95,8 @@ tag app-links
 
 			<app-tips$tips tips=tips>
 
-			unless $tips.show_more
-				<.links>
-					css ofy:scroll
-					for link, index in state.sorted_links
-						<app-link link=link index=index handle_edit=handle_edit>
+			<.links>
+				css ofy:scroll
+				for link, index in state.sorted_links
+					<app-link link=link index=index handle_edit=handle_edit>
 
