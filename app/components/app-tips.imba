@@ -70,11 +70,10 @@ tag app-tips
 					if show_more
 						css rd:0
 
-					css svg w:15px
-					if show_more
-						<svg src="../assets/chevron-down.svg">
-					else
-						<svg src="../assets/chevron-up.svg">
+					<svg src="../assets/chevron-down.svg">
+						css w:15px transition:transform 150ms
+						if show_more
+							css transform:rotate(180deg)
 
 				<.more>
 					css d:flex fld:column gap:15px
