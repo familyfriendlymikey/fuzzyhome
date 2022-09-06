@@ -50,7 +50,7 @@ tag app-tips
 		let chunks = get_chunks!
 
 		<self[d:none]=!config.data.enable_tips>
-			css d:flex fld:column gap:15px
+			css d:flex fld:column gap:15px max-height:75%
 
 			css .tip-row
 				d:flex fld:row w:100% fl:1
@@ -76,7 +76,7 @@ tag app-tips
 							css transform:rotate(180deg)
 
 				<.more>
-					css d:flex fld:column gap:15px
+					css d:flex fld:column gap:15px ofy:auto 
 					unless show_more
 						css d:none
 

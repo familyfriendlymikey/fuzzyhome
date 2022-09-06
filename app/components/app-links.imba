@@ -96,7 +96,7 @@ tag app-links
 			<app-tips$tips tips=tips>
 
 			<.links>
-				css ofy:scroll
+				css ofy:auto
 				for link, index in state.sorted_links
 					<app-link link=link index=index handle_edit=handle_edit>
 
