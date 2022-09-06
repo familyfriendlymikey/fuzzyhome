@@ -5,8 +5,19 @@ tag app-links
 
 		result.push <>
 			<.tip
+				@click=api.handle_click_link
+				@hotkey('return').force=api.handle_click_link
+			>
+				<.tip-hotkey> "Return"
+				if api.selected_link.is_bang
+					<.tip-content> "Use Bang"
+				else
+					<.tip-content> "Navigate To Link"
+
+		result.push <>
+			<.tip
 				@click=api.handle_add_link
-				@hotkey('shift+return').capture.if(!state.loading)=api.handle_add_link
+				@hotkey('shift+return').force=api.handle_add_link
 			>
 				<.tip-hotkey> "Shift + Return"
 				<.tip-content.ellipsis>
@@ -23,38 +34,30 @@ tag app-links
 
 		result.push <>
 			<.tip
-				@click=api.handle_click_link
-				@hotkey('return').force.if(!loading)=api.handle_click_link
-			>
-				<.tip-hotkey> "Return"
-				<.tip-content> "Navigate To Link"
-
-		result.push <>
-			<.tip
 				@click=handle_edit
-				@hotkey('shift+backspace').capture.if(!state.loading)=handle_edit
+				@hotkey('shift+backspace').force=handle_edit
 			>
 				<.tip-hotkey> "Shift + Backspace"
 				<.tip-content> "Edit Link"
 
 		result.push <>
 			<.tip
-				@click.if(!state.loading)=api.toggle_effective_names
-				@hotkey('tab').capture.if(!state.loading)=api.toggle_effective_names
+				@click=api.toggle_effective_names
+				@hotkey('tab').force=api.toggle_effective_names
 			>
 				<.tip-hotkey> "Tab"
 				<.tip-content> "Toggle Effective Names"
 
 		result.push <>
 			<.tip
-				@click.if(!state.loading)=refs.settings.open
-				@hotkey('shift+tab').capture.if(!state.loading)=refs.settings.open
+				@click=refs.settings.open
+				@hotkey('shift+tab').force=refs.settings.open
 			>
 				<.tip-hotkey> "Shift + Tab"
 				<.tip-content> "Toggle Settings"
 
 		result.push <>
-			<.tip @click.if(!loading)=api.handle_cut>
+			<.tip @click=api.handle_cut>
 				if api.math_result
 					<.tip-hotkey> "Cut (Math, If No Selection)"
 					<.tip-content> "Cut Math Result"
@@ -64,8 +67,8 @@ tag app-links
 
 		result.push <>
 			<.tip.noclick
-				@hotkey('down').capture.if(!state.loading)=api.increment_link_selection_index
-				@hotkey('up').capture.if(!state.loading)=api.decrement_link_selection_index
+				@hotkey('down').force=api.increment_link_selection_index
+				@hotkey('up').force=api.decrement_link_selection_index
 			>
 				<.tip-hotkey> "Up/Down Arrow"
 				<.tip-content> "Move Selection"
