@@ -13,7 +13,7 @@ tag app-home
 		global.setTimeout(&, 0) do
 			return if api.math_result isnt no
 			bang ||= config.data.default_bang
-			handle_bang!
+			api.handle_bang!
 
 	def handle_click_copy s
 		try
