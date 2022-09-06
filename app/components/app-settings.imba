@@ -33,7 +33,7 @@ tag app-settings
 		config.save!
 		active = no
 
-	def handle_click_import e
+	def handle_import e
 
 		def handle_import
 			let errors = []
@@ -53,13 +53,14 @@ tag app-settings
 			if errors.length > 0
 				err "importing some links", errors.join("\n\n")
 
-		loading = yes
+		state.loading = yes
 		await handle_import!
 		active = no
-		loading = no
+		state.loading = no
+		close!
 
 	def handle_click_export
-		loading = yes
+		state.loading = yes
 		await api.reload_db!
 		let links = state.links.map do |link|
 			api.construct_link_text link
@@ -69,7 +70,7 @@ tag app-settings
 		let filename = "fuzzyhome_v{version}_{date}_{time}.txt"
 		download(links.join("\n"), filename, "text/plain")
 		active = no
-		loading = no
+		state.loading = no
 
 	def render
 
@@ -114,7 +115,7 @@ tag app-settings
 						"IMPORT"
 						<input[d:none]
 							disabled=state.loading
-							@change=handle_click_import
+							@change=handle_import
 							@click=(this.value = '')
 							type="file"
 						>
@@ -148,5 +149,5 @@ tag app-settings
 
 				<.settings-container>
 
-					<.settings-button @click=api.delete_all_bang_history>
+					<.settings-button @click=(api.delete_all_bang_history! and close!)>
 						"DELETE ALL BANG HISTORY"
