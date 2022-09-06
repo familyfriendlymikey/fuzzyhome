@@ -75,8 +75,8 @@ tag app-community-links
 
 		result.push <>
 			<.tip.noclick
-				@hotkey('down').capture.if(!state.loading)=increment_selection_index
-				@hotkey('up').capture.if(!state.loading)=decrement_selection_index
+				@hotkey('down').force=increment_selection_index
+				@hotkey('up').force=decrement_selection_index
 			>
 				<.tip-hotkey> "Up/Down Arrow"
 				<.tip-content> "Move Selection"

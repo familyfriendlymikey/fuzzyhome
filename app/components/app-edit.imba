@@ -38,7 +38,7 @@ tag app-edit
 		result.push <>
 			<.tip
 				@click=handle_delete
-				@hotkey('shift+backspace').capture.if(!state.loading)=handle_delete
+				@hotkey('shift+backspace').force=handle_delete
 			>
 				<.tip-hotkey> "Shift + Backspace"
 				<.tip-content> "Delete Link"
@@ -46,7 +46,7 @@ tag app-edit
 		result.push <>
 			<.tip
 				@click=save
-				@hotkey('return').capture.if(!state.loading)=save
+				@hotkey('return').force=save
 			>
 				<.tip-hotkey> "Return"
 				<.tip-content> "Update Link"
@@ -60,7 +60,7 @@ tag app-edit
 		result.push <>
 			<.tip
 				@click=close
-				@hotkey('esc').capture.if(!state.loading)=close
+				@hotkey('esc').force=close
 			>
 				<.tip-hotkey> "Esc"
 				<.tip-content> "Cancel"
