@@ -1,82 +1,90 @@
 tag app-links
 
+	def handle_edit
+		return unless state.sorted_links.length > 0
+		refs.edit.open api.selected_link
+
 	get tips
 		let result = []
+		let temp
 
-		result.push <>
-			<.tip
-				@click=api.handle_click_link
-				@hotkey('return').force=api.handle_click_link
-			>
-				<.tip-hotkey> "Return"
-				if api.selected_link.is_bang
-					<.tip-content> "Use Bang"
-				else
-					<.tip-content> "Navigate To Link"
+		temp = {
+			click_handler: api.handle_click_link.bind(api)
+			hotkey_handler: api.handle_click_link.bind(api)
+			hotkey: 'return'
+			hotkey_display_name: 'Return'
+		}
+		temp.content = api.selected_link.is_bang ? "Use Bang" : "Navigate To Link"
+		result.push temp
 
-		result.push <>
-			<.tip
-				@click=api.handle_add_link
-				@hotkey('shift+return').force=api.handle_add_link
-			>
-				<.tip-hotkey> "Shift + Return"
-				<.tip-content.ellipsis>
-					<span[ws:pre]> "Create Link "
-					let sq = state.query.trim!.split /\s+/
-					if sq.length >= 2
-						let url = sq.pop!
-						<span> '"'
-						<span> sq.join " "
-						<span[c:blue3 ws:pre]> " {url}"
-						<span> '"'
-					else
-						<span> "\"{sq.join " "}\""
+		temp = {
+			click_handler: api.handle_add_link.bind(api)
+			hotkey_handler: api.handle_add_link.bind(api)
+			hotkey: 'shift+return'
+			hotkey_display_name: 'Shift + Return'
+			content: "Create Link \"{state.query.trim!}\""
+		}
+		result.push temp
 
-		result.push <>
-			<.tip
-				@click=handle_edit
-				@hotkey('shift+backspace').force=handle_edit
-			>
-				<.tip-hotkey> "Shift + Backspace"
-				<.tip-content> "Edit Link"
+		temp = {
+				click_handler: handle_edit.bind(this)
+				hotkey_handler: handle_edit.bind(this)
+				hotkey: 'shift+backspace'
+				hotkey_display_name: "Shift + Backspace"
+				content: "Edit Link"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip
-				@click=api.toggle_effective_names
-				@hotkey('tab').force=api.toggle_effective_names
-			>
-				<.tip-hotkey> "Tab"
-				<.tip-content> "Toggle Effective Names"
+		temp = {
+				click_handler: api.toggle_effective_names.bind(api)
+				hotkey_handler: api.toggle_effective_names.bind(api)
+				hotkey: 'tab'
+				hotkey_display_name: "Tab"
+				content: "Toggle Effective Names"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip
-				@click=refs.settings.open
-				@hotkey('shift+tab').force=refs.settings.open
-			>
-				<.tip-hotkey> "Shift + Tab"
-				<.tip-content> "Toggle Settings"
+		temp = {
+				click_handler: (do refs.settings.open!).bind(this)
+				hotkey_handler: (do refs.settings.open!).bind(this)
+				hotkey: 'shift+tab'
+				hotkey_display_name: "Shift + Tab"
+				content: "Toggle Settings"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip @click=api.handle_cut>
-				if api.math_result
-					<.tip-hotkey> "Cut (Math, If No Selection)"
-					<.tip-content> "Cut Math Result"
-				else
-					<.tip-hotkey> "Cut (If No Selection)"
-					<.tip-content> "Cut All Text"
+		temp = {
+				click_handler: api.handle_cut.bind(api)
+		}
+		if api.math_result
+			temp.hotkey_display_name = "Cut (If No Selection)"
+			temp.content = "Cut All Text"
+		else
+			temp.hotkey_display_name = "Cut (Math, If No Selection)"
+			temp.content = "Cut Math Result"
+		result.push temp
 
-		result.push <>
-			<.tip.noclick
-				@hotkey('down').force=api.increment_link_selection_index
-				@hotkey('up').force=api.decrement_link_selection_index
-			>
-				<.tip-hotkey> "Up/Down Arrow"
-				<.tip-content> "Move Selection"
+		temp = {
+				hotkey_handler: api.increment_link_selection_index.bind(api)
+				hotkey: 'down'
+				hotkey_display_name: "Down Arrow"
+				content: "Move Selection Down"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip.noclick>
-				<.tip-hotkey> "Paste (If Input Empty)"
-				<.tip-content> "Instant Search"
+		temp = {
+				hotkey_handler: api.decrement_link_selection_index.bind(api)
+				hotkey: 'up'
+				hotkey_display_name: "Up Arrow"
+				content: "Move Selection Up"
+		}
+		result.push temp
+
+		temp = {
+				hotkey_display_name: "Paste (If Input Empty)"
+				content: "Instant Search"
+		}
+		result.push temp
 
 		result
 
@@ -91,5 +99,5 @@ tag app-links
 				<.links>
 					css ofy:scroll
 					for link, index in state.sorted_links
-						<app-link link=link index=index>
+						<app-link link=link index=index handle_edit=handle_edit>
 

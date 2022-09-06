@@ -8,13 +8,10 @@ tag app-tips
 	def toggle
 		show_more = not show_more
 
-	get placeholder
-		<.tip.placeholder>
-
 	def pad arr
 		let i = arr.length
 		while i < 3
-			arr.push placeholder
+			arr.push { placeholder: yes }
 			i += 1
 
 	def get_chunks
@@ -54,7 +51,13 @@ tag app-tips
 
 			<.tip-row>
 				for tip in chunks[0]
-					<> tip
+					<.tip
+						.noclick=(not tip.click_handler)
+						@click.if(tip.click_handler)=tip.click_handler
+						@hotkey(tip.hotkey).if(tip.hotkey_handler and tip.hotkey).force=tip.hotkey_handler
+					>
+						<.tip-hotkey> tip.hotkey_display_name
+						<.tip-content> tip.content
 
 			if chunks.length > 1
 
@@ -79,4 +82,10 @@ tag app-tips
 					for row in chunks.slice(1)
 						<.tip-row>
 							for tip in row
-								<> tip
+								<.tip
+									.noclick=(not tip.click_handler)
+									@click.if(tip.click_handler)=tip.click_handler
+									@hotkey(tip.hotkey).if(tip.hotkey_handler and tip.hotkey).force=tip.hotkey_handler
+								>
+									<.tip-hotkey> tip.hotkey_display_name
+									<.tip-content> tip.content

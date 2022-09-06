@@ -4,8 +4,7 @@ tag app-home
 		$home-input.focus!
 
 	def blur
-		# setTimeout(&, 100) do $home-input.focus!
-		p!
+		setTimeout(&, 100) do $home-input.focus!
 
 	def handle_paste e
 		return unless config.data.enable_search_on_paste

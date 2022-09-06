@@ -316,4 +316,3 @@ export default new class api
 		catch e
 			err "deleting some link histories", e
 		imba.commit!
-

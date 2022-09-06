@@ -7,10 +7,6 @@ tag app-link
 	def handle_pin link
 		api.pin_link link
 
-	def handle_edit
-		return unless state.sorted_links.length > 0
-		refs.edit.open api.selected_link
-
 	def render
 		<self
 			@pointerover=api.set_link_selection_index(index)
@@ -55,7 +51,7 @@ tag app-link
 
 					css .link-button svg w:15px
 
-					<.link-button@click.prevent.stop=handle_edit(link)>
+					<.link-button@click.prevent.stop=handle_edit>
 						<svg src='../assets/edit-2.svg'>
 
 					<.link-button@click.prevent.stop=handle_delete(link)>
