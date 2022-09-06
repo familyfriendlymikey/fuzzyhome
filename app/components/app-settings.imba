@@ -29,7 +29,7 @@ tag app-settings
 		active = no
 
 	def handle_toggle_light_theme
-		config.data.enable_dark_theme = not config.data.enable_dark_theme
+		config.data.enable_light_theme = not config.data.enable_light_theme
 		config.save!
 		active = no
 
@@ -84,11 +84,12 @@ tag app-settings
 
 			css .settings-button, .settings-container button
 				d:flex fld:column jc:center ai:center fl:1
-				bg:none c:purple4 bd:none cursor:pointer fs:14px
-				bg:purple4/10 rd:5px
+				bg:none bd:none cursor:pointer fs:14px
+				rd:5px
 				transition:background 100ms
 				h:100%
-				@hover bg:purple4/20
+				bg:$button-bg c:$button-c
+				@hover bg:$button-hover-bg
 
 			if refs.community-links.active
 				<app-community-links>
@@ -104,7 +105,7 @@ tag app-settings
 
 				<.settings-container>
 
-					<.settings-button @click.if(!loading)=(refs.community-links.open! and close!)>
+					<.settings-button @click=(refs.community-links.open! and close!)>
 						"VIEW COMMUNITY LINKS"
 
 				<.settings-container>
@@ -118,15 +119,15 @@ tag app-settings
 							type="file"
 						>
 
-					<.settings-button @click.if(!loading)=handle_click_export>
+					<.settings-button @click=handle_click_export>
 						"EXPORT"
 
 				<.settings-container>
 
-					<.settings-button @click.if(!loading)=handle_click_github>
+					<.settings-button @click=handle_click_github>
 						"TUTORIAL"
 
-					<.settings-button @click.if(!loading)=handle_click_github>
+					<.settings-button @click=handle_click_github>
 						"GITHUB"
 
 				<.settings-container>
@@ -142,8 +143,8 @@ tag app-settings
 					<.settings-button @click=handle_click_toggle_search_on_paste>
 						config.data.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
 
-					<.settings-button @click.if(!loading)=handle_toggle_light_theme>
-						config.data.enable_dark_theme ? "DISABLE DARK THEME" : "ENABLE DARK THEME"
+					<.settings-button @click=config.cycle_theme>
+						"THEME: {config.data.theme.toUpperCase!}"
 
 				<.settings-container>
 

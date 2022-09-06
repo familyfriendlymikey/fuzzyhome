@@ -1,15 +1,57 @@
+global css html
+	$effective-name-c:gray4
+	$effective-name-parens-c:gray4/80
+
+global css .dark
+	$appbg:#20222f
+	$bodybg:#20222f
+	$selected-color:blue3/5
+	$bang-color:#fad4ab
+	$text-c:blue3
+	$input-bg:purple4/10
+	$input-c:blue3
+	$input-caret-color:blue3
+	$input-bc:purple4
+	$tip-hotkey-c:purple3/50
+	$tip-content-c:purple3
+	$tip-hover-c:purple3/3
+	$tip-bc:blue3/10
+	$button-c:purple3/90
+	$button-dim-c:purple3/50
+	$button-bg:purple4/10
+	$button-hover-bg:purple4/20
+
+global css .light
+	$bodybg:#ececec
+	$appbg:#fff
+	$selected-color:blue5/7
+	$bang-color:#ff7070
+	$text-c:#3c3c3c
+	$input-bg:blue4/10
+	$input-c:blue3
+	$input-caret-color:blue3
+	$input-bc:blue4
+	$tip-hotkey-c:blue4/80
+	$tip-content-c:blue5
+	$tip-hover-c:black/3
+	$tip-bc:black/10
+	$button-c:blue5/90
+	$button-dim-c:blue5/50
+	$button-bg:blue4/10
+	$button-hover-bg:blue4/20
+
 global css body
-	d:flex fld:column jc:start ai:center
-	m:0 w:100% h:100% bg:#20222f
-	ff:sans-serif fw:1
-	user-select:none
+	m:0 bd:0 p:0
 
 global css input
 	w:100% h:50px px:20px fl:1
 	fs:20px ta:center
-	bd:1px solid purple4
-	bg:purple4/10 c:blue3 caret-color:blue3
+	bd:1px solid
 	outline:none rd:5px
+	bg:$input-bg
+	bc:$input-bc
+	c:$text-c
+	caret-color:$input-caret-color
 
 global css a
 	td:none
@@ -21,7 +63,7 @@ global css .disabled $main-input
 	@important bg:gray4/10 bc:gray4
 
 global css .selected
-	bg:blue3/5
+	bg:$selected-color
 
 global css .ellipsis
 	of:hidden text-overflow:ellipsis white-space:nowrap

@@ -6,8 +6,6 @@ p "fuzzyhome version {version}"
 # import sw from './sw.imba?serviceworker'
 # navigator..serviceWorker..register(sw).then! do |reg| reg.update!
 
-p "hehe"
-
 import { nanoid } from 'nanoid'
 import { err } from './utils'
 
@@ -74,33 +72,44 @@ tag app
 
 	def render
 
-		<self.disabled=state.loading>
+		<self
+			.light=(config.theme is "light")
+			.dark=(config.theme is "dark")
+			.disabled=state.loading
+		>
 			css d:flex fld:column jc:start ai:center
-				w:80vw max-width:700px max-height:80vh
-				bxs:0px 0px 10px rgba(0,0,0,0.35)
-				box-sizing:border-box p:30px rd:10px mt:10vh
+				m:0 w:100% h:100% bg:$bodybg
+				ff:sans-serif fw:1
+				user-select:none
 
-			if fatal_error
-				<.fatal>
-					css c:blue2
-					"""
-						There was an error state.loading the database.
-						This could be due to a user setting
-						disallowing local storage, or a random error.
-						Consider refreshing.
-						Check developer console for more information.
-					"""
+			<.main>
+				css d:flex fld:column jc:start ai:center
+					bg:$appbg
+					w:80vw max-width:700px max-height:80vh
+					bxs:0px 0px 10px rgba(0,0,0,0.35)
+					box-sizing:border-box p:30px rd:10px mt:10vh
 
-			elif $acl.active
-				<app-community-links$acl>
+				if fatal_error
+					<.fatal>
+						css c:$text-c
+						"""
+							There was an error state.loading the database.
+							This could be due to a user setting
+							disallowing local storage, or a random error.
+							Consider refreshing.
+							Check developer console for more information.
+						"""
 
-			elif $as.active
-				<app-settings$as>
+				elif $acl.active
+					<app-community-links$acl>
 
-			elif $ae.active
-				<app-edit$ae>
+				elif $as.active
+					<app-settings$as>
 
-			else
-				<app-home$ah>
+				elif $ae.active
+					<app-edit$ae>
+
+				else
+					<app-home$ah>
 
 imba.mount <app>

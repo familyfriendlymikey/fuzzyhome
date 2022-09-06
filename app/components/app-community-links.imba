@@ -106,10 +106,10 @@ tag app-community-links
 						@click=add_community_link
 					>
 						css d:flex fld:row jc:space-between ai:center px:16px
-							py:2px rd:5px cursor:pointer c:blue3 min-height:35px
+							py:2px rd:5px cursor:pointer c:$text-c min-height:35px
 
 						if link.is_bang
-							css c:#FAD4AB
+							css c:$bang-color
 
 						<.link-left> link.name
 							css fl:1

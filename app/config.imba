@@ -14,6 +14,7 @@ export default new class config
 		this.data.enable_search_on_paste ??= yes
 		this.data.enable_dark_theme ??= yes
 		this.data.enable_effective_names ??= yes
+		this.data.theme ??= "dark"
 
 		this.data.default_bang ??= {}
 		this.data.default_bang.name ??= "!google"
@@ -26,6 +27,27 @@ export default new class config
 		this.data.default_bang.is_bang ??= yes
 
 		p "config:", this.data
+
+	def cycle_theme
+		if this.data.theme is "dark"
+			this.data.theme = "light"
+		elif this.data.theme is "light"
+			this.data.theme = "timed"
+		else
+			this.data.theme = "dark"
+		save!
+
+	get theme
+		if this.data.theme is "light"
+			"light"
+		elif this.data.theme is "timed"
+			let hour = new Date!.getHours!
+			if hour > 18 or hour < 8
+				"dark"
+			else
+				"light"
+		else
+			"dark"
 
 	def set_default_bang link
 		unless link.is_bang

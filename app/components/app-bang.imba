@@ -96,12 +96,12 @@ tag app-bang
 
 				<.bang
 					.selected=(state.bang_selection_index is -1)
-					[c:#FAD4AB]=(state.bang_selection_index is -1)
+					[c:$bang-color]=(state.bang_selection_index is -1)
 					@pointerover=(state.bang_selection_index = -1)
 					@click=api.handle_bang
 				>
 					css d:flex fld:row jc:space-between ai:center
-						px:16px py:11px rd:5px cursor:pointer c:blue3
+						px:16px py:11px rd:5px cursor:pointer c:$text-c
 
 					<.link-left>
 						css d:flex fl:1 ofy:hidden
@@ -125,8 +125,8 @@ tag app-bang
 						<.item
 							@pointerover=(state.bang_selection_index = index)
 							@click=api.handle_bang
-							[c:#FAD4AB]=(state.bang_selection_index is index)
+							[c:$bang-color]=(state.bang_selection_index is index)
 							.selected=(state.bang_selection_index is index)
 						> item
-							css w:100% fs:17px c:blue3 rd:5px p:10px 10px
+							css w:100% fs:17px c:$text-c rd:5px p:10px 10px
 								box-sizing:border-box cursor:pointer

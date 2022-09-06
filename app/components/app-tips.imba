@@ -26,25 +26,25 @@ tag app-tips
 		d:flex fld:row w:100% fl:1
 		fs:20px fs:14px
 		jc:end ta:center
-		bg:#20222f c:purple4
 
 	css >>> .tip
 		d:flex fld:column jc:start fl:1
-		bdr:1px solid blue3/10
+		bdr:1px solid
+		bc:$tip-bc
 		min-width:0 ta:center p:10px
 		cursor:pointer transition:background 100ms
 		@first ta:left rdl:3px
 		@last ta:right bd:none rdr:3px
-		@hover bg:purple3/3
+		@hover bg:$tip-hover-c
 
 	css >>> .tip.noclick, .tip.placeholder
 		@hover bg:none cursor:auto
 
 	css >>> .tip-hotkey
-		fs:12px c:purple3/50
+		fs:12px c:$tip-hotkey-c
 
 	css >>> .tip-content
-		pt:2px fs:14px c:purple3
+		pt:2px fs:14px c:$tip-content-c
 
 	def render
 		let chunks = get_chunks!
@@ -59,9 +59,9 @@ tag app-tips
 			if chunks.length > 1
 
 				<@click=toggle>
-					css w:100% d:flex ja:center c:purple3 rdb:4px cursor:pointer
+					css w:100% d:flex ja:center c:$button-c rdb:4px cursor:pointer
 						transition:background 100ms
-						@hover bg:purple3/3
+						@hover bg:$tip-hover-c
 					if show_more
 						css rd:0
 

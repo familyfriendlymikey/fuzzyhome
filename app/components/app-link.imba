@@ -7,9 +7,9 @@ tag app-link
 			.selected=(index is state.link_selection_index)
 		>
 			css d:flex fld:row jc:space-between ai:center
-				px:16px py:11px rd:5px cursor:pointer c:blue3
+				px:16px py:11px rd:5px cursor:pointer c:$text-c
 			if link.is_bang
-				css c:#FAD4AB
+				css c:$bang-color
 
 			<.link-left>
 				css d:flex fl:1
@@ -22,8 +22,8 @@ tag app-link
 
 				if link.display_name isnt link.name and config.data.enable_effective_names
 					<.name>
-						css d:flex ja:center c:gray4 ml:10px fs:14px
-						css .parens fs:10px c:gray4/80
+						css d:flex ja:center c:$effective-name-c ml:10px fs:14px
+						css .parens fs:10px c:$effective-name-parens-c
 
 						<span.parens> "("
 						<span> link.name
@@ -36,7 +36,7 @@ tag app-link
 
 				<.link-buttons .buttons-disabled=!config.data.enable_buttons>
 					css d:flex fld:row jc:start ai:center pr:25px gap:5px
-					css .link-button visibility:hidden rd:3px c:purple4 fs:15px cursor:pointer px:3px
+					css .link-button visibility:hidden rd:3px c:$button-c fs:15px cursor:pointer px:3px
 					css .link-button svg w:15px
 
 					<.link-button@click.prevent.stop=handle_click_edit(link)>
@@ -47,7 +47,7 @@ tag app-link
 
 					<.link-button
 						@click.prevent.stop=handle_click_pin(link)
-						[visibility:visible c:purple3/50]=(link.is_pinned and (index isnt state.link_selection_index or not config.data.enable_buttons))
+						[visibility:visible c:$button-dim-c]=(link.is_pinned and (index isnt state.link_selection_index or not config.data.enable_buttons))
 					> <svg src='../assets/star.svg'>
 
 				<.frequency> link.frequency

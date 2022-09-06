@@ -33,7 +33,7 @@ tag app-home
 
 			<.header>
 				css d:flex fld:row w:100%
-				css .side c:purple3/90 fs:15px d:flex ja:center w:30px cursor:pointer
+				css .side c:$button-c fs:15px d:flex ja:center w:30px cursor:pointer
 				css .side svg w:15px d:flex
 				css .left jc:left
 				css .right jc:right
@@ -59,7 +59,7 @@ tag app-home
 				if (let m = api.math_result) isnt no
 					<.side.right@click=handle_click_copy(m)>
 						"= {Math.round(m * 100)/100}"
-						css c:blue3 fs:20px ml:10px w:unset
+						css c:$text-c fs:20px ml:10px w:unset
 
 				else
 					<.side.right @click.if(!state.loading)=refs.settings.open>
