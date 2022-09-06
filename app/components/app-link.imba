@@ -1,5 +1,16 @@
 tag app-link
 
+	def handle_delete link
+		return unless window.confirm "Do you really want to delete {link..display_name}?"
+		api.delete_link link
+
+	def handle_pin link
+		api.pin_link link
+
+	def handle_edit
+		return unless state.sorted_links.length > 0
+		refs.edit.open api.selected_link
+
 	def render
 		<self
 			@pointerover=api.set_link_selection_index(index)
@@ -12,7 +23,7 @@ tag app-link
 				css c:$bang-color
 
 			<.link-left>
-				css d:flex fl:1
+				css d:flex fl:3
 
 				<img.link-icon src=link.icon>
 					css w:20px h:20px mr:10px rd:3px
@@ -30,25 +41,31 @@ tag app-link
 						<span.parens> ")"
 
 			<.link-right>
-				css d:flex fld:row jc:space-between ai:center
+				css fl:1 d:flex fld:row jc:space-between ai:center
+
 				css .buttons-disabled .link-button visibility:hidden
 				css .selected .link-button visibility:visible
 
 				<.link-buttons .buttons-disabled=!config.data.enable_buttons>
-					css d:flex fld:row jc:start ai:center pr:25px gap:5px
+					css d:flex fld:row jc:start ai:center gap:5px
+
 					css .link-button visibility:hidden rd:3px c:$button-c fs:15px cursor:pointer px:3px
+					if index is state.link_selection_index
+						css .link-button visibility:visible
+
 					css .link-button svg w:15px
 
-					<.link-button@click.prevent.stop=handle_click_edit(link)>
+					<.link-button@click.prevent.stop=handle_edit(link)>
 						<svg src='../assets/edit-2.svg'>
 
-					<.link-button@click.prevent.stop=handle_click_delete(link)>
+					<.link-button@click.prevent.stop=handle_delete(link)>
 						<svg src='../assets/trash.svg'>
 
-					<.link-button
-						@click.prevent.stop=handle_click_pin(link)
-						[visibility:visible c:$button-dim-c]=(link.is_pinned and (index isnt state.link_selection_index or not config.data.enable_buttons))
-					> <svg src='../assets/star.svg'>
+					<.link-button @click.prevent.stop=handle_pin(link)>
+						if link.is_pinned
+							css visibility:visible c:$button-dim-c
+
+						<svg src='../assets/star.svg'>
 
 				<.frequency> link.frequency
 					css fs:15px ml:7px

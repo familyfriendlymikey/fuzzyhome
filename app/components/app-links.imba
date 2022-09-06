@@ -1,16 +1,5 @@
 tag app-links
 
-	def handle_click_delete link
-		return unless window.confirm "Do you really want to delete {link..display_name}?"
-		handle_delete link
-
-	def handle_click_pin link
-		api.pin_link link
-
-	def handle_edit
-		return unless state.sorted_links.length > 0
-		refs.edit.open api.selected_link
-
 	get tips
 		let result = []
 
