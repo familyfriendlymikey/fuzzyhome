@@ -5,78 +5,75 @@ tag app-bang
 
 	get tips
 		let result = []
+		let temp
 
+		temp = {
+				click_handler: api.handle_bang.bind(api)
+				hotkey_handler: api.handle_bang.bind(api)
+				hotkey: 'return'
+				hotkey_display_name: "Return"
+		}
 		if state.bang_selection_index > -1
-			result.push <>
-				<.tip
-					@click=api.handle_bang
-					@hotkey('return').force=api.handle_bang
-				>
-					<.tip-hotkey> "Return"
-					<.tip-content> "Use History Item"
+			temp.content = "Use History Item"
 		else
-			result.push <>
-				<.tip
-					@click=api.handle_bang
-					@hotkey('return').force=api.handle_bang
-				>
-					<.tip-hotkey> "Return"
-					<.tip-content> "Search"
+			temp.content = "Search"
+		result.push temp
 
-		result.push <>
-			<.tip.ellipsis
-				@click=api.handle_add_link
-				@hotkey('shift+return').force=api.handle_add_link
-			>
-				<.tip-hotkey> "Shift + Return"
-				<.tip-content.ellipsis>
-					<span[ws:pre]> "Create Link "
-					let sq = state.query.trim!.split /\s+/
-					if sq.length >= 2
-						let url = sq.pop!
-						<span> '"'
-						<span> sq.join " "
-						<span[c:blue3 ws:pre]> " {url}"
-						<span> '"'
-					else
-						<span> "\"{sq.join " "}\""
+		temp = {
+			click_handler: api.handle_add_link.bind(api)
+			hotkey_handler: api.handle_add_link.bind(api)
+			hotkey: 'shift+return'
+			hotkey_display_name: 'Shift + Return'
+			content: "Create Link \"{state.query.trim!}\""
+		}
+		result.push temp
 
 		if state.bang_selection_index > -1
-			result.push <>
-				<.tip
-					@click=api.delete_bang_history_item
-					@hotkey('shift+backspace').force=api.delete_bang_history_item
-				>
-					<.tip-hotkey> "Shift + Backspace"
-					<.tip-content> "Delete History Item"
+			temp = {
+					click_handler: api.delete_bang_history_item.bind(api)
+					hotkey_handler: api.delete_bang_history_item.bind(api)
+					hotkey: 'shift+backspace'
+					hotkey_display_name: "Shift + Backspace"
+					content: "Delete History Item"
+			}
+			result.push temp
 
 		if state.active_bang
-			result.push <>
-				<.tip
-					@click=api.unset_active_bang
-					@hotkey('esc').force=api.unset_active_bang
-				>
-					<.tip-hotkey> "Esc"
-					<.tip-content> "Back"
+			temp = {
+					click_handler: api.unset_active_bang.bind(api)
+					hotkey_handler: api.unset_active_bang.bind(api)
+					hotkey: 'esc'
+					hotkey_display_name: "Esc"
+					content: "Back"
+			}
+			result.push temp
 
-		result.push <>
-			<.tip@click=(api.delete_bang_history! and $tips.show_more = no)>
-				<.tip-hotkey> "Click"
-				<.tip-content> "Delete Bang History"
+		def handle_delete_bang_history
+			api.delete_bang_history!
+			$tips.show_more = no
+		temp = {
+				click_handler: handle_delete_bang_history
+				hotkey_display_name: "Click"
+				content: "Delete Bang History"
+		}
+		result.push temp
 
-		result.push <>
-			<.tip @click=api.handle_cut>
-				if api.math_result
-					<.tip-hotkey> "Cut (Math, If No Selection)"
-					<.tip-content> "Cut Math Result"
-				else
-					<.tip-hotkey> "Cut (If No Selection)"
-					<.tip-content> "Cut All Text"
+		temp = {
+				click_handler: api.handle_cut.bind(api)
+		}
+		if api.math_result
+			temp.hotkey_display_name = "Cut (If No Selection)"
+			temp.content = "Cut All Text"
+		else
+			temp.hotkey_display_name = "Cut (Math, If No Selection)"
+			temp.content = "Cut Math Result"
+		result.push temp
 
-		result.push <>
-			<.tip.noclick>
-				<.tip-hotkey> "Paste (If Input Empty)"
-				<.tip-content> "Instant Search"
+		temp = {
+				hotkey_display_name: "Paste (If Input Empty)"
+				content: "Instant Search"
+		}
+		result.push temp
 
 		result
 
