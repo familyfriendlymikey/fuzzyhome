@@ -7,7 +7,7 @@
 		"publish-release": "npx gh-pages --no-history --dotfiles --dist dist/ --branch release",
 		"start": "imba -w app/index.html",
 		"static": "npm run build && cd dist && python3 -m http.server",
-		"preview": "npm version patch && npm run build && npm run publish-preview",
+		"preview": "npm run build && npm run publish-preview",
 		"deploy-only-after-preview": "npm run publish-release"
 	},
 	"dependencies": {

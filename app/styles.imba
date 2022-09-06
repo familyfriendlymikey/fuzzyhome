@@ -25,7 +25,7 @@ global css .light
 	$text-c:#3c3c3c
 	$input-bg:blue4/10
 	$input-c:blue3
-	$input-caret-c:blue3
+	$input-caret-c:#3c3c3c
 	$input-bc:blue4
 	$tip-hotkey-c:blue4/80
 	$tip-content-c:blue5
