@@ -1,11 +1,14 @@
-import { cloneDeep } from 'lodash'
+let p = console.log
 
-tag app-prompt
+export default class Prompt
+
+	def constructor
+		store = $1
 
 	def get_input d
 		data = cloneDeep d
 		active = yes
-		let result = await new Promise! do |resolve|
+		let result = await new Promise do |resolve|
 			self.addEventListener('end') do |e|
 				self.removeEventListener('end', this)
 				resolve(e.detail)

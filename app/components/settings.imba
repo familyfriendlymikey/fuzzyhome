@@ -1,29 +1,42 @@
+let p = console.log
+
 import download from 'downloadjs'
 
-tag app-settings
+export default class Settings
+
+	def constructor
+		store = $1
+
+	active = no
+
+	def open
+		active = yes
+
+	def close
+		active = no
 
 	def handle_click_github
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
 
 	def handle_click_toggle_tips
-		config.data.enable_tips = not config.data.enable_tips
-		config.save!
-		api.close_settings!
+		store.config.data.enable_tips = not store.config.data.enable_tips
+		store.config.save!
+		close!
 
 	def handle_click_toggle_buttons
-		config.data.enable_buttons = not config.data.enable_buttons
-		config.save!
-		api.close_settings!
+		store.config.data.enable_buttons = not store.config.data.enable_buttons
+		store.config.save!
+		close!
 
 	def handle_click_toggle_search_on_paste
-		config.data.enable_search_on_paste = not config.data.enable_search_on_paste
-		config.save!
-		api.close_settings!
+		store.config.data.enable_search_on_paste = not store.config.data.enable_search_on_paste
+		store.config.save!
+		close!
 
 	def handle_toggle_light_theme
-		config.data.enable_light_theme = not config.data.enable_light_theme
-		config.save!
-		api.close_settings!
+		store.config.data.enable_light_theme = not store.config.data.enable_light_theme
+		store.config.save!
+		close!
 
 	def handle_import e
 
@@ -36,37 +49,37 @@ tag app-settings
 				return err "importing db", e
 			for link_text in links
 				try
-					let link = await api.create_link_from_text link_text
-					if api.name_exists link.name
+					let link = await create_link_from_text link_text
+					if name_exists link.name
 						throw "Name already exists, add manually if you don't mind duplicates."
-					api.add_link link_text
+					add_link link_text
 				catch e
 					errors.push "{link_text}\n{e}"
 			if errors.length > 0
 				err "importing some links", errors.join("\n\n")
 
-		state.loading = yes
+		store.loading = yes
 		await handle_import!
-		api.close_settings!
-		state.loading = no
-		api.close_settings!
+		close!
+		store.loading = no
+		close!
 
 	def handle_click_export
-		state.loading = yes
-		await api.reload_db!
-		let links = state.links.map do |link|
-			api.construct_link_text link
+		store.loading = yes
+		await reload_db!
+		let links = store.links.links.map do |link|
+			construct_link_text link
 		let datetime = new Date!.toString!.split(" ")
 		let date = datetime.slice(1, 4).join("-").toLowerCase!
 		let time = datetime[4].split(":").join("-")
 		let filename = "fuzzyhome_v{version}_{date}_{time}.txt"
 		download(links.join("\n"), filename, "text/plain")
-		api.close_settings!
-		state.loading = no
+		close!
+		store.loading = no
 
-	def render
+	get view
 
-		<self>
+		<div>
 			css w:100%
 
 			css .settings-container
@@ -84,21 +97,21 @@ tag app-settings
 				bg:$button-bg c:$button-c
 				@hover bg:$button-hover-bg
 
-			if state.community_links_active
-				<app-community-links>
+			if store.community_links.active
+				<(store.community_links.view)>
 
 			else
 				<.settings-container>
 
 					<.settings-button
-						@click=api.close_settings
-						@hotkey("esc")=api.close_settings
-						@hotkey("shift+tab")=api.close_settings
+						@click=close
+						@hotkey("esc")=close
+						@hotkey("shift+tab")=close
 					> "BACK"
 
 				<.settings-container>
 
-					<.settings-button @click=(api.open_community_links! and api.close_settings!)>
+					<.settings-button @click=(open_community_links! and close!)>
 						"VIEW COMMUNITY LINKS"
 
 				<.settings-container>
@@ -106,7 +119,7 @@ tag app-settings
 					<label.settings-button>
 						"IMPORT"
 						<input[d:none]
-							disabled=state.loading
+							disabled=store.loading
 							@change=handle_import
 							@click=(this.value = '')
 							type="file"
@@ -126,20 +139,20 @@ tag app-settings
 				<.settings-container>
 
 					<.settings-button @click=handle_click_toggle_tips>
-						config.data.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
+						store.config.data.enable_tips ? "DISABLE TIPS" : "ENABLE TIPS"
 
 					<.settings-button @click=handle_click_toggle_buttons>
-						config.data.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
+						store.config.data.enable_buttons ? "DISABLE BUTTONS" : "ENABLE BUTTONS"
 
 				<.settings-container>
 
 					<.settings-button @click=handle_click_toggle_search_on_paste>
-						config.data.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
+						store.config.data.enable_search_on_paste ? "DISABLE SEARCH ON PASTE" : "ENABLE SEARCH ON PASTE"
 
-					<.settings-button @click=config.cycle_theme>
-						"THEME: {config.data.theme.toUpperCase!}"
+					<.settings-button @click=store.config.cycle_theme>
+						"THEME: {store.config.data.theme.toUpperCase!}"
 
 				<.settings-container>
 
-					<.settings-button @click=(api.delete_all_bang_history! and api.close_settings!)>
+					<.settings-button @click=(delete_all_bang_history! and close!)>
 						"DELETE ALL BANG HISTORY"

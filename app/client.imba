@@ -1,46 +1,10 @@
 let p = console.log
-import pkg from '../package.json'
-let version = pkg.version
-p "fuzzyhome version {version}"
 
 # import sw from './sw.imba?serviceworker'
-# navigator..serviceWorker..register(sw).then! do |reg| reg.update!
+# navigator..serviceWorker..register(sw).then do |reg| reg.update!
 
-import { nanoid } from 'nanoid'
-import { err } from './utils'
-
-import db from './db'
-import state from './state'
-import api from './api'
-import config from './config'
-import global_tips from './global_tips'
-
-import './components/app-home'
-import './components/app-community-links'
-import './components/app-settings'
-import './components/app-prompt'
-import './components/app-edit'
-import './components/app-links'
-import './components/app-link'
-import './components/app-bang'
-import './components/app-tips'
+import store from './store'
 import './styles'
-
-extend tag element
-	get state
-		state
-	get api
-		api
-	get config
-		config
-	get err
-		err
-	get version
-		version
-	get global_tips
-		global_tips
-	get p
-		console.log
 
 tag app
 
@@ -49,33 +13,25 @@ tag app
 	get render? do mounted?
 
 	def mount
-
 		unless global.localStorage.fuzzyhome_visited
-			await api.add_initial_links!
-			try
-				let default_bang = await api.add_link '!google search https://www.google.com/search?q='
-				config.data.default_bang = default_bang
+			await store.add_initial_links!
 			global.localStorage.fuzzyhome_visited = yes
-
 		try
-			await api.reload_db!
-			p "links:", state.links
+			await store.reload_db!
 		catch e
 			err "loading database", e
 			fatal_error = yes
-			return
+		render!
 
 	def render
 
 		<self
-			.light=(config.theme is "light")
-			.dark=(config.theme is "dark")
-			.disabled=state.loading
+			.light=(store.config.theme is "light")
+			.dark=(store.config.theme is "dark")
+			.disabled=store.loading
 		>
-			css d:flex fld:column jc:start ai:center
-				m:0 w:100% h:100% bg:$bodybg
-				ff:sans-serif fw:1
-				user-select:none
+			css d:flex fld:column jc:start ai:center m:0 w:100% h:100%
+				bg:$bodybg ff:sans-serif fw:1 user-select:none
 
 			<.main>
 				css d:flex fld:column jc:start ai:center
@@ -95,16 +51,16 @@ tag app
 							Check developer console for more information.
 						"""
 
-				elif state.community_links_active
-					<app-community-links>
+				elif store.community_links.active
+					<(store.community_links.view)>
 
-				elif state.settings_active
-					<app-settings>
+				elif store.settings.active
+					<(store.settings.view)>
 
-				elif state.editing_link
-					<app-edit>
+				elif store.edit.link
+					<(store.edit.view)>
 
 				else
-					<app-home$ah>
+					<(store.home.view)>
 
 imba.mount <app>

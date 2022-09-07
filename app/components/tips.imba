@@ -1,4 +1,4 @@
-import { chunk, fill } from 'lodash'
+let p = console.log
 
 tag app-tip
 
@@ -27,7 +27,22 @@ tag app-tip
 		<.tip-content> tip.content
 			css pt:2px fs:14px c:$tip-content-c
 
-tag app-tips
+export default class Tips
+
+	def constructor
+		store = $1
+
+	show_more = no
+	tips = []
+
+	def show_more_tips
+		show_more = yes
+
+	def hide_more_tips
+		show_more = no
+
+	def toggle_more_tips
+		show_more = not show_more
 
 	def pad arr
 		let i = arr.length
@@ -36,14 +51,15 @@ tag app-tips
 			i += 1
 
 	def get_chunks
-		let chunks = chunk(tips, 3)
+		let chunks = store.chunk(tips, 3)
 		pad(chunks[-1])
 		chunks
 
-	def render
+	get view
+
 		let chunks = get_chunks!
 
-		<self[d:none]=!config.data.enable_tips>
+		<[d:none]=!store.config.data.enable_tips>
 			css d:flex fld:column gap:15px max-height:75%
 
 			css .tip-row
@@ -57,21 +73,21 @@ tag app-tips
 
 			if chunks.length > 1
 
-				<@click=api.toggle_more_tips>
+				<@click=toggle_more>
 					css w:100% d:flex ja:center c:$button-c rdb:4px cursor:pointer
 						transition:background 100ms
 						@hover bg:$tip-hover-c
-					if state.show_more_tips
+					if store.tips.show_more
 						css rd:0
 
 					<svg src="../assets/chevron-down.svg">
 						css w:15px transition:transform 150ms
-						if state.show_more_tips
+						if store.tips.show_more
 							css transform:rotate(180deg)
 
 				<.more>
 					css d:flex fld:column gap:15px ofy:auto 
-					unless state.show_more_tips
+					unless store.tips.show_more
 						css d:none
 
 					for row in chunks.slice(1)

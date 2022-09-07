@@ -1,158 +1,157 @@
-import api from './api'
-import state from './state'
+let p = console.log
 
-let tips = {}
+export default class GlobalTips
 
-tips.navigate_to_link = {
-	click_handler: api.handle_click_link.bind(api)
-	hotkey_handler: api.handle_click_link.bind(api)
-	hotkey: 'return'
-	hotkey_display_name: 'Return'
-	content: "Navigate To Link"
-}
+	def constructor
+		store = $1
 
-tips.use_bang = {
-	click_handler: api.handle_click_link.bind(api)
-	hotkey_handler: api.handle_click_link.bind(api)
-	hotkey: 'return'
-	hotkey_display_name: 'Return'
-	content: "Use Bang"
-}
+		navigate_to_link = {
+			click_handler: store.link.handle_click.bind(store)
+			hotkey_handler: store.link.handle_click.bind(store)
+			hotkey: 'return'
+			hotkey_display_name: 'Return'
+			content: "Navigate To Link"
+		}
 
-tips.create_link = {
-	click_handler: api.handle_add_link.bind(api)
-	hotkey_handler: api.handle_add_link.bind(api)
-	hotkey: 'shift+return'
-	hotkey_display_name: 'Shift + Return'
-	content: "Create Link \"{state.query.trim!}\""
-}
+		use_bang = {
+			click_handler: store.link.handle_click.bind(store)
+			hotkey_handler: store.link.handle_click.bind(store)
+			hotkey: 'return'
+			hotkey_display_name: 'Return'
+			content: "Use Bang"
+		}
 
-tips.edit_link = {
-	click_handler: api.handle_edit.bind(api)
-	hotkey_handler: api.handle_edit.bind(api)
-	hotkey: 'shift+backspace'
-	hotkey_display_name: "Shift + Backspace"
-	content: "Edit Link"
-}
+		create_link = {
+			click_handler: store.link.handle_add.bind(store)
+			hotkey_handler: store.link.handle_add.bind(store)
+			hotkey: 'shift+return'
+			hotkey_display_name: 'Shift + Return'
+			content: "Create Link \"{store.home.query.trim!}\""
+		}
 
-tips.toggle_effective_names = {
-	click_handler: api.toggle_effective_names.bind(api)
-	hotkey_handler: api.toggle_effective_names.bind(api)
-	hotkey: 'tab'
-	hotkey_display_name: "Tab"
-	content: "Toggle Effective Names"
-}
+		edit_link = {
+			click_handler: store.edit.open.bind(store)
+			hotkey_handler: store.edit.open.bind(store)
+			hotkey: 'shift+backspace'
+			hotkey_display_name: "Shift + Backspace"
+			content: "Edit Link"
+		}
 
-tips.toggle_settings = {
-	click_handler: api.open_settings.bind(api)
-	hotkey_handler: api.open_settings.bind(api)
-	hotkey: 'shift+tab'
-	hotkey_display_name: "Shift + Tab"
-	content: "Toggle Settings"
-}
+		toggle_effective_names = {
+			click_handler: store.links.toggle_effective_names.bind(store)
+			hotkey_handler: store.links.toggle_effective_names.bind(store)
+			hotkey: 'tab'
+			hotkey_display_name: "Tab"
+			content: "Toggle Effective Names"
+		}
 
-tips.cut_math_result = {
-	click_handler: api.handle_cut.bind(api)
-	hotkey_display_name: "Cut (If No Selection)"
-	content: "Cut Math Result"
-}
+		toggle_settings = {
+			click_handler: store.settings.open.bind(store)
+			hotkey_handler: store.settings.open.bind(store)
+			hotkey: 'shift+tab'
+			hotkey_display_name: "Shift + Tab"
+			content: "Toggle Settings"
+		}
 
-tips.cut_all_text = {
-	click_handler: api.handle_cut.bind(api)
-	hotkey_display_name: "Cut (If No Selection)"
-	content: "Cut All Text"
-}
+		cut_math_result = {
+			click_handler: store.home.handle_cut.bind(store)
+			hotkey_display_name: "Cut (If No Selection)"
+			content: "Cut Math Result"
+		}
 
-tips.increment_link_selection_index = {
-	click_handler: api.increment_link_selection_index.bind(api)
-	hotkey_handler: api.increment_link_selection_index.bind(api)
-	hotkey: 'down'
-	hotkey_display_name: "Down Arrow"
-	content: "Move Selection Down"
-}
+		cut_all_text = {
+			click_handler: store.home.handle_cut.bind(store)
+			hotkey_display_name: "Cut (If No Selection)"
+			content: "Cut All Text"
+		}
 
-tips.decrement_link_selection_index = {
-	click_handler: api.decrement_link_selection_index.bind(api)
-	hotkey_handler: api.decrement_link_selection_index.bind(api)
-	hotkey: 'up'
-	hotkey_display_name: "Up Arrow"
-	content: "Move Selection Up"
-}
+		increment_link_selection_index = {
+			click_handler: store.links.increment_selection_index.bind(store)
+			hotkey_handler: store.links.increment_selection_index.bind(store)
+			hotkey: 'down'
+			hotkey_display_name: "Down Arrow"
+			content: "Move Selection Down"
+		}
 
-tips.instant_search = {
-	hotkey_display_name: "Paste (If Input Empty)"
-	content: "Instant Search"
-}
+		decrement_link_selection_index = {
+			click_handler: store.links.decrement_selection_index.bind(store)
+			hotkey_handler: store.links.decrement_selection_index.bind(store)
+			hotkey: 'up'
+			hotkey_display_name: "Up Arrow"
+			content: "Move Selection Up"
+		}
 
-tips.use_bang_history_item = {
-	click_handler: api.handle_bang.bind(api)
-	hotkey_handler: api.handle_bang.bind(api)
-	hotkey: 'return'
-	hotkey_display_name: "Return"
-	content: "Use History Item"
-}
+		instant_search = {
+			hotkey_display_name: "Paste (If Input Empty)"
+			content: "Instant Search"
+		}
 
-tips.search = {
-	click_handler: api.handle_bang.bind(api)
-	hotkey_handler: api.handle_bang.bind(api)
-	hotkey: 'return'
-	hotkey_display_name: "Return"
-	content: "Search"
-}
+		use_bang_history_item = {
+			click_handler: store.bang.handle_click.bind(store)
+			hotkey_handler: store.bang.handle_click.bind(store)
+			hotkey: 'return'
+			hotkey_display_name: "Return"
+			content: "Use History Item"
+		}
 
-tips.delete_bang_history_item = {
-	click_handler: api.delete_bang_history_item.bind(api)
-	hotkey_handler: api.delete_bang_history_item.bind(api)
-	hotkey: 'shift+backspace'
-	hotkey_display_name: "Shift + Backspace"
-	content: "Delete History Item"
-}
+		search = {
+			click_handler: store.bang.handle_click.bind(store)
+			hotkey_handler: store.bang.handle_click.bind(store)
+			hotkey: 'return'
+			hotkey_display_name: "Return"
+			content: "Search"
+		}
 
-tips.unset_active_bang = {
-	click_handler: api.unset_active_bang.bind(api)
-	hotkey_handler: api.unset_active_bang.bind(api)
-	hotkey: 'esc'
-	hotkey_display_name: "Esc"
-	content: "Back"
-}
+		delete_bang_history_item = {
+			click_handler: store.bang.delete_history_item.bind(store)
+			hotkey_handler: store.bang.delete_history_item.bind(store)
+			hotkey: 'shift+backspace'
+			hotkey_display_name: "Shift + Backspace"
+			content: "Delete History Item"
+		}
 
-tips.delete_bang_history = {
-	click_handler: api.delete_bang_history.bind(api)
-	hotkey_display_name: "Click"
-	content: "Delete Bang History"
-}
+		unset_active_bang = {
+			click_handler: store.bang.unset_active_bang.bind(store)
+			hotkey_handler: store.bang.unset_active_bang.bind(store)
+			hotkey: 'esc'
+			hotkey_display_name: "Esc"
+			content: "Back"
+		}
 
-tips.close_community_links = {
-	click_handler: api.close_community_links.bind(api)
-	hotkey_handler: api.close_community_links.bind(api)
-	hotkey: "esc"
-	hotkey_display_name: "Esc"
-	content: "Exit Community Links"
-}
+		delete_bang_history = {
+			click_handler: store.bang.delete_history.bind(store)
+			hotkey_display_name: "Click"
+			content: "Delete Bang History"
+		}
 
-tips.add_community_link = {
-	click_handler: api.add_community_link.bind(api)
-	hotkey_handler: api.add_community_link.bind(api)
-	hotkey: "shift+return"
-	hotkey_display_name: "Shift + Return Or Click"
-	content: "Add To Your Links"
-}
+		close_community_links = {
+			click_handler: store.community_links.close.bind(store)
+			hotkey_handler: store.community_links.close.bind(store)
+			hotkey: "esc"
+			hotkey_display_name: "Esc"
+			content: "Exit Community Links"
+		}
 
-tips.increment_community_link_selection_index = {
-	click_handler: api.increment_community_link_selection_index.bind(api)
-	hotkey_handler: api.increment_community_link_selection_index.bind(api)
-	hotkey: 'down'
-	hotkey_display_name: "Down Arrow"
-	content: "Move Selection Down"
-}
+		add_community_link = {
+			click_handler: store.community_links.add.bind(store)
+			hotkey_handler: store.community_links.add.bind(store)
+			hotkey: "shift+return"
+			hotkey_display_name: "Shift + Return Or Click"
+			content: "Add To Your Links"
+		}
 
-tips.decrement_community_link_selection_index = {
-	click_handler: api.decrement_community_link_selection_index.bind(api)
-	hotkey_handler: api.decrement_community_link_selection_index.bind(api)
-	hotkey: 'up'
-	hotkey_display_name: "Up Arrow"
-	content: "Move Selection Up"
-}
+		increment_community_link_selection_index = {
+			click_handler: store.community_links.increment_selection_index.bind(store)
+			hotkey_handler: store.community_links.increment_selection_index.bind(store)
+			hotkey: 'down'
+			hotkey_display_name: "Down Arrow"
+			content: "Move Selection Down"
+		}
 
-
-export default tips
+		decrement_community_link_selection_index = {
+			click_handler: store.community_links.decrement_selection_index.bind(store)
+			hotkey_handler: store.community_links.decrement_selection_index.bind(store)
+			hotkey: 'up'
+			hotkey_display_name: "Up Arrow"
+			content: "Move Selection Up"
+		}

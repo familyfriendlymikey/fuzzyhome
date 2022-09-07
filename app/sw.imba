@@ -31,7 +31,7 @@ self.addEventListener('install') do |e|
 self.addEventListener('activate') do |e|
 	p "activate"
 	def delete_cached keys
-		let temp = keys.map! do |key, i|
+		let temp = keys.map do |key, i|
 			p "checking cache {key}"
 			if key !== cache_name
 				p "deleting cache {key}"
