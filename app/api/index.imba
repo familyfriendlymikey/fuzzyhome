@@ -1,17 +1,20 @@
 let p = console.log
-import { err } from './utils'
+import { err } from '../utils'
+import db from '../db'
+import state from '../state'
+import config from '../config'
 
-import db from './db'
-import state from './state'
-
-import config from './config'
 import { find, omit, orderBy } from 'lodash'
 import { nanoid } from 'nanoid'
-import fzi from 'fzi'
 import { evaluate as eval_math } from 'mathjs'
 import { cloneDeep } from 'lodash'
+import fzi from 'fzi'
 
-export default new class api
+import community_links from './community_links'
+
+export default {
+
+	community_links
 
 	def add_link text
 		let link = await create_link_from_text text
@@ -332,18 +335,6 @@ export default new class api
 		catch e
 			err "editing link, selected link is undefined"
 
-	def open_settings
-		state.settings_active = yes
-
-	def close_settings
-		state.settings_active = no
-
-	def open_community_links
-		state.community_links_active = yes
-
-	def close_community_links
-		state.community_links_active = no
-
 	def show_more_tips
 		state.show_more_tips = yes
 
@@ -353,17 +344,4 @@ export default new class api
 	def toggle_more_tips
 		state.show_more_tips = not state.show_more_tips
 
-	def add_community_link
-		return if state.loading
-		state.loading = yes
-		try
-			await add_link selected_community_link_e.link_text
-		catch e
-			err "adding link", e
-		state.loading = no
-
-	get selected_community_link
-		sorted_community_links[state.community_links_selection_index]
-
-	get sorted_community_links
-		fzi.sort query, filtered_links, do |x| x.name
+}
