@@ -61,7 +61,7 @@ tag app
 			await api.reload_db!
 			p "links:", state.links
 		catch e
-			err "state.loading database", e
+			err "loading database", e
 			fatal_error = yes
 			return
 
@@ -88,7 +88,7 @@ tag app
 					<.fatal>
 						css c:$text-c
 						"""
-							There was an error state.loading the database.
+							There was an error loading the database.
 							This could be due to a user setting
 							disallowing local storage, or a random error.
 							Consider refreshing.
