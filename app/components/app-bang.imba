@@ -5,75 +5,29 @@ tag app-bang
 
 	get tips
 		let result = []
-		let temp
 
-		temp = {
-				click_handler: api.handle_bang.bind(api)
-				hotkey_handler: api.handle_bang.bind(api)
-				hotkey: 'return'
-				hotkey_display_name: "Return"
-		}
 		if state.bang_selection_index > -1
-			temp.content = "Use History Item"
+			result.push global_tips.use_bang_history_item
 		else
-			temp.content = "Search"
-		result.push temp
+			result.push global_tips.search
 
-		temp = {
-			click_handler: api.handle_add_link.bind(api)
-			hotkey_handler: api.handle_add_link.bind(api)
-			hotkey: 'shift+return'
-			hotkey_display_name: 'Shift + Return'
-			content: "Create Link \"{state.query.trim!}\""
-		}
-		result.push temp
+		result.push global_tips.create_link
 
 		if state.bang_selection_index > -1
-			temp = {
-					click_handler: api.delete_bang_history_item.bind(api)
-					hotkey_handler: api.delete_bang_history_item.bind(api)
-					hotkey: 'shift+backspace'
-					hotkey_display_name: "Shift + Backspace"
-					content: "Delete History Item"
-			}
-			result.push temp
+			result.push global_tips.delete_bang_history_item
 
 		if state.active_bang
-			temp = {
-					click_handler: api.unset_active_bang.bind(api)
-					hotkey_handler: api.unset_active_bang.bind(api)
-					hotkey: 'esc'
-					hotkey_display_name: "Esc"
-					content: "Back"
-			}
-			result.push temp
+			result.push global_tips.unset_active_bang
 
-		def handle_delete_bang_history
-			api.delete_bang_history!
-			$tips.show_more = no
-		temp = {
-				click_handler: handle_delete_bang_history
-				hotkey_display_name: "Click"
-				content: "Delete Bang History"
-		}
-		result.push temp
+		result.push global_tips.delete_bang_history
 
-		temp = {
-				click_handler: api.handle_cut.bind(api)
-		}
 		if api.math_result
-			temp.hotkey_display_name = "Cut (If No Selection)"
-			temp.content = "Cut All Text"
+			result.push global_tips.cut_math_result
 		else
-			temp.hotkey_display_name = "Cut (Math, If No Selection)"
-			temp.content = "Cut Math Result"
-		result.push temp
+			result.push global_tips.cut_all_text
 
-		temp = {
-				hotkey_display_name: "Paste (If Input Empty)"
-				content: "Instant Search"
-		}
-		result.push temp
+		if config.data.enable_search_on_paste
+			result.push global_tips.instant_search
 
 		result
 

@@ -11,9 +11,9 @@ import { err } from './utils'
 
 import db from './db'
 import state from './state'
-let refs = {}
 import api from './api'
 import config from './config'
+import global_tips from './global_tips'
 
 import './components/app-home'
 import './components/app-community-links'
@@ -33,12 +33,12 @@ extend tag element
 		api
 	get config
 		config
-	get refs
-		refs
 	get err
 		err
 	get version
 		version
+	get global_tips
+		global_tips
 	get p
 		console.log
 
@@ -49,11 +49,6 @@ tag app
 	get render? do mounted?
 
 	def mount
-
-		refs.settings = $as
-		refs.edit = $ae
-		refs.community-links = $acl
-		refs.links = $ah
 
 		unless global.localStorage.fuzzyhome_visited
 			await api.add_initial_links!
@@ -100,14 +95,14 @@ tag app
 							Check developer console for more information.
 						"""
 
-				elif $acl.active
-					<app-community-links$acl>
+				elif state.community_links_active
+					<app-community-links>
 
-				elif $as.active
-					<app-settings$as>
+				elif state.settings_active
+					<app-settings>
 
-				elif $ae.active
-					<app-edit$ae>
+				elif state.editing_link
+					<app-edit>
 
 				else
 					<app-home$ah>

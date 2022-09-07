@@ -29,12 +29,6 @@ tag app-tip
 
 tag app-tips
 
-	def unmount
-		show_more = no
-
-	def toggle
-		show_more = not show_more
-
 	def pad arr
 		let i = arr.length
 		while i < 3
@@ -63,21 +57,21 @@ tag app-tips
 
 			if chunks.length > 1
 
-				<@click=toggle>
+				<@click=api.toggle_more_tips>
 					css w:100% d:flex ja:center c:$button-c rdb:4px cursor:pointer
 						transition:background 100ms
 						@hover bg:$tip-hover-c
-					if show_more
+					if state.show_more_tips
 						css rd:0
 
 					<svg src="../assets/chevron-down.svg">
 						css w:15px transition:transform 150ms
-						if show_more
+						if state.show_more_tips
 							css transform:rotate(180deg)
 
 				<.more>
 					css d:flex fld:column gap:15px ofy:auto 
-					unless show_more
+					unless state.show_more_tips
 						css d:none
 
 					for row in chunks.slice(1)

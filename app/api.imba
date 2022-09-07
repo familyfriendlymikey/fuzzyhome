@@ -188,7 +188,7 @@ export default new class api
 	def get_pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 
-	get selected_link
+	get selected_link_e
 		state.sorted_links[state.link_selection_index]
 
 	def set_link_selection_index index
@@ -232,7 +232,10 @@ export default new class api
 		state.loading = no
 
 	def handle_click_link
-		let link = selected_link
+		try
+			var link = selected_link_e
+		catch
+			return
 		if link.is_bang
 			state.query = ''
 			state.active_bang = link
@@ -307,6 +310,7 @@ export default new class api
 			err "deleting bang history", e
 		config.data.default_bang.history = []
 		config.save!
+		hide_more_tips!
 
 	def delete_all_bang_history
 		return unless window.confirm "Are you sure you want to delete all bang history?"
@@ -316,3 +320,50 @@ export default new class api
 		catch e
 			err "deleting some link histories", e
 		imba.commit!
+
+	def cancel_edit
+		state.editing_link = no
+
+	def handle_edit
+		return if state.loading
+		return unless state.sorted_links.length > 0
+		try
+			state.editing_link = selected_link_e
+		catch e
+			err "editing link, selected link is undefined"
+
+	def open_settings
+		state.settings_active = yes
+
+	def close_settings
+		state.settings_active = no
+
+	def open_community_links
+		state.community_links_active = yes
+
+	def close_community_links
+		state.community_links_active = no
+
+	def show_more_tips
+		state.show_more_tips = yes
+
+	def hide_more_tips
+		state.show_more_tips = no
+
+	def toggle_more_tips
+		state.show_more_tips = not state.show_more_tips
+
+	def add_community_link
+		return if state.loading
+		state.loading = yes
+		try
+			await add_link selected_community_link_e.link_text
+		catch e
+			err "adding link", e
+		state.loading = no
+
+	get selected_community_link
+		sorted_community_links[state.community_links_selection_index]
+
+	get sorted_community_links
+		fzi.sort query, filtered_links, do |x| x.name

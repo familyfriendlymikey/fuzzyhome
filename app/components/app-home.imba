@@ -63,7 +63,7 @@ tag app-home
 						css c:$text-c fs:20px ml:10px w:unset
 
 				else
-					<.side.right @click=refs.settings.open>
+					<.side.right @click=api.open_settings>
 						<svg src="../assets/settings.svg">
 
 			if state.active_bang or state.sorted_links.length < 1

@@ -1,34 +1,25 @@
 tag app-edit
 
-	active = no
-
 	def mount
 		$dn.setSelectionRange 0, 0
 		$dn.focus!
-
-	def open data
-		link = data
-		new_link_text = value=api.construct_link_text(link)
-		active = yes
-
-	def close
-		active = no
+		new_link_text = api.construct_link_text state.editing_link
 
 	def handle_click_set_default_bang
-		config.set_default_bang link
-		close!
+		config.set_default_bang state.editing_link
+		state.editing_link = no
 
 	def handle_delete
 		try
-			await api.delete_link link
-			close!
+			await api.delete_link state.editing_link
+			state.editing_link = no
 		catch e
 			err "deleting link", e
 
 	def save
 		try
-			api.update_link link, new_link_text
-			close!
+			api.update_link state.editing_link, new_link_text
+			state.editing_link = no
 		catch e
 			err "saving link", e
 
@@ -54,7 +45,7 @@ tag app-edit
 		}
 		result.push temp
 
-		if link.is_bang
+		if state.editing_link.is_bang
 			temp = {
 					click_handler: handle_click_set_default_bang.bind(this)
 					hotkey_display_name: "Click"
@@ -63,8 +54,8 @@ tag app-edit
 			result.push temp
 
 		temp = {
-				click_handler: close.bind(this)
-				hotkey_handler: close.bind(this)
+				click_handler: api.cancel_edit
+				hotkey_handler: api.cancel_edit
 				hotkey: 'esc'
 				hotkey_display_name: "Esc"
 				content: "Cancel"

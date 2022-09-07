@@ -2,36 +2,28 @@ import download from 'downloadjs'
 
 tag app-settings
 
-	active = no
-
-	def close
-		active = no
-
-	def open
-		active = yes
-
 	def handle_click_github
 		global.location.href = "https://github.com/familyfriendlymikey/fuzzyhome"
 
 	def handle_click_toggle_tips
 		config.data.enable_tips = not config.data.enable_tips
 		config.save!
-		active = no
+		api.close_settings!
 
 	def handle_click_toggle_buttons
 		config.data.enable_buttons = not config.data.enable_buttons
 		config.save!
-		active = no
+		api.close_settings!
 
 	def handle_click_toggle_search_on_paste
 		config.data.enable_search_on_paste = not config.data.enable_search_on_paste
 		config.save!
-		active = no
+		api.close_settings!
 
 	def handle_toggle_light_theme
 		config.data.enable_light_theme = not config.data.enable_light_theme
 		config.save!
-		active = no
+		api.close_settings!
 
 	def handle_import e
 
@@ -55,9 +47,9 @@ tag app-settings
 
 		state.loading = yes
 		await handle_import!
-		active = no
+		api.close_settings!
 		state.loading = no
-		close!
+		api.close_settings!
 
 	def handle_click_export
 		state.loading = yes
@@ -69,7 +61,7 @@ tag app-settings
 		let time = datetime[4].split(":").join("-")
 		let filename = "fuzzyhome_v{version}_{date}_{time}.txt"
 		download(links.join("\n"), filename, "text/plain")
-		active = no
+		api.close_settings!
 		state.loading = no
 
 	def render
@@ -92,21 +84,21 @@ tag app-settings
 				bg:$button-bg c:$button-c
 				@hover bg:$button-hover-bg
 
-			if refs.community-links.active
+			if state.community_links_active
 				<app-community-links>
 
 			else
 				<.settings-container>
 
 					<.settings-button
-						@click=close
-						@hotkey("esc")=close
-						@hotkey("shift+tab")=close
+						@click=api.close_settings
+						@hotkey("esc")=api.close_settings
+						@hotkey("shift+tab")=api.close_settings
 					> "BACK"
 
 				<.settings-container>
 
-					<.settings-button @click=(refs.community-links.open! and close!)>
+					<.settings-button @click=(api.open_community_links! and api.close_settings!)>
 						"VIEW COMMUNITY LINKS"
 
 				<.settings-container>
@@ -149,5 +141,5 @@ tag app-settings
 
 				<.settings-container>
 
-					<.settings-button @click=(api.delete_all_bang_history! and close!)>
+					<.settings-button @click=(api.delete_all_bang_history! and api.close_settings!)>
 						"DELETE ALL BANG HISTORY"
