@@ -14,10 +14,10 @@ export default class Link
 
 	def handle_delete link
 		return unless window.confirm "Do you really want to delete {link..display_name}?"
-		gdelete link
+		delete link
 
 	def handle_pin link
-		gpin link
+		pin link
 
 	def add text
 		let link = await create_link_from_text text
@@ -135,7 +135,7 @@ export default class Link
 	def view link, index
 		<div
 			@pointerover=store.links.set_selection_index(index)
-			@click=ghandle_click
+			@click=handle_click
 			.selected=(index is store.links.selection_index)
 		>
 			css d:flex fld:row jc:space-between ai:center
