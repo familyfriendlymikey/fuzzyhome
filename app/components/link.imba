@@ -10,7 +10,7 @@ export default class Link
 		try
 			await put_link link
 		catch e
-			err "putting link", e
+			store.err "putting link", e
 
 	def handle_delete link
 		return unless window.confirm "Do you really want to delete {link..display_name}?"
@@ -46,18 +46,18 @@ export default class Link
 				store.config.set_default_bang link
 			await reload_db!
 		catch e
-			err "putting link", e
+			store.err "putting link", e
 
 	def delete_link link
 		def go
 			try
 				await store.db.links.delete(link.id)
 			catch e
-				return err "deleting link", e
+				return store.err "deleting link", e
 			try
 				await reload_db!
 			catch e
-				return err "reloading db after successful delete", e
+				return store.err "reloading db after successful delete", e
 		store.loading = yes
 		await go!
 		selection_index = Math.min store.link.selection_index, store.links.sorted.length - 1
@@ -69,7 +69,7 @@ export default class Link
 			let result = await db.links.update link.id, link
 			throw "Link id not found." if result is 0
 		catch e
-			return err "pinning link", e
+			return store.err "pinning link", e
 		await reload_db!
 		imba.commit!
 
@@ -118,7 +118,7 @@ export default class Link
 			store.home.query = ''
 			links.filter_sort!
 		catch e
-			err "adding link", e
+			store.err "adding link", e
 		store.loading = no
 
 	def handle_click

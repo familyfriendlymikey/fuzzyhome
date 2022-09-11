@@ -19,7 +19,7 @@ tag app
 		try
 			await store.reload_db!
 		catch e
-			err "loading database", e
+			store.err "loading database", e
 			fatal_error = yes
 		render!
 

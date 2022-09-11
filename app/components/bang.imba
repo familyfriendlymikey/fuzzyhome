@@ -17,7 +17,7 @@ export default class Bang
 			await put_link bang
 			selection_index = -1
 		catch e
-			err "deleting bang history", e
+			store.err "deleting bang history", e
 		store.config.data.default_bang.history = []
 		store.config.save!
 		hide_more_tips!
@@ -32,7 +32,7 @@ export default class Bang
 			await put_link bang
 			store.bang.selection_index = Math.min store.bang.selection_index, sorted_bang_history.length - 1
 		catch e
-			err "updating bang history", e
+			store.err "updating bang history", e
 
 	get encoded_bang_query
 		"{bang.url}{window.encodeURIComponent(store.home.query)}"
@@ -53,7 +53,7 @@ export default class Bang
 		try
 			await put_link bang
 		catch e
-			err "updating bang history", e
+			store.err "updating bang history", e
 
 	def handle_click
 		return if store.loading
@@ -84,7 +84,7 @@ export default class Bang
 			await db.links.toCollection!.modify do |link| link.history = []
 			await reload_db!
 		catch e
-			err "deleting some link histories", e
+			store.err "deleting some link histories", e
 		imba.commit!
 
 	get tips

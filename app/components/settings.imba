@@ -46,7 +46,7 @@ export default class Settings
 				let text = await e.target.files[0].text!
 				var links = text.split "\n"
 			catch e
-				return err "importing db", e
+				return store.err "importing db", e
 			for link_text in links
 				try
 					let link = await create_link_from_text link_text
@@ -56,7 +56,7 @@ export default class Settings
 				catch e
 					errors.push "{link_text}\n{e}"
 			if errors.length > 0
-				err "importing some links", errors.join("\n\n")
+				store.err "importing some links", errors.join("\n\n")
 
 		store.loading = yes
 		await handle_import!

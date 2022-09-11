@@ -18,14 +18,14 @@ export default class Edit
 		try
 			link = store.links.selected_link_e
 		catch e
-			err "editing link, selected link is undefined"
+			store.err "editing link, selected link is undefined"
 
 	def save
 		try
 			store.link.update store.edit.link, new_link_text
 			store.edit.link = no
 		catch e
-			err "saving link", e
+			store.err "saving link", e
 
 	def cancel
 		store.edit.link = no
@@ -39,7 +39,7 @@ export default class Edit
 			await store.link.delete store.edit.link
 			store.edit.link = no
 		catch e
-			err "deleting link", e
+			store.err "deleting link", e
 
 	get tips
 		let result = []

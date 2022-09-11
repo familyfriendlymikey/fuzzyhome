@@ -30,7 +30,7 @@ export default class CommunityLinks
 		try
 			await add_link selected_link_e.link_text
 		catch e
-			err "adding link", e
+			store.err "adding link", e
 		store.loading = no
 
 	get selected_community_link

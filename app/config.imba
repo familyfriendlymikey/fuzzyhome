@@ -48,7 +48,7 @@ export default class Config
 
 	def set_default_bang link
 		unless link.is_bang
-			return err "setting default bang", "Link is not a bang."
+			return store.err "setting default bang", "Link is not a bang."
 		data.default_bang = link
 		save!
 
