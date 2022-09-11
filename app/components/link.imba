@@ -19,7 +19,7 @@ export default class Link
 	def create_link text
 		let link = await create_link_from_text text
 		link.id = nanoid!
-		await db.links.add link
+		await store.db.links.add link
 		await reload_db!
 		imba.commit!
 		p omit(link, "icon")
@@ -28,7 +28,7 @@ export default class Link
 	def update_link old_link, new_link_text
 		let new_link = await create_link_from_text new_link_text
 		new_link.frequency = old_link.frequency
-		let result = await db.links.update old_link.id, new_link
+		let result = await store.db.links.update old_link.id, new_link
 		throw "Link id not found." if result is 0
 		await reload_db!
 		imba.commit!
@@ -38,7 +38,7 @@ export default class Link
 
 	def put_link link
 		try
-			await db.links.update link.id, link
+			await store.db.links.update link.id, link
 			if link.is_bang and store.config.data.default_bang.id is link.id
 				store.config.set_default_bang link
 			await reload_db!
@@ -63,7 +63,7 @@ export default class Link
 	def pin_link link
 		link.is_pinned = !link.is_pinned
 		try
-			let result = await db.links.update link.id, link
+			let result = await store.db.links.update link.id, link
 			throw "Link id not found." if result is 0
 		catch e
 			return store.err "pinning link", e

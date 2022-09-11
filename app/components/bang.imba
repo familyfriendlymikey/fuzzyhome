@@ -81,7 +81,7 @@ export default class Bang
 	def delete_all_bang_history
 		return unless window.confirm "Are you sure you want to delete all bang history?"
 		try
-			await db.links.toCollection!.modify do |link| link.history = []
+			await store.db.links.toCollection!.modify do |link| link.history = []
 			await reload_db!
 		catch e
 			store.err "deleting some link histories", e
