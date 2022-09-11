@@ -14,7 +14,7 @@ export default class Link
 
 	def handle_delete link
 		return unless window.confirm "Do you really want to delete {link..display_name}?"
-		delete link
+		delete_link link
 
 	def handle_pin link
 		pin link
@@ -48,10 +48,10 @@ export default class Link
 		catch e
 			err "putting link", e
 
-	def delete link
+	def delete_link link
 		def go
 			try
-				await db.links.delete(link.id)
+				await store.db.links.delete(link.id)
 			catch e
 				return err "deleting link", e
 			try
@@ -108,7 +108,7 @@ export default class Link
 		link_text
 
 	def navigate link
-		await increment_link_frequency link
+		await increment_frequency link
 		window.location.href = link.url
 
 	def handle_add
