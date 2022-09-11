@@ -60,7 +60,7 @@ export default class Link
 				return err "reloading db after successful delete", e
 		store.loading = yes
 		await go!
-		gselection_index = Math.min store.link.selection_index, store.links.sorted.length - 1
+		selection_index = Math.min store.link.selection_index, store.links.sorted.length - 1
 		store.loading = no
 
 	def pin link
@@ -171,7 +171,7 @@ export default class Link
 					css d:flex fld:row jc:start ai:center gap:5px
 
 					css .link-button visibility:hidden rd:3px c:$button-c fs:15px cursor:pointer px:3px
-					if index is gselection_index
+					if index is selection_index
 						css .link-button visibility:visible
 
 					css .link-button svg w:15px
