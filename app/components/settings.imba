@@ -66,7 +66,7 @@ export default class Settings
 
 	def handle_click_export
 		store.loading = yes
-		await reload_db!
+		await store.reload_db!
 		let links = store.links.links.map do |link|
 			construct_link_text link
 		let datetime = new Date!.toString!.split(" ")

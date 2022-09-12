@@ -1,5 +1,7 @@
 let p = console.log
 
+import fzi from 'fzi'
+
 export default class Links
 
 	def constructor

@@ -20,7 +20,7 @@ export default class Link
 		let link = await create_link_from_text text
 		link.id = nanoid!
 		await store.db.links.add link
-		await reload_db!
+		await store.reload_db!
 		imba.commit!
 		p omit(link, "icon")
 		return link
@@ -30,7 +30,7 @@ export default class Link
 		new_link.frequency = old_link.frequency
 		let result = await store.db.links.update old_link.id, new_link
 		throw "Link id not found." if result is 0
-		await reload_db!
+		await store.reload_db!
 		imba.commit!
 		p omit(old_link, "icon")
 		p omit(new_link, "icon")
@@ -41,7 +41,7 @@ export default class Link
 			await store.db.links.update link.id, link
 			if link.is_bang and store.config.data.default_bang.id is link.id
 				store.config.set_default_bang link
-			await reload_db!
+			await store.reload_db!
 		catch e
 			store.err "putting link", e
 
@@ -52,7 +52,7 @@ export default class Link
 			catch e
 				return store.err "deleting link", e
 			try
-				await reload_db!
+				await store.reload_db!
 			catch e
 				return store.err "reloading db after successful delete", e
 		store.loading = yes
@@ -67,7 +67,7 @@ export default class Link
 			throw "Link id not found." if result is 0
 		catch e
 			return store.err "pinning link", e
-		await reload_db!
+		await store.reload_db!
 		imba.commit!
 
 	def create_from_text text, get_icon=yes
@@ -106,7 +106,7 @@ export default class Link
 
 	def navigate link
 		await increment_frequency link
-		# window.location.href = link.url
+		window.location.href = link.url
 
 	def handle_add
 		store.loading = yes
@@ -125,7 +125,7 @@ export default class Link
 			return
 		if link.is_bang
 			store.home.query = ''
-			store.bang.active = link
+			store.bang.active_bang = link
 		else
 			navigate link
 

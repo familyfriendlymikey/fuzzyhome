@@ -1,11 +1,17 @@
 let p = console.log
 
+import fzi from 'fzi'
+
 export default class Bang
 
 	def constructor
 		store = $1
 
 	active_bang = no
+
+	get bang
+		active_bang or config.data.default_bang
+
 	selection_index = -1
 
 	def unmount
@@ -82,7 +88,7 @@ export default class Bang
 		return unless window.confirm "Are you sure you want to delete all bang history?"
 		try
 			await store.db.links.toCollection!.modify do |link| link.history = []
-			await reload_db!
+			await store.reload_db!
 		catch e
 			store.err "deleting some link histories", e
 		imba.commit!

@@ -123,11 +123,6 @@ class Store
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
 	###
 
-	###
-	get bang
-		bang.active or config.data.default_bang
-	###
-
 global._fuzzyhome_delete_everything = do |prompt=yes|
 	return if prompt and window.confirm "This will delete everything. Are you sure?"
 	indexedDB.deleteDatabase("fuzzyhome")

@@ -83,7 +83,7 @@ export default class Home
 					<.side.right @click=store.settings.open>
 						<svg src="../assets/settings.svg">
 
-			if store.bang.active or store.links.sorted_links.length < 1
+			if store.bang.active_bang or store.links.sorted_links.length < 1
 				<(store.bang.view)>
 
 			else
