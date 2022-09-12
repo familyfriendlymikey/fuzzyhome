@@ -56,9 +56,9 @@ class Store
 
 	def reload_db
 		links.links = await db.links.toArray()
-		if bang.active
-			let id = bang.active.id
-			bang.active = find links.links, { id }
+		if bang.active_bang
+			let id = bang.active_bang.id
+			bang.active_bang = find links.links, { id }
 		let id = config.data.default_bang.id
 		let link = find links.links, { id }
 		if link

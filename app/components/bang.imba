@@ -72,7 +72,7 @@ export default class Bang
 		window.location.href = encoded_bang_query
 
 	def unset_active_bang
-		store.bang.active = no
+		active_bang = no
 		links.filter_sort!
 
 	def increment_bang_selection_index
@@ -106,7 +106,7 @@ export default class Bang
 		if selection_index > -1
 			result.push global_tips.delete_bang_history_item
 
-		if store.bang.active
+		if active_bang
 			result.push global_tips.unset_active_bang
 
 		result.push global_tips.toggle_effective_names
