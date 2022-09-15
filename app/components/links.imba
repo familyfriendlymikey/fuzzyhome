@@ -11,6 +11,9 @@ export default class Links
 	links = []
 	sorted_links = []
 
+	increment_selection_index = do
+		set_selection_index Math.min(sorted_links.length - 1, selection_index + 1)
+
 	def filter_sort
 		if store.home.query.trim!.length <= 0
 			sorted_links = store.orderBy(store.links.links, ['is_pinned', 'frequency'], ['desc', 'desc'])
@@ -30,10 +33,8 @@ export default class Links
 	def set_selection_index index
 		selection_index = index
 
-	def increment_selection_index
-		set_selection_index Math.min(sorted_links.length - 1, selection_index + 1)
-
 	def decrement_selection_index
+		p thiS
 		set_selection_index Math.max(0, selection_index - 1)
 
 	get tips

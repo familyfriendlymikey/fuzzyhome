@@ -24,10 +24,8 @@ tag app
 		render!
 
 	def render
-
 		<self
-			.light=(store.config.theme is "light")
-			.dark=(store.config.theme is "dark")
+			.{store.config.theme is "light" ? "light" : "dark"}
 			.disabled=store.loading
 		>
 			css d:flex fld:column jc:start ai:center m:0 w:100% h:100%

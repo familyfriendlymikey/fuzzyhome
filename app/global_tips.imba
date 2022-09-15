@@ -66,16 +66,16 @@ export default class GlobalTips
 		}
 
 		increment_link_selection_index = {
-			click_handler: store.links.increment_selection_index.bind(store)
-			hotkey_handler: store.links.increment_selection_index.bind(store)
+			click_handler: store.links.increment_selection_index
+			hotkey_handler: store.links.increment_selection_index
 			hotkey: 'down'
 			hotkey_display_name: "Down Arrow"
 			content: "Move Selection Down"
 		}
 
 		decrement_link_selection_index = {
-			click_handler: store.links.decrement_selection_index.bind(store)
-			hotkey_handler: store.links.decrement_selection_index.bind(store)
+			click_handler: store.links.decrement_selection_index.bind(store.links)
+			hotkey_handler: store.links.decrement_selection_index.bind(store.links)
 			hotkey: 'up'
 			hotkey_display_name: "Up Arrow"
 			content: "Move Selection Up"
