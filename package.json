@@ -1,26 +1,19 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.1.43",
-	"scripts": {
-		"build": "imba build app/index.html",
-		"publish-preview": "npx gh-pages --no-history --dotfiles --dist dist/ --branch preview",
-		"publish-release": "npx gh-pages --no-history --dotfiles --dist dist/ --branch release",
-		"start": "imba -w app/index.html",
-		"static": "npm run build && cd dist && python3 -m http.server",
-		"preview": "npm run build && npm run publish-preview",
-		"deploy-only-after-preview": "npm run publish-release"
-	},
-	"dependencies": {
-		"dexie": "^3.2.2",
-		"dexie-export-import": "^1.0.3",
-		"downloadjs": "^1.4.7",
-		"fzi": "^1.1.0",
-		"imba": "^2.0.0-alpha.220",
-		"lodash": "^4.17.21",
-		"mathjs": "^11.1.0",
-		"nanoid": "^4.0.0"
-	},
+	"version": "0.2.1",
 	"description": "A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.",
 	"homepage": "https://fuzzyho.me/",
-	"author": "Mikey Oz (https://github.com/familyfriendlymikey)"
+	"author": "Mikey Oz (https://github.com/familyfriendlymikey)",
+	"scripts": {
+		"dev": "vite build -w --outDir chrome/dist --minify false",
+		"build": "vite build --outDir chrome/dist"
+	},
+	"dependencies": {
+		"fzi": "^1.5.0",
+		"imba": "^2.0.0-alpha.225",
+		"lodash": "^4.17.21",
+		"math-expression-evaluator": "^1.4.0",
+		"vite": "^3.2.5",
+		"vite-plugin-imba": "^0.10.1"
+	}
 }
