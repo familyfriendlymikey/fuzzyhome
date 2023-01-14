@@ -1,6 +1,6 @@
 {
 	"name": "fuzzyhome",
-	"version": "0.2.1",
+	"version": "1.0.0",
 	"description": "A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.",
 	"homepage": "https://fuzzyho.me/",
 	"author": "Mikey Oz (https://github.com/familyfriendlymikey)",
