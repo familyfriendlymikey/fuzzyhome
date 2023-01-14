@@ -4,7 +4,8 @@ import config from './config.imba'
 import { find, omit, orderBy } from 'lodash'
 import fzi from 'fzi'
 import { cloneDeep } from 'lodash'
-import mexp from 'math-expression-evaluator'
+import Mexp from 'math-expression-evaluator'
+let mexp = new Mexp
 
 export default new class api
 
