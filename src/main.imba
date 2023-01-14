@@ -38,7 +38,10 @@ def init
 	Frequencies = frequencies or {}
 
 	global.chrome.bookmarks.getTree! do(bookmarks)
-		const folder = api.bfs 'Bookmarks Bar', bookmarks
+		# Bookmarks Bar folder is guaranteed to be the first child of the bookmarks tree root
+		const bookmarkBarTitle = bookmarks[0].children[0].title
+
+		const folder = api.bfs bookmarkBarTitle, bookmarks
 		state.links = api.traverse folder
 		api.sort_links!
 		state.loaded = yes
