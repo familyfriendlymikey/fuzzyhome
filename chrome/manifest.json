@@ -1,7 +1,7 @@
 {
 	"name": "fuzzyhome",
 	"description": "A power user oriented new-tab page that enables lightning speed navigation through the dark magic of fuzzy finding.",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"manifest_version": 3,
 	"permissions": [
 		"bookmarks",
