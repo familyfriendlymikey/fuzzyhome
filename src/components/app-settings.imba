@@ -1,7 +1,7 @@
 tag app-settings
 
 	<self>
-		css w:100%
+		css w:100% of:auto
 
 		css .settings-container
 			d:flex fld:row jc:space-around ai:center
@@ -51,3 +51,7 @@ tag app-settings
 			<.settings-button @click=config.set_default_bang>
 				"change default bang"
 
+		<.settings-container>
+
+			<.settings-button @click=config.toggle_open_urls>
+				"OPEN URLS: {config.data.open_urls}"

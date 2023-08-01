@@ -10,6 +10,7 @@ export default new class config
 			data = JSON.parse(global.localStorage.fuzzyhome_config)
 
 		data.focus ??= yes
+		data.open_urls ??= yes
 
 		data.theme ??= "timed"
 
@@ -40,6 +41,10 @@ export default new class config
 
 	def toggle_focus
 		data.focus = !data.focus
+		save!
+
+	def toggle_open_urls
+		data.open_urls = !data.open_urls
 		save!
 
 	def set_timed_theme_end

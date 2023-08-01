@@ -121,6 +121,8 @@ export default new class api
 		"{window.encodeURIComponent(state.query)}"
 
 	def handle_bang
+		if config.data.open_urls and /^https?:\/\//.test(state.query.trim!)
+			return window.location.href = state.query.trim!
 		return if state.loading
 		await increment_link_frequency bang
 		window.location.href = encoded_bang_query
