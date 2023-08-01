@@ -55,12 +55,7 @@ tag app-home
 				disabled=state.loading
 				@blur=blur
 			>
-				css h:50px px:20px fl:1
-					fs:20px ta:center
-					bd:1px solid $input-bc
-					outline:none rd:5px
-					bg:$input-bg c:$text-c
-					caret-color:$input-caret-c
+				css bg:$input-bg
 
 			<.side.right@click=handle_click_copy(api.math_result or 0)>
 				<$math>

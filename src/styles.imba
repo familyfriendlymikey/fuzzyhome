@@ -51,11 +51,34 @@ global css a
 global css .disabled *
 	@important c:gray4 user-select:none pointer-events:none
 
-global css .disabled $main-input
+global css .disabled
 	@important bg:gray4/10 bc:gray4
+
+global css input
+	bg:none h:50px px:20px fl:1 e:300ms
+	fs:20px ta:center
+	bd:1px solid $input-bc
+	outline:none rd:5px
+	c:$text-c
+	caret-color:$input-caret-c
+	@focus
+		bg:$input-bg
+
+global css button
+	bg:none bd:none fs:14px d:box fl:1
+	rd:5px tt:uppercase
+	transition:background 100ms
+	h:100% px:5px
+	of:hidden text-overflow:ellipsis white-space:nowrap
+	bg:$button-bg c:$button-c
+	@hover bg:$button-hover-bg
 
 global css .selected
 	bg:$selected-c
 
 global css .ellipsis
 	of:hidden text-overflow:ellipsis white-space:nowrap
+
+global css .button-row
+	d:flex fld:row jc:space-around ai:center
+	w:100% h:50px mt:10px g:10px

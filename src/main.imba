@@ -4,6 +4,8 @@ import pkg from '../package.json'
 let version = pkg.version
 L "fuzzyhome version {version}"
 
+import './std.imba'
+
 import state from './state.imba'
 import api from './api.imba'
 import config from './config.imba'
@@ -14,6 +16,7 @@ import './components/app-links.imba'
 import './components/app-link.imba'
 import './components/app-bang.imba'
 import './components/app-tips.imba'
+import './components/app-edit.imba'
 import './styles.imba'
 
 extend tag element
@@ -37,12 +40,7 @@ def init
 	let { frequencies } = await global.chrome.storage.sync.get 'frequencies'
 	Frequencies = frequencies or {}
 
-	global.chrome.bookmarks.getTree! do(bookmarks)
-		const bookmarks-bar = bookmarks[0].children[0].children
-		state.links = api.traverse bookmarks-bar
-		api.sort_links!
-		state.loaded = yes
-		imba.commit!
+	api.reload-bookmarks!
 
 init!
 
@@ -70,6 +68,8 @@ tag app
 
 			if state.view is 'settings'
 				<app-settings>
+			elif state.editing-link
+				<app-edit>
 			else
 				<app-home>
 

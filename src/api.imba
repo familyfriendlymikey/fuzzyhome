@@ -9,6 +9,14 @@ let mexp = new Mexp
 
 export default new class api
 
+	def reload-bookmarks
+		global.chrome.bookmarks.getTree! do(bookmarks)
+			const bookmarks-bar = bookmarks[0].children[0].children
+			state.links = traverse bookmarks-bar
+			sort_links!
+			state.loaded = yes
+			imba.commit!
+
 	def pin_link link
 		Pins[link.url] ^= 1
 		sort_links!
@@ -16,23 +24,23 @@ export default new class api
 		imba.commit!
 
 	def edit-link link
-		console.log link
+		state.editing-link = link
 
 	def increment_link_frequency link
 		Frequencies[link.url] ??= 0
 		Frequencies[link.url] += 1
 		global.chrome.storage.sync.set {frequencies:Frequencies}
 
-	def get-link-from-node node
-		return unless let url = node..url
-		let split_text = node.title.split /\s+/
+	def get-link-from-node { id, title, url }
+		return unless url
+		let split_text = title.split /\s+/
 		let alias
 		let last = split_text[-1]
 		if last.startsWith("(") and last.endsWith(")")
 			alias = split_text.pop!.slice(1,-1)
 		let name = split_text.join(" ")
 		{
-			name, alias, url
+			name, alias, url, id
 			get bang?
 				/\$\d+/.test(url)
 		}
