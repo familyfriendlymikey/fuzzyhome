@@ -15,6 +15,9 @@ export default new class api
 		global.chrome.storage.sync.set {pins:Pins}
 		imba.commit!
 
+	def edit-link link
+		console.log link
+
 	def increment_link_frequency link
 		Frequencies[link.url] ??= 0
 		Frequencies[link.url] += 1
@@ -22,16 +25,17 @@ export default new class api
 
 	def get-link-from-node node
 		return unless let url = node..url
-		let split_text = node.title.split	/\s+/
+		let split_text = node.title.split /\s+/
 		let alias
 		let last = split_text[-1]
-		if last.startsWith("(")	and	last.endsWith(")")
+		if last.startsWith("(") and last.endsWith(")")
 			alias = split_text.pop!.slice(1,-1)
 		let name = split_text.join(" ")
-		let is_bang = no
-		if /\$\d+/.test(url)
-			is_bang = yes
-		{ name, alias, is_bang, url }
+		{
+			name, alias, url
+			get bang?
+				/\$\d+/.test(url)
+		}
 
 	def traverse stack
 		const links = []
@@ -104,7 +108,7 @@ export default new class api
 
 	def handle_click_link
 		let link = selected_link
-		if link.is_bang
+		if link.bang?
 			state.query = ''
 			state.active_bang = link
 		else

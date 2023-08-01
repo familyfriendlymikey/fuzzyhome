@@ -7,4 +7,5 @@ export default {
 	link_selection_index: 0
 	active_bang: no
 	loaded:no
+	editing-link: no
 }

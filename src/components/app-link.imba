@@ -9,7 +9,7 @@ tag app-link
 	>
 		css d:flex fld:row jc:space-between ai:center
 			px:16px py:11px rd:5px c:$text-c
-		if link.is_bang
+		if link.bang?
 			css c:$bang-c
 
 		<.link-left>
@@ -32,12 +32,12 @@ tag app-link
 					<span.parens> ")"
 
 		<.link-right>
-			css d:hflex jc:space-between w:70px ai:center
+			css d:hflex jc:space-between ai:center g:5px
 
 			css .selected .link-button visibility:visible
 
 			<.link-buttons>
-				css d:flex fld:row jc:start ai:center gap:5px
+				css d:flex fld:row jc:start ai:center g:5px
 
 				css .link-button visibility:hidden rd:3px c:$button-c fs:15px px:3px
 				if index is state.link_selection_index
@@ -45,7 +45,10 @@ tag app-link
 
 				css .link-button svg w:15px
 
-				<.link-button @click.prevent.stop=api.pin_link(link)>
+				<.link-button @click.trap=api.edit-link(link)>
+					<svg src='../assets/edit-2.svg'>
+
+				<.link-button @click.trap=api.pin_link(link)>
 					if Pins[link.url]
 						css visibility:visible c:$button-dim-c
 

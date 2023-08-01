@@ -10,7 +10,7 @@ tag app-links
 			hotkey: 'return'
 			hotkey_display_name: 'Return'
 		}
-		temp.content = api.selected_link.is_bang ? "Use Bang" : "Navigate To Link"
+		temp.content = api.selected_link.bang? ? "Use Bang" : "Navigate To Link"
 		result.push temp
 
 		temp = {
