@@ -53,8 +53,9 @@ tag app-bang
 					<img.link-icon src=api.get-icon(api.bang.url)>
 						css w:20px h:20px mr:10px rd:3px
 
-					<.display-name> "...{api.encoded_bang_query_nourl}"
+					<.display-name> api.encoded_bang_query
 						css fs:20px of:hidden text-overflow:ellipsis
+							word-break:break-all
 
 				<.link-right>
 					css d:flex fld:row jc:space-between ai:center

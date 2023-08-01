@@ -19,7 +19,7 @@ export default new class config
 
 		data.default_bang ??= {}
 		data.default_bang.name ??= ""
-		data.default_bang.url ??= "https://www.google.com/search?q="
+		data.default_bang.url ??= "https://www.google.com/search?q=$0"
 		data.default_bang.frequency ??= 0
 		data.default_bang.is_bang ??= yes
 		save!
@@ -34,7 +34,7 @@ export default new class config
 		save!
 
 	def set_default_bang
-		let res = window.prompt('Insert a new search URL. For example:\nhttps://search.brave.com/search?q=')..trim!
+		let res = window.prompt('Insert a new search URL:', data.default_bang.url)..trim!
 		return unless res
 		data.default_bang.url = res
 		save!

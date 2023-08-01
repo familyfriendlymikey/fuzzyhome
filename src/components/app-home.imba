@@ -16,6 +16,12 @@ tag app-home
 		api.set_link_selection_index 0
 		api.sort_links!
 
+	def insert-tab { target:t }
+		let start = t.selectionStart
+		let end = t.selectionEnd
+		t.value = t.value.substring(0, start) + "\t" + t.value.substring(end)
+		t.selectionStart = t.selectionEnd = start + 1
+
 	<self>
 		css w:100% d:flex fld:column ofy:hidden gap:20px
 
@@ -44,6 +50,7 @@ tag app-home
 				autofocus
 				bind=state.query
 				@input=handle_input
+				@keydown.tab.prevent=insert-tab
 				@cut=api.handle_cut
 				disabled=state.loading
 				@blur=blur

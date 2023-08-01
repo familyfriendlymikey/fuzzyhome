@@ -21,26 +21,25 @@ export default new class api
 		global.chrome.storage.sync.set {frequencies:Frequencies}
 
 	def get-link-from-node node
-			return unless let url = node..url
-			let split_text = node.title.split	/\s+/
-			let alias
-			let last = split_text[-1]
-			if last.startsWith("(")	and	last.endsWith(")")
-				alias = split_text.pop!.slice(1,-1)
-			let name = split_text.join(" ")
-			let is_bang = no
-			if name.startsWith "!"
-				is_bang = yes
-				name = name.slice(1)
-			{ name, alias, is_bang, url }
+		return unless let url = node..url
+		let split_text = node.title.split	/\s+/
+		let alias
+		let last = split_text[-1]
+		if last.startsWith("(")	and	last.endsWith(")")
+			alias = split_text.pop!.slice(1,-1)
+		let name = split_text.join(" ")
+		let is_bang = no
+		if /\$\d+/.test(url)
+			is_bang = yes
+		{ name, alias, is_bang, url }
 
 	def traverse stack
 		const links = []
 		while stack.length > 0
-				const node = stack.pop!
-				const link = get-link-from-node(node)
-				links.push(link) if link
-				node..children..forEach do stack.push $1
+			const node = stack.pop!
+			const link = get-link-from-node(node)
+			links.push(link) if link
+			node..children..forEach do stack.push $1
 		links
 
 	def bfs title, queue
@@ -115,10 +114,11 @@ export default new class api
 		state.active_bang or config.data.default_bang
 
 	get encoded_bang_query
-		"{bang.url}{window.encodeURIComponent(state.query)}"
-
-	get encoded_bang_query_nourl
-		"{window.encodeURIComponent(state.query)}"
+		bang.url.replace /\$\d+/g, do
+			return window.encodeURIComponent(state.query) if $1 is '$0'
+			let i = parseInt($1.slice(1)) - 1
+			let replacement = state.query.split(/\t/)[i] or ''
+			window.encodeURIComponent(replacement)
 
 	def handle_bang
 		if config.data.open_urls and /^https?:\/\//.test(state.query.trim!)
