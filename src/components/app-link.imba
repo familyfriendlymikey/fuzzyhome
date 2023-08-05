@@ -20,7 +20,7 @@ tag app-link
 
 				css w:20px h:20px mr:10px rd:3px
 
-			<.name> link.name
+			<.name> link.display-name
 				css tt:capitalize fs:20px overflow-wrap:anywhere
 
 			if link.alias

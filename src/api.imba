@@ -33,16 +33,20 @@ export default new class api
 
 	def get-link-from-node { id, title, url }
 		return unless url
-		let split_text = title.split /\s+/
-		let alias
-		let last = split_text[-1]
-		if last.startsWith("(") and last.endsWith(")")
-			alias = split_text.pop!.slice(1,-1)
-		let name = split_text.join(" ")
 		{
-			name, alias, url, id
+			id
+			url
+			name: title.split(/\s+/).join(" ")
+			get display-name
+				return name unless alias
+				name.split(" ").slice(0,-1).join(" ")
 			get bang?
 				/\$\d+/.test(url)
+			get alias
+				let split-text = name.split " "
+				let last = split-text[-1]
+				if last.startsWith("(") and last.endsWith(")")
+					split-text.pop!.slice(1,-1)
 		}
 
 	def traverse stack
