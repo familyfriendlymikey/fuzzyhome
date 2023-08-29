@@ -17,6 +17,8 @@ export default new class config
 		data.timed_theme_start ??= 8
 		data.timed_theme_end ??= 18
 
+		data.url_regex = '^\\S\\S+\\.\\w\\w+$'
+
 		data.default_bang ??= {}
 		data.default_bang.name ??= ""
 		data.default_bang.url ??= "https://www.google.com/search?q=$0"
@@ -60,6 +62,12 @@ export default new class config
 		return unless res > 0
 		return unless res < 24
 		data.timed_theme_start = res
+		save!
+
+	def set_url_regex
+		let res = window.prompt('Please enter a new regex for url matching.', data.url_regex)
+		return unless res
+		data.url_regex = res
 		save!
 
 	get theme

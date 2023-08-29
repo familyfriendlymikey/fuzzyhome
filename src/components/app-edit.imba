@@ -8,9 +8,7 @@ tag app-edit
 		$name.focus!
 
 	def save
-		await global.chrome.bookmarks.update link.id,
-			title: link.name
-			url: link.url
+		await api.save(link)
 		await api.reload-bookmarks!
 		state.editing-link = no
 

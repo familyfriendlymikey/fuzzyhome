@@ -13,9 +13,21 @@ export default new class api
 		global.chrome.bookmarks.getTree! do(bookmarks)
 			const bookmarks-bar = bookmarks[0].children[0].children
 			state.links = traverse bookmarks-bar
+
+			for link in state.links
+				if /^!/.test(link.name)
+					link.url += '$0'
+					link.name = link.name.slice(1)
+					save(link)
+
 			sort_links!
 			state.loaded = yes
 			imba.commit!
+
+	def save link
+		await global.chrome.bookmarks.update link.id,
+			title: link.name
+			url: link.url
 
 	def pin_link link
 		Pins[link.url] ^= 1
@@ -136,9 +148,19 @@ export default new class api
 			let replacement = state.query.split(/\t/)[i] or ''
 			window.encodeURIComponent(replacement)
 
+	get url-query
+		return unless config.data.open_urls
+		let re = new RegExp(config.data.url_regex)
+		return unless re.test state.query.trim!
+		let q = state.query.trim!
+		unless /^https?:\/\//.test(q)
+			q = 'https://' + q
+		q
+
+	def handle_url
+		window.location.href = url-query
+
 	def handle_bang
-		if config.data.open_urls and /^https?:\/\//.test(state.query.trim!)
-			return window.location.href = state.query.trim!
 		return if state.loading
 		await increment_link_frequency bang
 		window.location.href = encoded_bang_query

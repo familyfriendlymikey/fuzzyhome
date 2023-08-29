@@ -65,8 +65,7 @@ global css input
 		bg:$input-bg
 
 global css button
-	bg:none bd:none fs:14px d:box fl:1
-	rd:5px tt:uppercase
+	bg:none bd:none fs:14px d:box fl:1 rd:5px
 	transition:background 100ms
 	h:100% px:5px
 	of:hidden text-overflow:ellipsis white-space:nowrap

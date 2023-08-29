@@ -1,8 +1,6 @@
-global.L = console.log
-
 import pkg from '../package.json'
 let version = pkg.version
-L "fuzzyhome version {version}"
+console.log "fuzzyhome version {version}"
 
 import './std.imba'
 
@@ -15,6 +13,7 @@ import './components/app-settings.imba'
 import './components/app-links.imba'
 import './components/app-link.imba'
 import './components/app-bang.imba'
+import './components/app-url.imba'
 import './components/app-tips.imba'
 import './components/app-edit.imba'
 import './styles.imba'
