@@ -13,6 +13,7 @@ tag app-tip
 			@first ta:left rdl:3px
 			@last ta:right bd:none rdr:3px
 			@hover bg:$tip-hover-c
+			cursor:pointer
 		if tip.placeholder or not tip.click_handler
 			css
 				@hover @important bg:none
@@ -65,7 +66,7 @@ tag app-tips
 			<@click=toggle>
 				css w:100% d:flex ja:center c:$button-c rdb:4px
 					transition:background 100ms
-					@hover bg:$tip-hover-c
+					@hover bg:$tip-hover-c cursor:pointer
 				if show_more
 					css rd:0
 

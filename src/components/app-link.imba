@@ -34,28 +34,29 @@ tag app-link
 					<span> link.alias
 					<span.parens> ")"
 
-		<.link-right>
-			css d:hflex jc:space-between ai:center g:5px
+		unless link.name is "Localhost"
+			<.link-right>
+				css d:hflex jc:space-between ai:center g:5px
 
-			css .selected .link-button visibility:visible
+				css .selected .link-button visibility:visible
 
-			<.link-buttons>
-				css d:flex fld:row jc:start ai:center g:5px
+				<.link-buttons>
+					css d:flex fld:row jc:start ai:center g:5px
 
-				css .link-button visibility:hidden rd:3px c:$button-c fs:15px px:3px
-				if index is state.link_selection_index
-					css .link-button visibility:visible
+					css .link-button visibility:hidden rd:3px c:$button-c fs:15px px:3px
+					if index is state.link_selection_index
+						css .link-button visibility:visible
 
-				css .link-button svg w:15px
+					css .link-button svg w:15px
 
-				<.link-button @click.trap=api.edit-link(link)>
-					<svg src='../assets/edit-2.svg'>
+					<.link-button @click.trap=api.edit-link(link)>
+						<svg src='../assets/edit-2.svg'>
 
-				<.link-button @click.trap=api.pin_link(link)>
-					if Pins[link.url]
-						css visibility:visible c:$button-dim-c
+					<.link-button @click.trap=api.pin_link(link)>
+						if Pins[link.url]
+							css visibility:visible c:$button-dim-c
 
-					<svg src='../assets/star.svg'>
+						<svg src='../assets/star.svg'>
 
-			<.frequency> Frequencies[link.url] or 0
-				css fs:15px ml:7px
+				<.frequency> Frequencies[link.url] or 0
+					css fs:15px ml:7px

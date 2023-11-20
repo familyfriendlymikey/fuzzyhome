@@ -12,17 +12,14 @@ export default new class api
 	def reload-bookmarks
 		global.chrome.bookmarks.getTree! do(bookmarks)
 			const bookmarks-bar = bookmarks[0].children[0].children
-			
-			const localhostLink = { 
-				id: -1, 
+			bookmarks-bar.push { 
+				id: 999, 
 				title: 'Localhost', 
 				name: 'localhost', 
 				url: 'http://localhost:'
 			}
-			bookmarks-bar.push(localhostLink)
 			
 			state.links = traverse bookmarks-bar
-
 
 			for link in state.links
 				if /^!/.test(link.name)
@@ -46,9 +43,10 @@ export default new class api
 		imba.commit!
 
 	def edit-link link
-		state.editing-link = link
+		state.editing-link = link unless link.name is "Localhost"
 
 	def increment_link_frequency link
+		return if link.name is "Localhost"
 		Frequencies[link.url] ??= 0
 		Frequencies[link.url] += 1
 		global.chrome.storage.sync.set {frequencies:Frequencies}
@@ -126,13 +124,15 @@ export default new class api
 		await increment_link_frequency link
 		window.location.href = link.url
 
-	def enter_port
-		state.port = yes
-		console.log state
-
-
 	def navigateLocalhost port
-		state.port = no
+		if !port and config.data.last_port
+			state.port = false
+			window.location.href = "http://localhost:" + config.data.last_port
+			return
+
+		state.port = false
+		config.set_last_port port
+
 		window.location.href = "http://localhost:" + port
 
 	get math_result
@@ -155,7 +155,7 @@ export default new class api
 			state.query = ''
 			state.active_bang = link
 		elif link.name is 'Localhost'
-			enter_port
+			state.port = true
 		else
 			navigate link
 

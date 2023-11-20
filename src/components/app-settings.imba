@@ -49,5 +49,7 @@ tag app-settings
 
 			<button @click=config.toggle_keybindings>
 				"Keybindings: {config.data.keybindings}"
+			<button @click=config.reset_frequencies>
+				"Reset frequencies"
 
 			

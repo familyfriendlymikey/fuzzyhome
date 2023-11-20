@@ -23,7 +23,10 @@ export default new class config
 		data.default_bang.name ??= ""
 		data.default_bang.url ??= "https://www.google.com/search?q=$0"
 		data.default_bang.frequency ??= 0
+
 		data.keybindings ??= 'Arrow Keys'
+		data.last_port ??= null
+
 		save!
 
 	def cycle_theme
@@ -91,3 +94,10 @@ export default new class config
 		else
 			data.keybindings = "Arrow Keys"
 		save!
+
+	def set_last_port port
+		data.last_port = port
+		save!
+
+	def reset_frequencies
+		global.chrome.storage.sync.set {frequencies: { "http://localhost:": -1 }}

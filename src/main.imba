@@ -16,6 +16,8 @@ import './components/app-bang.imba'
 import './components/app-url.imba'
 import './components/app-tips.imba'
 import './components/app-edit.imba'
+import './components/app-modal.imba'
+
 import './styles.imba'
 
 extend tag element
@@ -58,6 +60,9 @@ tag app
 			e:100ms
 			@off o:0
 
+		if state.port	
+			<app-modal .open>
+
 		<.main>
 			css d:flex fld:column jc:start ai:center
 				bg:$appbg
@@ -71,13 +76,5 @@ tag app
 				<app-edit>
 			else
 				<app-home>
-
-			if state.port is yes
-				<dialog open>
-					<input
-						type="number"
-						autofocus
-						@keydown('returm')
-					>
 
 imba.mount <app>
