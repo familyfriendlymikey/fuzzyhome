@@ -17,12 +17,13 @@ export default new class config
 		data.timed_theme_start ??= 8
 		data.timed_theme_end ??= 18
 
-		data.url_regex = '^\\S\\S+\\.\\w\\w+$'
+		data.url_regex = '\^((https?\\%3A\\%2F\\%2F)?([\\w\\.\\-]+\\.)+\\w+)|(localhost\\:\\d+)\$'
 
 		data.default_bang ??= {}
 		data.default_bang.name ??= ""
 		data.default_bang.url ??= "https://www.google.com/search?q=$0"
 		data.default_bang.frequency ??= 0
+		data.keybindings ??= 'Arrow Keys'
 		save!
 
 	def cycle_theme
@@ -81,3 +82,12 @@ export default new class config
 				"light"
 		else
 			"dark"
+
+	def toggle_keybindings
+		if data.keybindings is "Arrow Keys"
+			data.keybindings = "Vim Style"
+		elif data.keybindings is "Vim Style"
+			data.keybindings = "Arrow Keys"
+		else
+			data.keybindings = "Arrow Keys"
+		save!

@@ -72,4 +72,12 @@ tag app
 			else
 				<app-home>
 
+			if state.port is yes
+				<dialog open>
+					<input
+						type="number"
+						autofocus
+						@keydown('returm')
+					>
+
 imba.mount <app>

@@ -12,7 +12,7 @@ tag app-home
 			state.query = ''
 			api.sort_links!
 
-	def handle_input
+	def handle_input e
 		api.set_link_selection_index 0
 		api.sort_links!
 

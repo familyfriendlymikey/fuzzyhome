@@ -45,3 +45,9 @@ tag app-settings
 
 				<button @click=config.set_url_regex>
 					"URL REGEX: {config.data.url_regex}"
+		<.button-row>
+
+			<button @click=config.toggle_keybindings>
+				"Keybindings: {config.data.keybindings}"
+
+			

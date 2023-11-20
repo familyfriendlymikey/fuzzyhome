@@ -12,7 +12,17 @@ export default new class api
 	def reload-bookmarks
 		global.chrome.bookmarks.getTree! do(bookmarks)
 			const bookmarks-bar = bookmarks[0].children[0].children
+			
+			const localhostLink = { 
+				id: -1, 
+				title: 'Localhost', 
+				name: 'localhost', 
+				url: 'http://localhost:'
+			}
+			bookmarks-bar.push(localhostLink)
+			
 			state.links = traverse bookmarks-bar
+
 
 			for link in state.links
 				if /^!/.test(link.name)
@@ -116,6 +126,15 @@ export default new class api
 		await increment_link_frequency link
 		window.location.href = link.url
 
+	def enter_port
+		state.port = yes
+		console.log state
+
+
+	def navigateLocalhost port
+		state.port = no
+		window.location.href = "http://localhost:" + port
+
 	get math_result
 		try
 			mexp.eval(state.query)
@@ -135,6 +154,8 @@ export default new class api
 		if link.bang?
 			state.query = ''
 			state.active_bang = link
+		elif link.name is 'Localhost'
+			enter_port
 		else
 			navigate link
 
@@ -154,7 +175,7 @@ export default new class api
 		return unless re.test state.query.trim!
 		let q = state.query.trim!
 		unless /^https?:\/\//.test(q)
-			q = 'https://' + q
+			q =  'http://' + q
 		q
 
 	def handle_url
@@ -172,6 +193,9 @@ export default new class api
 	def get-icon url
 		let { host } = parse_url url
 		"https://icon.horse/icon/{host}"
+	
+	def get_keybindings
+		return config.data.keybindings
 
 	def help
 		let url = "https://github.com/familyfriendlymikey/fuzzyhome"
