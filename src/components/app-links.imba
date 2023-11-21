@@ -27,8 +27,8 @@ tag app-links
 		temp = {
 				click_handler: api.increment_link_selection_index.bind(api)
 				hotkey_handler: api.increment_link_selection_index.bind(api)
-				hotkey: 'down'
-				hotkey_display_name: "Down Arrow"
+				hotkey: api.get_keybindings() is "Arrow Keys" ? "down" : "ctrl+j"
+				hotkey_display_name: api.get_keybindings() is "Arrow Keys" ? "Down Arrow" : "<C + j>"
 				content: "Move Selection Down"
 		}
 		result.push temp
@@ -36,12 +36,11 @@ tag app-links
 		temp = {
 				click_handler: api.decrement_link_selection_index.bind(api)
 				hotkey_handler: api.decrement_link_selection_index.bind(api)
-				hotkey: 'up'
-				hotkey_display_name: "Up Arrow"
+				hotkey: api.get_keybindings() is 'Arrow Keys' ? 'up' : 'ctrl+k'
+				hotkey_display_name: api.get_keybindings() is 'Arrow Keys' ? 'Up Arrow' : '<C + k>'
 				content: "Move Selection Up"
 		}
 		result.push temp
-
 		result
 
 	<self>

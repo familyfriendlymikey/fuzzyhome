@@ -8,4 +8,6 @@ export default {
 	active_bang: no
 	loaded:no
 	editing-link: no
+	keybindings: 'Arrow Keys'
+	port: no
 }

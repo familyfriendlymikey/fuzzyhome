@@ -1,10 +1,10 @@
 tag app-home
 
 	def mount
-		$home-input.focus!
+		$home-input.focus! if !state.port 
 
 	def blur
-		setTimeout(&, 100) do $home-input.focus!
+		setTimeout(&, 100) do $home-input.focus! if !state.port 
 
 	def handle_click_copy s
 		try
@@ -12,7 +12,7 @@ tag app-home
 			state.query = ''
 			api.sort_links!
 
-	def handle_input
+	def handle_input e
 		api.set_link_selection_index 0
 		api.sort_links!
 
@@ -21,6 +21,11 @@ tag app-home
 		let end = t.selectionEnd
 		t.value = t.value.substring(0, start) + "\t" + t.value.substring(end)
 		t.selectionStart = t.selectionEnd = start + 1
+
+	def clearInput
+		state.query = ""
+		api.set_link_selection_index 0
+		api.sort_links!
 
 	<self>
 		css w:100% d:flex fld:column ofy:hidden gap:20px
@@ -44,16 +49,18 @@ tag app-home
 					jc:right
 
 			<.side.left @click=(state.view = 'settings')>
+				css cursor:pointer
 				<svg src="../assets/settings.svg">
 
 			<input$home-input
-				autofocus
+				autofocus=!state.port
 				bind=state.query
 				@input=handle_input
 				@keydown.tab.prevent=insert-tab
 				@cut=api.handle_cut
 				disabled=state.loading
 				@blur=blur
+				@keydown.esc=clearInput
 			>
 				css bg:$input-bg
 

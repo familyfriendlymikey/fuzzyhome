@@ -16,6 +16,8 @@ import './components/app-bang.imba'
 import './components/app-url.imba'
 import './components/app-tips.imba'
 import './components/app-edit.imba'
+import './components/app-modal.imba'
+
 import './styles.imba'
 
 extend tag element
@@ -57,6 +59,9 @@ tag app
 			us:none
 			e:100ms
 			@off o:0
+
+		if state.port	
+			<app-modal .open>
 
 		<.main>
 			css d:flex fld:column jc:start ai:center

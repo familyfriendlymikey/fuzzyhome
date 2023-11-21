@@ -63,6 +63,15 @@ global css input
 	caret-color:$input-caret-c
 	@focus
 		bg:$input-bg
+		
+global css input[type="number"] 
+	-webkit-appearance: textfield;
+	-moz-appearance: textfield;
+	appearance: textfield;
+
+global css input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button
+	-webkit-appearance: none;
+
 
 global css button
 	bg:none bd:none fs:14px d:box fl:1 rd:5px
@@ -70,7 +79,7 @@ global css button
 	h:100% px:5px
 	of:hidden text-overflow:ellipsis white-space:nowrap
 	bg:$button-bg c:$button-c
-	@hover bg:$button-hover-bg
+	@hover bg:$button-hover-bg cursor:pointer
 
 global css .selected
 	bg:$selected-c
@@ -81,3 +90,17 @@ global css .ellipsis
 global css .button-row
 	d:flex fld:row jc:space-around ai:center
 	w:100% h:50px mt:10px g:10px
+
+global css .modal
+	d:none pos:fixed inset:0 zi: 10000
+	bgc: rgba(0, 0, 0, .75) p:40px of: auto
+
+global css .modal.open 
+	d:block
+	
+global css .modal-body
+	d:flex fld:column bg:#20222f
+	mt:20vh mx:30% p:20px rd:10px
+
+global css .modal-body input
+	p:10px
