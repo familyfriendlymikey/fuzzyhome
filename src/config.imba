@@ -13,6 +13,7 @@ export default new class config
 		data.open_urls ??= yes
 
 		data.theme ??= "timed"
+		data.case ??= "capitalize"
 
 		data.timed_theme_start ??= 8
 		data.timed_theme_end ??= 18
@@ -68,6 +69,15 @@ export default new class config
 		let res = window.prompt('Please enter a new regex for url matching.', data.url_regex)
 		return unless res
 		data.url_regex = res
+		save!
+
+	def toggle_case
+		if data.case is "lowercase"
+			data.case = "capitalize"
+		elif data.case is "capitalize"
+			data.case = "none"
+		else
+			data.case = "lowercase"
 		save!
 
 	get theme
