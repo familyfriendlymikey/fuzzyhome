@@ -21,7 +21,9 @@ tag app-link
 				css w:20px h:20px mr:10px rd:3px
 
 			<.name> link.display-name
-				css tt:lowercase fs:20px overflow-wrap:anywhere
+				css fs:20px overflow-wrap:anywhere
+				if config.data.lowercase is "on"
+					css tt:lowercase
 
 			if link.alias
 				<.name>
