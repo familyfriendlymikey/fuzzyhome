@@ -24,6 +24,8 @@ tag app-link
 				css fs:20px overflow-wrap:anywhere
 				if config.data.lowercase is "on"
 					css tt:lowercase
+				if config.data.lowercase is "off"
+					css tt:capitalize
 
 			if link.alias
 				<.name>
