@@ -22,9 +22,9 @@ tag app-link
 
 			<.name> link.display-name
 				css fs:20px overflow-wrap:anywhere
-				if config.data.lowercase is "on"
+				if config.data.case is "lowercase"
 					css tt:lowercase
-				else
+				elif config.data.case is "capitalize"
 					css tt:capitalize
 
 			if link.alias

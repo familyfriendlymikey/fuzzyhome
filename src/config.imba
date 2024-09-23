@@ -13,7 +13,7 @@ export default new class config
 		data.open_urls ??= yes
 
 		data.theme ??= "timed"
-		data.lowercase ??= "on"
+		data.case ??= "capitalize"
 
 		data.timed_theme_start ??= 8
 		data.timed_theme_end ??= 18
@@ -71,11 +71,13 @@ export default new class config
 		data.url_regex = res
 		save!
 
-	def toggle_lowercase
-		if data.lowercase is "on"
-			data.lowercase = "off"
+	def toggle_case
+		if data.case is "lowercase"
+			data.case = "capitalize"
+		elif data.case is "capitalize"
+			data.case = "none"
 		else
-			data.lowercase = "on"
+			data.case = "lowercase"
 		save!
 
 	get theme

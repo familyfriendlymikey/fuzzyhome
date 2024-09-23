@@ -48,5 +48,5 @@ tag app-settings
 
 		<.button-row>
 
-			<button @click=config.toggle_lowercase>
-				"LOWERCASE: {config.data.lowercase.toUpperCase!}"
+			<button @click=config.toggle_case>
+				"CASE: {config.data.case.toUpperCase!}"
