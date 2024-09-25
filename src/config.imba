@@ -18,7 +18,7 @@ export default new class config
 		data.timed_theme_start ??= 8
 		data.timed_theme_end ??= 18
 
-		data.url_regex = '^\\S\\S+\\.\\w\\w+$'
+		data.url_regex = '^\\S\\S+\\.\\S\\S+$'
 
 		data.default_bang ??= {}
 		data.default_bang.name ??= ""
