@@ -52,4 +52,4 @@ tag app-links
 		<.links>
 			css ofy:auto
 			for link, index in state.sorted_links
-				<app-link link=link index=index>
+				<app-link link=link index=index key=link>
