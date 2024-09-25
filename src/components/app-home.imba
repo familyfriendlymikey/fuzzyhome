@@ -71,7 +71,7 @@ tag app-home
 				css e:400ms of:hidden
 					@off o:0
 
-				if api.url-query
+				if api.url-query and !state.active_bang
 					<app-url>
 
 				elif state.active_bang or state.sorted_links.length < 1
