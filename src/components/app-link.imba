@@ -3,9 +3,9 @@ tag app-link
 	frequency = 0
 
 	<self
-		@contextmenu.trap=api.edit-link(link)
-		@pointerover=api.set_link_selection_index(index)
-		@click=api.handle_click_link
+		@contextmenu.trap.if(config.data.enable_mouse)=api.edit-link(link)
+		@pointerover.if(config.data.enable_mouse)=api.set_link_selection_index(index)
+		@click.if(config.data.enable_mouse)=api.handle_click_link
 		.selected=(index is state.link_selection_index)
 	>
 		css d:flex fld:row jc:space-between ai:center

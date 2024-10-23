@@ -31,7 +31,7 @@ tag app-url
 
 		<app-tips$tips tips=tips>
 
-		<.bang .selected @click=api.handle_url>
+		<.bang .selected @click.if(config.data.enable_mouse)=api.handle_url>
 			css d:flex fld:row jc:space-between ai:center
 				px:16px py:11px rd:5px c:blue6
 

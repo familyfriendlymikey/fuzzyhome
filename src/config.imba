@@ -24,6 +24,7 @@ export default new class config
 		data.default_bang.name ??= ""
 		data.default_bang.url ??= "https://www.google.com/search?q=$0"
 		data.default_bang.frequency ??= 0
+		data.enable_mouse ??= yes
 		save!
 
 	def cycle_theme
@@ -79,6 +80,11 @@ export default new class config
 		else
 			data.case = "lowercase"
 		save!
+
+	def toggle_mouse
+		data.enable_mouse = !data.enable_mouse
+		save!
+
 
 	get theme
 		if data.theme is "light"

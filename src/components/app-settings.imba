@@ -50,3 +50,9 @@ tag app-settings
 
 			<button @click=config.toggle_case>
 				"CASE: {config.data.case.toUpperCase!}"
+
+
+		<.button-row>
+			<button @click=config.toggle_mouse>
+				"MOUSE INPUT: {config.data.enable_mouse}"
+

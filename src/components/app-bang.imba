@@ -43,7 +43,7 @@ tag app-bang
 
 		unless $tips.show_more
 
-			<.bang .selected [c:$bang-c] @click=api.handle_bang>
+			<.bang .selected [c:$bang-c] @click.if(config.data.enable_mouse)=api.handle_bang>
 				css d:flex fld:row jc:space-between ai:center
 					px:16px py:11px rd:5px c:$text-c
 
