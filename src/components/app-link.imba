@@ -14,7 +14,7 @@ tag app-link
 				bg:$selected-bg
 
 			@hover
-				bg@!.selected:$hover-bg
+				!@.selected bg:$hover-bg
 				.link-button
 					visibility:visible
 				
