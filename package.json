@@ -1,19 +1,19 @@
 {
-	"name": "fuzzyhome",
-	"version": "2.2.0",
-	"description": "A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.",
-	"homepage": "https://fuzzyho.me/",
-	"author": "Mikey Oz (https://github.com/familyfriendlymikey)",
-	"scripts": {
-		"dev": "vite build -w --outDir chrome/dist --minify false",
-		"build": "vite build --outDir chrome/dist"
-	},
-	"dependencies": {
-		"fzi": "^1.5.0",
-		"imba": "^2.0.0-alpha.226",
-		"lodash": "^4.17.21",
-		"math-expression-evaluator": "^2.0.0",
-		"vite": "^3.2.5",
-		"vite-plugin-imba": "^0.10.1"
-	}
+  "name": "fuzzyhome",
+  "version": "2.2.0",
+  "description": "A lightweight new-tab page that lets you very quickly fuzzy find links and navigate to a result.",
+  "homepage": "https://fuzzyho.me/",
+  "author": "Mikey Oz (https://github.com/familyfriendlymikey)",
+  "scripts": {
+    "dev": "vite build -w --outDir chrome/dist --minify false",
+    "build": "vite build --outDir chrome/dist"
+  },
+  "dependencies": {
+    "fzi": "^1.5.0",
+    "imba": "^2.0.0-alpha.237",
+    "lodash": "^4.17.21",
+    "math-expression-evaluator": "^2.0.0",
+    "vite": "^3.2.5",
+    "vite-plugin-imba": "^0.10.1"
+  }
 }
