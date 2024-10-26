@@ -18,6 +18,10 @@ import './components/app-tips.imba'
 import './components/app-edit.imba'
 import './styles.imba'
 
+extend class String
+	get a-z
+		replace(/[^a-z]+/gi,' ')
+
 extend tag element
 	get state
 		state
