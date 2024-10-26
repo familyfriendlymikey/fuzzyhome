@@ -4,12 +4,20 @@ tag app-link
 
 	<self
 		@contextmenu.trap=api.edit-link(link)
-		@pointerover=api.set_link_selection_index(index)
-		@click=api.handle_click_link
+		@click=api.handle_click_link(link)
 		.selected=(index is state.link_selection_index)
 	>
 		css d:flex fld:row jc:space-between ai:center
 			px:16px py:11px rd:5px c:$text-c
+			
+			@.selected
+				bg:$selected-bg
+
+			@hover
+				bg@!.selected:$hover-bg
+				.link-button
+					visibility:visible
+				
 		if link.bang?
 			css c:$bang-c
 
@@ -35,15 +43,11 @@ tag app-link
 		<.link-right>
 			css d:hflex jc:space-between ai:center g:5px
 
-			css .selected .link-button visibility:visible
+			css .link-button visibility:hidden
 
 			<.link-buttons>
 				css d:flex fld:row jc:start ai:center g:5px
-
-				css .link-button visibility:hidden rd:3px c:$button-c fs:15px px:3px
-				if index is state.link_selection_index
-					css .link-button visibility:visible
-
+				css .link-button rd:3px c:$button-c fs:15px px:3px
 				css .link-button svg w:15px
 
 				<.link-button @click.trap=api.edit-link(link)>

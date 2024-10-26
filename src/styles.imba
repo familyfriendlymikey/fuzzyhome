@@ -10,7 +10,8 @@ global css body
 global css .dark
 	$appbg:#20222f
 	$bodybg:#20222f
-	$selected-c:blue3/5
+	$selected-bg:blue3/3
+	$hover-bg:blue3/1
 	$bang-c:#fad4ab
 	$text-c:blue3
 	$input-bg:purple4/10
@@ -29,7 +30,8 @@ global css .dark
 global css .light
 	$bodybg:#ececec
 	$appbg:#fff
-	$selected-c:blue5/7
+	$selected-bg:blue5/7
+	$hover-bg:blue5/2
 	$bang-c:#ff7070
 	$text-c:#3c3c3c
 	$input-bg:blue4/10
@@ -73,7 +75,7 @@ global css button
 	@hover bg:$button-hover-bg
 
 global css .selected
-	bg:$selected-c
+	bg:$selected-bg
 
 global css .ellipsis
 	of:hidden text-overflow:ellipsis white-space:nowrap
