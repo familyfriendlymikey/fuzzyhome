@@ -37,11 +37,21 @@ global.Pins = {}
 global.Frequencies = {}
 
 def init
-	let { pins } = await global.chrome.storage.sync.get 'pins'
-	Pins = pins or {}
+	let data = await global.chrome.storage.sync.get null
+	console.log "chrome storage:", data
 
-	let { frequencies } = await global.chrome.storage.sync.get 'frequencies'
-	Frequencies = frequencies or {}
+	let { pins } = data
+	if pins
+		Pins = pins
+
+	# LOADING BOTH OLD AND NEW STORAGE METHODS
+	let { frequencies } = data
+	if frequencies
+		Frequencies = frequencies
+
+	for own k,v of data
+		continue unless k.startsWith 'freq_'
+		Frequencies[k.slice(5)] = v
 
 	api.reload-bookmarks!
 

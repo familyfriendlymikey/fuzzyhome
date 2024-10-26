@@ -10,19 +10,21 @@ let mexp = new Mexp
 export default new class api
 
 	def reload-bookmarks
-		global.chrome.bookmarks.getTree! do(bookmarks)
-			const bookmarks-bar = bookmarks[0].children[0].children
-			state.links = traverse bookmarks-bar
+		let bookmarks = await global.chrome.bookmarks.getTree!
+		const bookmarks-bar = bookmarks[0].children[0].children
+		state.links = traverse bookmarks-bar
 
-			for link in state.links
-				if /^!/.test(link.name)
-					link.url += '$0'
-					link.name = link.name.slice(1)
-					save(link)
+		# CONVERTING OLD BANGS
+		for link in state.links
+			if /^!/.test(link.name)
+				link.url += '$0'
+				link.name = link.name.slice(1)
+				save(link)
 
-			sort_links!
-			state.loaded = yes
-			imba.commit!
+		sort_links!
+		state.loaded = yes
+		imba.commit!
+		state.links
 
 	def save link
 		await global.chrome.bookmarks.update link.id,
@@ -39,9 +41,19 @@ export default new class api
 		state.editing-link = link
 
 	def increment_link_frequency link
-		Frequencies[link.url] ??= 0
-		Frequencies[link.url] += 1
-		global.chrome.storage.sync.set {frequencies:Frequencies}
+		# CONVERTING OLD TYPE OF FREQ STORAGE
+		Frequencies[link.id] = Math.max((Frequencies[link.id] or 0), (Frequencies[link.url] or 0))
+		Frequencies[link.id] += 1
+
+		# Chrome sync storage can only be
+		# - 8kb per item
+		# - 100kb total
+		# - 512 items total
+		# So < 512 frequencies is the max
+
+		let key = "freq_{link.id}"
+		let val = Frequencies[link.id]
+		try await global.chrome.storage.sync.set {[key]:val}
 
 	def get-link-from-node { id, title, url }
 		return unless url
@@ -80,7 +92,7 @@ export default new class api
 	def sort_links
 		if state.query.trim!.length <= 0
 			const pinned = do Pins[$1.url] or no
-			const freq = do Frequencies[$1.url] or 0
+			const freq = do Math.max((Frequencies[$1.id] or 0), (Frequencies[$1.url] or 0))
 			state.sorted_links = orderBy(state.links, [pinned, freq], ['desc', 'desc'])
 		else
 			state.sorted_links = fzi.search state.query, state.links, (do $1.name), (do $1.alias)

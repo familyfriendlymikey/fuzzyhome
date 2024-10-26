@@ -59,5 +59,5 @@ tag app-link
 
 					<svg src='../assets/star.svg'>
 
-			<.frequency> Frequencies[link.url] or 0
+			<.frequency> Math.max((Frequencies[link.id] or 0), (Frequencies[link.url] or 0))
 				css fs:15px ml:7px
