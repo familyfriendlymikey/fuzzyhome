@@ -7,7 +7,7 @@ tag app-links
 		temp = {
 			click_handler: api.handle_click_link.bind(api,null)
 			hotkey_handler: api.handle_click_link.bind(api,null)
-			hotkey: 'return'
+			hotkey: config.data.hotkey.handle_click_link
 			hotkey_display_name: 'Return'
 		}
 		temp.content = api.selected_link.bang? ? "Use Bang" : "Navigate To Link"
@@ -27,7 +27,7 @@ tag app-links
 		temp = {
 				click_handler: api.increment_link_selection_index.bind(api)
 				hotkey_handler: api.increment_link_selection_index.bind(api)
-				hotkey: 'down'
+				hotkey: config.data.hotkey.increment_link_selection_index
 				hotkey_display_name: "Down Arrow"
 				content: "Move Selection Down"
 		}
@@ -36,7 +36,7 @@ tag app-links
 		temp = {
 				click_handler: api.decrement_link_selection_index.bind(api)
 				hotkey_handler: api.decrement_link_selection_index.bind(api)
-				hotkey: 'up'
+				hotkey: config.data.hotkey.decrement_link_selection_index
 				hotkey_display_name: "Up Arrow"
 				content: "Move Selection Up"
 		}

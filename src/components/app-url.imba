@@ -7,7 +7,7 @@ tag app-url
 		temp = {
 				click_handler: api.handle_url.bind(api)
 				hotkey_handler: api.handle_url.bind(api)
-				hotkey: 'return'
+				hotkey: config.data.hotkey.handle_url
 				hotkey_display_name: "Return"
 				content: "Go To URL"
 		}

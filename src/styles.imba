@@ -79,7 +79,3 @@ global css .selected
 
 global css .ellipsis
 	of:hidden text-overflow:ellipsis white-space:nowrap
-
-global css .button-row
-	d:flex fld:row jc:space-around ai:center
-	w:100% h:50px mt:10px g:10px

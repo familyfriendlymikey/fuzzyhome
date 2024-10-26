@@ -24,6 +24,34 @@ export default new class config
 		data.default_bang.name ??= ""
 		data.default_bang.url ??= "https://www.google.com/search?q=$0"
 		data.default_bang.frequency ??= 0
+
+		data.hotkey ??= {}
+		data.hotkey.handle_bang ??= 'return'
+		data.hotkey.handle_url ??= 'return'
+		data.hotkey.handle_click_link ??= 'return'
+		data.hotkey.unset_active_bang ??= 'esc'
+		data.hotkey.increment_link_selection_index ??= 'down'
+		data.hotkey.decrement_link_selection_index ??= 'up'
+
+		save!
+
+	def set_hotkey name
+		let res = window.prompt '''
+		Insert a hotkey. The formatting is intuitive; basically, you can input something like:
+
+		ctrl+j
+
+		or, if you want multiple keys to work, you can use a pipe symbol:
+
+		down|ctrl+j
+
+		An exhaustive list of hotkey names can be found here if necessary:
+
+		https://github.com/imba/imba/blob/master/packages/imba/src/imba/events/mousetrap.mjs
+		'''
+
+		return unless res
+		data.hotkey[name] = res..trim!
 		save!
 
 	def cycle_theme

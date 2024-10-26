@@ -7,7 +7,7 @@ tag app-bang
 		temp = {
 				click_handler: api.handle_bang.bind(api)
 				hotkey_handler: api.handle_bang.bind(api)
-				hotkey: 'return'
+				hotkey: config.data.hotkey.handle_bang
 				hotkey_display_name: "Return"
 				content: "Search"
 		}
@@ -28,7 +28,7 @@ tag app-bang
 			temp = {
 					click_handler: api.unset_active_bang.bind(api)
 					hotkey_handler: api.unset_active_bang.bind(api)
-					hotkey: 'esc'
+					hotkey: config.data.hotkey.unset_active_bang
 					hotkey_display_name: "Esc"
 					content: "Back"
 			}
