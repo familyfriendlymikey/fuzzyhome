@@ -4,17 +4,17 @@ tag app-link
 
 	<self
 		@contextmenu.trap=api.edit-link(link)
-		@click=api.navigate(link)
+		@click=api.handle_click_link(link)
 		.selected=(index is state.link_selection_index)
 	>
 		css d:flex fld:row jc:space-between ai:center
 			px:16px py:11px rd:5px c:$text-c
 			
-			&.selected
-				bg:$selected-c
+			@.selected
+				bg:$selected-bg
 
 			@hover
-				bg:$hover-c
+				bg@!.selected:$hover-bg
 				.link-button
 					visibility:visible
 				

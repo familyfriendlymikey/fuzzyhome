@@ -5,8 +5,8 @@ tag app-links
 		let temp
 
 		temp = {
-			click_handler: api.handle_click_link.bind(api)
-			hotkey_handler: api.handle_click_link.bind(api)
+			click_handler: api.handle_click_link.bind(api,null)
+			hotkey_handler: api.handle_click_link.bind(api,null)
 			hotkey: 'return'
 			hotkey_display_name: 'Return'
 		}

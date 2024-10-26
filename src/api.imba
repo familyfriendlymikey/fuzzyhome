@@ -130,8 +130,8 @@ export default new class api
 		state.query = ''
 		sort_links!
 
-	def handle_click_link
-		let link = selected_link
+	def handle_click_link link
+		link ??= selected_link
 		if link.bang?
 			state.query = ''
 			state.active_bang = link
