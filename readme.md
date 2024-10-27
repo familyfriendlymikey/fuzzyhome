@@ -25,27 +25,27 @@ don't know Imba, consider learning it, it's extremely powerful.
 	npm run dev
 	```
 
-2. Go to
+2. Go to:
 
 	```
 	chrome://extensions/
 	```
 
-3. Click `Load unpacked`
+3. Click `Load unpacked`.
 
-4. Select the `chrome` folder
+4. Select the `chrome` folder.
 
 Then you're good to go. With the dev server running, any change you save will
-be built, and all you need to do is refresh with `mod+r`.
+be built, and all you need to do is refresh Chrome with `mod+r`.
 
 ## Publishing
 
 This is just for me to remember 😛
 
-1. Run
+1. Run:
 
 	```
 	npm run build
 	```
 
-2. Upload the newly created `chrome.zip` to the Chrome store
+2. Upload the newly created `chrome.zip` to the Chrome store.
