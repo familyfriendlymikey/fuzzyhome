@@ -6,7 +6,7 @@
   "author": "Mikey Oz (https://github.com/familyfriendlymikey)",
   "scripts": {
     "dev": "vite build -w --outDir chrome/dist --minify false",
-    "build": "vite build --outDir chrome/dist"
+    "build": "vite build --outDir chrome/dist && zip -r chrome.zip chrome"
   },
   "dependencies": {
     "fzi": "^1.5.0",
