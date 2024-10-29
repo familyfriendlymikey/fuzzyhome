@@ -22,7 +22,13 @@ export default new class config
 
 		data.default_bang ??= {}
 		data.default_bang.name ??= ""
+
+		# converting old links to new format
+		if data.default_bang.url..endsWith('=') and !imba.locals.converted_bang
+			data.default_bang.url += '$0'
 		data.default_bang.url ??= "https://www.google.com/search?q=$0"
+		imba.locals.converted_bang = yes
+
 		data.default_bang.frequency ??= 0
 
 		data.hotkey ??= {}
