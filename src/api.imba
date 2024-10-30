@@ -26,6 +26,9 @@ export default new class api
 		imba.commit!
 		state.links
 
+	def del link
+		await global.chrome.bookmarks.remove link.id
+
 	def save link
 		await global.chrome.bookmarks.update link.id,
 			title: link.name
