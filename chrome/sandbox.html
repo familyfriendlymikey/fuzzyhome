@@ -1,0 +1,18 @@
+<script>
+window.addEventListener('message', (e) => {
+	try {
+		const res = eval(e.data);
+		if (res && typeof res.then === 'function') {
+			res.then((data) => {
+				window.parent.postMessage(JSON.stringify(data),'*');
+			}).catch((error) => {
+				window.parent.postMessage({error:error.message},'*');
+			});
+		} else {
+			window.parent.postMessage(res,'*');
+		}
+	} catch (error) {
+		window.parent.postMessage({error:error.message},'*');
+	}
+});
+</script>

@@ -15,13 +15,9 @@ tag app-links
 
 		temp = {
 				click_handler: api.handle_cut.bind(api)
+				hotkey_display_name: "Cut"
+				content: "Cut All Text"
 		}
-		if api.math_result
-			temp.hotkey_display_name = "Cut Math"
-			temp.content = "Cut Math Result"
-		else
-			temp.hotkey_display_name = "Cut"
-			temp.content = "Cut All Text"
 		result.push temp
 
 		temp = {

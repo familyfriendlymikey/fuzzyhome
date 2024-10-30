@@ -1,3 +1,9 @@
+window.addEventListener('message') do(e)
+	global.evalresult = e.data
+
+imba.mount do
+	<iframe src="/sandbox.html" #evaluator [d:none]>
+
 import './std.imba'
 
 import state from './state.imba'
@@ -12,6 +18,7 @@ import './components/app-bang.imba'
 import './components/app-url.imba'
 import './components/app-tips.imba'
 import './components/app-edit.imba'
+import './components/app-code.imba'
 import './styles.imba'
 
 extend class String

@@ -49,3 +49,18 @@ This is just for me to remember 😛
 	```
 
 2. Upload the newly created `chrome.zip` to the Chrome store.
+
+### Notes
+
+1. Sandboxed iframes for running eval had to be placed in the same folder as
+	the manifest. I wish Chrome's docs had been clear about that.
+
+2. We're loading the sandbox.html file due to a bundling quirk, if I put
+	`/sandbox.html` that *should* refer to a file in the `/public/` folder which
+	will be automatically bundled, but in this case `/sandbox.html` appears to
+	actually refer to the folder that the chrome manifest is in, which is where we
+	place the sandbox.html file. Anyways, it works fine.
+
+3. For now, to use Imba's devlogs (`L`) feature, the production flag cannot be set.
+	Meaning if you happen to build with `npm run build`, the logs won't show up.
+	`npm run dev` specifies the `-d` flag for this purpose.

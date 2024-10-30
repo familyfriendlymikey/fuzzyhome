@@ -1,11 +1,11 @@
 import state from './state.imba'
 
+import {compile} from 'imba/compiler'
+
 import config from './config.imba'
 import { find, omit, orderBy } from 'lodash'
 import fzi from 'fzi'
 import { cloneDeep } from 'lodash'
-import Mexp from 'math-expression-evaluator'
-let mexp = new Mexp
 
 export default new class api
 
@@ -26,6 +26,15 @@ export default new class api
 		imba.commit!
 		state.links
 
+	def create
+		let title = global.prompt 'Title'
+		return unless title..trim!
+		let url = global.prompt 'Url'
+		return unless url..trim!
+		let parentId = '1'
+		await global.chrome.bookmarks.create {parentId,title,url}
+		reload-bookmarks!
+
 	def del link
 		await global.chrome.bookmarks.remove link.id
 
@@ -35,6 +44,7 @@ export default new class api
 			url: link.url
 
 	def pin_link link
+		# todo if editing a note's url, this will unpin it
 		Pins[link.url] ^= 1
 		sort_links!
 		global.chrome.storage.sync.set {pins:Pins}
@@ -67,8 +77,13 @@ export default new class api
 			get display-name
 				return name unless alias
 				name.split(" ").slice(0,-1).join(" ")
+
+			get js?
+				url.startsWith 'javascript:'
+
 			get bang?
 				/\$\d+/.test(url)
+
 			get alias
 				let split-text = name.split " "
 				let last = split-text[-1]
@@ -110,7 +125,7 @@ export default new class api
 			return get_url url
 		try
 			return get_url "https://{url}"
-		throw "invalid url"
+		return
 
 	def get_pretty_date
 		Date!.toString!.split(" ").slice(0, 4).join(" ")
@@ -132,23 +147,31 @@ export default new class api
 		window.location.href = link.url
 		state.query = ''
 
-	get math_result
-		try
-			mexp.eval(state.query)
-		catch
-			no
-
 	def handle_cut e
 		return unless e.target.selectionStart == e.target.selectionEnd
-		let s = math_result
-		s ||= state.query
+		let s = state.query
 		await window.navigator.clipboard.writeText(s)
 		state.query = ''
 		sort_links!
 
 	def handle_click_link link
 		link ??= selected_link
-		if link.bang?
+
+		if link.url.startsWith 'javascript:'
+			let code = global.decodeURIComponent link.url.slice(11)
+			L code
+
+			let o =
+				platform: 'browser'
+				sourcePath:'tmp.imba'
+
+			let js = String compile(code,o)
+			L js
+
+			document.getElementById('evaluator').contentWindow.postMessage(js,'*')
+			L global.evalresult
+
+		elif link.bang?
 			state.query = ''
 			state.active_bang = link
 		else
@@ -188,8 +211,9 @@ export default new class api
 		sort_links!
 
 	def get-icon url
-		let { host } = parse_url url
-		"https://icon.horse/icon/{host}"
+		let it = parse_url(url)
+		if it..host
+			"https://icon.horse/icon/{it.host}"
 
 	def help
 		let url = "https://github.com/familyfriendlymikey/fuzzyhome"

@@ -5,9 +5,17 @@
   "manifest_version": 3,
   "permissions": [
     "bookmarks",
-    "storage"
+    "storage",
+    "<all_urls>"
   ],
   "chrome_url_overrides": {
     "newtab": "dist/index.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src *; child-src 'self';"
+  },
+  "sandbox": {
+    "pages": ["sandbox.html"]
   }
 }

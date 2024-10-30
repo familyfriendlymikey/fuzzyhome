@@ -1,3 +1,5 @@
+import * as PH from 'imba-phosphor-icons'
+
 tag app-home
 
 	def mount
@@ -69,14 +71,8 @@ tag app-home
 			>
 				css bg:$input-bg
 
-			<.side.right@click=handle_click_copy(api.math_result or 0)>
-				<$math>
-					css d:box fs:17px min-width:min-content
-					"{Math.round(api.math_result * 100)/100}"
-
-				css e:200ms eaf:circ-out
-					max-width:{$math.offsetWidth or 30}px
-					min-width:{$math.offsetWidth}px
+			<.side.right @click=api.create>
+				<svg src=PH.PLUS>
 
 		if state.loaded
 			<div ease>
