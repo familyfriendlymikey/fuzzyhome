@@ -127,6 +127,7 @@ export default new class api
 	def navigate link
 		await increment_link_frequency link
 		window.location.href = link.url
+		state.query = ''
 
 	get math_result
 		try
@@ -171,11 +172,13 @@ export default new class api
 
 	def handle_url
 		window.location.href = url-query
+		state.query = ''
 
 	def handle_bang
 		return if state.loading
 		await increment_link_frequency bang
 		window.location.href = encoded_bang_query
+		state.query = ''
 
 	def unset_active_bang
 		state.active_bang = no

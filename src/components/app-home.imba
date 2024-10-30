@@ -22,6 +22,16 @@ tag app-home
 		t.value = t.value.substring(0, start) + "\t" + t.value.substring(end)
 		t.selectionStart = t.selectionEnd = start + 1
 
+	def mod-left e
+		return unless e.metaKey
+		return if state.query..trim!
+		global.history.back!
+
+	def mod-right e
+		return unless e.metaKey
+		return if state.query..trim!
+		global.history.forward!
+
 	<self>
 		css w:100% d:flex fld:column ofy:hidden gap:20px
 
@@ -51,6 +61,8 @@ tag app-home
 				bind=state.query
 				@input=handle_input
 				@keydown.tab.prevent=insert-tab
+				@keydown.left=mod-left
+				@keydown.right=mod-right
 				@cut=api.handle_cut
 				disabled=state.loading
 				@blur=blur
