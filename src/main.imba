@@ -1,6 +1,3 @@
-import pkg from '../package.json'
-let version = pkg.version
-console.log "fuzzyhome version {version}"
 
 import './std.imba'
 
