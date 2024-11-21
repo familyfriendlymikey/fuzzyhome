@@ -4,8 +4,6 @@ import config from './config.imba'
 import { find, omit, orderBy } from 'lodash'
 import fzi from 'fzi'
 import { cloneDeep } from 'lodash'
-import Mexp from 'math-expression-evaluator'
-let mexp = new Mexp
 
 export default new class api
 
@@ -129,16 +127,9 @@ export default new class api
 		window.location.href = link.url
 		state.query = ''
 
-	get math_result
-		try
-			mexp.eval(state.query)
-		catch
-			no
-
 	def handle_cut e
 		return unless e.target.selectionStart == e.target.selectionEnd
-		let s = math_result
-		s ||= state.query
+		let s = state.query
 		await window.navigator.clipboard.writeText(s)
 		state.query = ''
 		sort_links!
