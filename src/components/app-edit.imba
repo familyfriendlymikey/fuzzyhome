@@ -26,6 +26,7 @@ tag app-edit
 		await api.del(link)
 		await api.reload-bookmarks!
 		state.editing-link = no
+
 	<self>
 		css w:100% gap:15px ofy:hidden d:vcs
 			input fl:none
