@@ -71,6 +71,8 @@ tag app-home
 			>
 				css bg:$input-bg
 
+			<.side.right @click=api.create>
+				<svg src=PH.PLUS>
 
 		if state.loaded
 			<div ease>

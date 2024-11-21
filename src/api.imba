@@ -24,6 +24,17 @@ export default new class api
 		imba.commit!
 		state.links
 
+	def create
+		let title = global.prompt 'Title'
+		return unless title..trim!
+		return unless let url = (parse_url global.prompt 'Url')..href..trim!
+		let parentId = '1'
+		await global.chrome.bookmarks.create {parentId,title,url}
+		reload-bookmarks!
+
+	def del link
+		await global.chrome.bookmarks.remove link.id
+
 	def save link
 		await global.chrome.bookmarks.update link.id,
 			title: link.name
