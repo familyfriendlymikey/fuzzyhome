@@ -14,6 +14,12 @@ tag app-links
 		result.push temp
 
 		temp = {
+			hotkey_handler: api.handle_bang.bind(api)
+			hotkey: config.data.hotkey.force_bang
+			}
+		result.push temp
+
+		temp = {
 				click_handler: api.handle_cut.bind(api)
 				hotkey_display_name: "Cut"
 				content: "Cut All Text"

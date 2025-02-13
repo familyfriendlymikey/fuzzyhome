@@ -35,6 +35,7 @@ export default new class config
 		data.hotkey.handle_bang ??= 'return'
 		data.hotkey.handle_url ??= 'return'
 		data.hotkey.handle_click_link ??= 'return'
+		data.hotkey.force_bang ??= 'shift+return'
 		data.hotkey.unset_active_bang ??= 'esc'
 		data.hotkey.increment_link_selection_index ??= 'down'
 		data.hotkey.decrement_link_selection_index ??= 'up'
